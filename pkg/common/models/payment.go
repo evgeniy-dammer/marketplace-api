@@ -1,5 +1,6 @@
 package models
 
+//Payment model
 type Payment struct {
 	Id             string  `json:"id"`
 	DateTime       string  `json:"datetime"`

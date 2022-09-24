@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/evgeniy-dammer/emenu-api/pkg/common/config"
+	"github.com/evgeniy-dammer/emenu-api/pkg/common/models"
 	"github.com/jackc/pgx/v5"
 )
 
-func Connect(c *config.Configuration) *pgx.Conn {
-	databaseUrl := "postgres://" + c.DBUser + ":" + c.DBPass + "@" + c.DBHost + ":" + c.DBPort + "/" + c.DBName
+// Connect establishes a connection with a PostgreSQL database
+func Connect(c *models.DbConfiguration) *pgx.Conn {
+	databaseUrl := "postgres://" + c.DbUser + ":" + c.DbPass + "@" + c.DbHost + ":" + c.DbPort + "/" + c.DbName
 
 	connection, err := pgx.Connect(context.Background(), databaseUrl)
 

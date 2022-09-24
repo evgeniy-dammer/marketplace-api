@@ -1,18 +1,12 @@
 package config
 
 import (
+	"github.com/evgeniy-dammer/emenu-api/pkg/common/models"
 	"github.com/spf13/viper"
 )
 
-type Configuration struct {
-	DBHost string `mapstructure:"DATABASE_HOST"`
-	DBUser string `mapstructure:"DATABASE_USER"`
-	DBPass string `mapstructure:"DATABASE_PASS"`
-	DBName string `mapstructure:"DATABASE_NAME"`
-	DBPort string `mapstructure:"DATABASE_PORT"`
-}
-
-func LoadConfiguration() (c Configuration, err error) {
+// LoadConfiguration loads database configuration from .env file
+func LoadConfiguration() (dbConfiguration models.DbConfiguration, err error) {
 	viper.AddConfigPath("./")
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
@@ -24,7 +18,7 @@ func LoadConfiguration() (c Configuration, err error) {
 		return
 	}
 
-	err = viper.Unmarshal(&c)
+	err = viper.Unmarshal(&dbConfiguration)
 
 	return
 }

@@ -1,5 +1,6 @@
 package models
 
+//Organisation model
 type Organisation struct {
 	Id      string `json:"id"`
 	Name    string `json:"name"`

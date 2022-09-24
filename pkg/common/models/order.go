@@ -1,5 +1,6 @@
 package models
 
+//Order model
 type Order struct {
 	Id             string      `json:"id"`
 	DateTime       string      `json:"datetime"`
