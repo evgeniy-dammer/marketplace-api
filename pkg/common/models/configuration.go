@@ -7,4 +7,5 @@ type DbConfiguration struct {
 	DbPass string `mapstructure:"DATABASE_PASS"`
 	DbName string `mapstructure:"DATABASE_NAME"`
 	DbPort string `mapstructure:"DATABASE_PORT"`
+	SvPort string `mapstructure:"SERVICE_PORT"`
 }
