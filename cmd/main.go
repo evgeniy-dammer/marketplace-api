@@ -1,25 +1,31 @@
 package main
 
 import (
+	"fmt"
+	"github.com/evgeniy-dammer/emenu-api/pkg/handlers/items"
+	itemservice "github.com/evgeniy-dammer/emenu-api/pkg/proto"
 	"log"
 
-	"github.com/evgeniy-dammer/emenu-api/pkg/common/config"
-	"github.com/evgeniy-dammer/emenu-api/pkg/common/controller"
-	"github.com/evgeniy-dammer/emenu-api/pkg/common/db"
-	"github.com/gofiber/fiber/v2"
+	"google.golang.org/grpc"
+	"net"
 )
 
 func main() {
-	configuration, err := config.LoadConfiguration()
+	listen, err := net.Listen("tcp", ":1111")
 
 	if err != nil {
-		log.Fatalln("Configuration faild", err)
+		fmt.Println(err)
 	}
 
-	db.Connect(&configuration)
-	app := fiber.New()
+	defer listen.Close()
 
-	controller.RegisterRoutes(app, db.DB)
+	itemServ := handlers.ItemServiceServer{}
+	grpcServer := grpc.NewServer()
 
-	app.Listen(":" + configuration.SvPort)
+	itemservice.RegisterItemServiceServer(grpcServer, &itemServ)
+
+	log.Println("Starting server")
+	if err := grpcServer.Serve(listen); err != nil {
+		fmt.Println(err)
+	}
 }

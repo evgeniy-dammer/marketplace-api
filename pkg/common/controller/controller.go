@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/pkg/items"
+	"github.com/evgeniy-dammer/emenu-api/pkg/handlers/items"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
 )
