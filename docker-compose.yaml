@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  emenu-api:
+    container_name: emenu_api
+    build: .
+    depends_on:
+      - database

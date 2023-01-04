@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "emenu-api/pkg/proto";
+option go_package = "./pkg/protos";
 
-package itemservice;
+package protos;
 
 service ItemService {
   rpc FindAll (FindAllRequest) returns (FindAllResponse);

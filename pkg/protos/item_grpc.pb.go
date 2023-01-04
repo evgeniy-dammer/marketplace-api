@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: item.proto
 
-package proto
+package protos
 
 import (
 	context "context"
@@ -35,7 +35,7 @@ func NewItemServiceClient(cc grpc.ClientConnInterface) ItemServiceClient {
 
 func (c *itemServiceClient) FindAll(ctx context.Context, in *FindAllRequest, opts ...grpc.CallOption) (*FindAllResponse, error) {
 	out := new(FindAllResponse)
-	err := c.cc.Invoke(ctx, "/itemservice.ItemService/FindAll", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/protos.ItemService/FindAll", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _ItemService_FindAll_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/itemservice.ItemService/FindAll",
+		FullMethod: "/protos.ItemService/FindAll",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ItemServiceServer).FindAll(ctx, req.(*FindAllRequest))
@@ -92,7 +92,7 @@ func _ItemService_FindAll_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ItemService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "itemservice.ItemService",
+	ServiceName: "protos.ItemService",
 	HandlerType: (*ItemServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

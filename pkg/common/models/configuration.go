@@ -1,7 +1,7 @@
 package models
 
-//DbConfiguration model
-type DbConfiguration struct {
+// Configuration model
+type Configuration struct {
 	DbHost string `mapstructure:"DATABASE_HOST"`
 	DbUser string `mapstructure:"DATABASE_USER"`
 	DbPass string `mapstructure:"DATABASE_PASS"`

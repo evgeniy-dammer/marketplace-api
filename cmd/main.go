@@ -1,31 +1,46 @@
 package main
 
 import (
-	"fmt"
-	"github.com/evgeniy-dammer/emenu-api/pkg/handlers/items"
-	itemservice "github.com/evgeniy-dammer/emenu-api/pkg/proto"
 	"log"
+	"net"
 
 	"google.golang.org/grpc"
-	"net"
+	"google.golang.org/grpc/reflection"
+
+	"github.com/evgeniy-dammer/emenu-api/pkg/common/config"
+	handlers "github.com/evgeniy-dammer/emenu-api/pkg/handlers/items"
+	"github.com/evgeniy-dammer/emenu-api/pkg/protos"
 )
 
 func main() {
-	listen, err := net.Listen("tcp", ":1111")
+	configuration, err := config.LoadConfiguration()
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("Configuration faild: %s", err)
+	}
+
+	/*if err := db.Connect(&configuration); err != nil {
+		log.Fatalf("Unable to connect to database: %s", err)
+	}*/
+
+	itemServer := handlers.ItemServiceServer{}
+	grpcServer := grpc.NewServer()
+
+	protos.RegisterItemServiceServer(grpcServer, &itemServer)
+
+	reflection.Register(grpcServer)
+
+	listen, err := net.Listen("tcp", ":"+configuration.SvPort)
+
+	if err != nil {
+		log.Fatalf("Unable to listen on %s: %s", configuration.SvPort, err)
 	}
 
 	defer listen.Close()
 
-	itemServ := handlers.ItemServiceServer{}
-	grpcServer := grpc.NewServer()
+	log.Printf("Server started at port: %s", configuration.SvPort)
 
-	itemservice.RegisterItemServiceServer(grpcServer, &itemServ)
-
-	log.Println("Starting server")
 	if err := grpcServer.Serve(listen); err != nil {
-		fmt.Println(err)
+		log.Fatalf("Unable to serve: %s", err)
 	}
 }

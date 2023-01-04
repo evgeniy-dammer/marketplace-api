@@ -6,4 +6,4 @@
 *.env
 *.test
 *.out
-go.work
+.idea/

@@ -3,16 +3,16 @@ package handlers
 import (
 	"context"
 
-	itemservice "github.com/evgeniy-dammer/emenu-api/pkg/proto"
+	protos "github.com/evgeniy-dammer/emenu-api/pkg/protos"
 )
 
 type ItemServiceServer struct {
-	itemservice.UnimplementedItemServiceServer
+	protos.UnimplementedItemServiceServer
 }
 
-func (*ItemServiceServer) FindAll(ctx context.Context, in *itemservice.FindAllRequest) (*itemservice.FindAllResponse, error) {
-	return &itemservice.FindAllResponse{
-		Items: []*itemservice.Item{
+func (*ItemServiceServer) FindAll(ctx context.Context, in *protos.FindAllRequest) (*protos.FindAllResponse, error) {
+	return &protos.FindAllResponse{
+		Items: []*protos.Item{
 			{
 				Id:       "p01",
 				Name:     "name 1",

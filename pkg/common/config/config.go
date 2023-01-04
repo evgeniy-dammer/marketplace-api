@@ -5,8 +5,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// LoadConfiguration loads database configuration from .env file
-func LoadConfiguration() (dbConfiguration models.DbConfiguration, err error) {
+// LoadConfiguration loads configuration from .env file
+func LoadConfiguration() (configuration models.Configuration, err error) {
 	viper.AddConfigPath("./")
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
@@ -18,7 +18,7 @@ func LoadConfiguration() (dbConfiguration models.DbConfiguration, err error) {
 		return
 	}
 
-	err = viper.Unmarshal(&dbConfiguration)
+	err = viper.Unmarshal(&configuration)
 
 	return
 }
