@@ -8,7 +8,7 @@ type SignInInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// UpdateUserInput is a input data for updating user
+// UpdateUserInput is an input data for updating user
 type UpdateUserInput struct {
 	FirstName *string `json:"firstname"`
 	LastName  *string `json:"lastname"`
@@ -24,23 +24,7 @@ func (i UpdateUserInput) Validate() error {
 	return nil
 }
 
-// UpdateCategoryInput is a input data for updating category
-type UpdateCategoryInput struct {
-	Name   *string `json:"name"`
-	Parent *string `json:"parent"`
-	Level  *int    `json:"level"`
-}
-
-// Validate checks if update input is nil
-func (i UpdateCategoryInput) Validate() error {
-	if i.Name == nil && i.Level == nil {
-		return errors.New("update structure has no values")
-	}
-
-	return nil
-}
-
-// UpdateOrganizationInput is a input data for updating organization
+// UpdateOrganizationInput is an input data for updating organization
 type UpdateOrganizationInput struct {
 	Name    *string `json:"name"`
 	Address *string `json:"address"`
@@ -56,12 +40,28 @@ func (i UpdateOrganizationInput) Validate() error {
 	return nil
 }
 
-// UpdateItemInput is a input data for updating organization
+// UpdateCategoryInput is an input data for updating category
+type UpdateCategoryInput struct {
+	Name   *string `json:"name"`
+	Parent *string `json:"parent"`
+	Level  *int    `json:"level"`
+}
+
+// Validate checks if update input is nil
+func (i UpdateCategoryInput) Validate() error {
+	if i.Name == nil && i.Level == nil {
+		return errors.New("update structure has no values")
+	}
+
+	return nil
+}
+
+// UpdateItemInput is an input data for updating organization
 type UpdateItemInput struct {
-	Name           *string `json:"name"`
-	Price          *string `json:"price"`
-	CategoryId     *string `json:"category"`
-	OrganisationId *string `json:"organisation"`
+	Name           *string  `json:"name"`
+	Price          *float32 `json:"price"`
+	CategoryId     *string  `json:"category"`
+	OrganisationId *string  `json:"organisation"`
 }
 
 // Validate checks if update input is nil

@@ -13,7 +13,6 @@ import (
 const (
 	authorizationHeader = "Authorization"
 	userCtx             = "userId"
-	roleCtx             = "role"
 )
 
 // userIdentity validate access token
