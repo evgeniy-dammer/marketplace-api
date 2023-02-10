@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "./internal/proto";
+
+package protos;
+
+service ItemService {
+  rpc FindAll (FindAllRequest) returns (FindAllResponse);
+}
+
+message FindAllRequest {}
+
+message FindAllResponse {
+  repeated Item Items = 1;
+}
+
+message Item {
+  string id = 1;
+  string name = 2;
+  int32 quantity = 3;
+  double price = 4;
+  bool status = 5;
+}

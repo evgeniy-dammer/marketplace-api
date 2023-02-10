@@ -1,46 +1,75 @@
 package main
 
 import (
-	"log"
-	"net"
+	"context"
+	"github.com/evgeniy-dammer/emenu-api/internal/handler"
+	"github.com/evgeniy-dammer/emenu-api/internal/model"
+	"github.com/evgeniy-dammer/emenu-api/internal/repository"
+	"github.com/evgeniy-dammer/emenu-api/internal/service"
+	"github.com/spf13/viper"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-
-	"github.com/evgeniy-dammer/emenu-api/pkg/common/config"
-	handlers "github.com/evgeniy-dammer/emenu-api/pkg/handlers/items"
-	"github.com/evgeniy-dammer/emenu-api/pkg/protos"
+	"github.com/evgeniy-dammer/emenu-api/internal/config"
+	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	configuration, err := config.LoadConfiguration()
+	// set log format as JSON
+	logrus.SetFormatter(new(logrus.JSONFormatter))
 
-	if err != nil {
-		log.Fatalf("Configuration faild: %s", err)
+	// initializing config
+	if err := config.InitConfig(); err != nil {
+		logrus.Fatalf("error initializing config: %s", err.Error())
 	}
 
-	/*if err := db.Connect(&configuration); err != nil {
-		log.Fatalf("Unable to connect to database: %s", err)
-	}*/
-
-	itemServer := handlers.ItemServiceServer{}
-	grpcServer := grpc.NewServer()
-
-	protos.RegisterItemServiceServer(grpcServer, &itemServer)
-
-	reflection.Register(grpcServer)
-
-	listen, err := net.Listen("tcp", ":"+configuration.SvPort)
-
-	if err != nil {
-		log.Fatalf("Unable to listen on %s: %s", configuration.SvPort, err)
+	// loading env variables
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
-	defer listen.Close()
+	// establishing database connection
+	db, err := repository.NewPostgresDB(
+		model.DbConfig{
+			Host:     viper.GetString("database.host"),
+			Port:     viper.GetString("database.port"),
+			Username: viper.GetString("database.username"),
+			Password: os.Getenv("DB_PASSWORD"),
+			DbName:   viper.GetString("database.dbname"),
+			SSLMode:  viper.GetString("database.sslmode"),
+		},
+	)
 
-	log.Printf("Server started at port: %s", configuration.SvPort)
+	if err != nil {
+		logrus.Fatalf("failed to initialize database: %s", err)
+	}
 
-	if err := grpcServer.Serve(listen); err != nil {
-		log.Fatalf("Unable to serve: %s", err)
+	// dependency injections
+	repos := repository.NewRepository(db)
+	services := service.NewService(repos)
+	handlers := handler.NewHandler(services)
+
+	// create new server
+	srv := new(model.Server)
+
+	go func() {
+		// run server
+		if err = srv.Run(viper.GetString("application.port"), handlers.InitRoutes()); err != nil {
+			logrus.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}()
+
+	logrus.Println("Application started...")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Println("Application shutdown...")
+
+	if err = srv.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("error ocured on server shutdown: %s", err.Error())
 	}
 }

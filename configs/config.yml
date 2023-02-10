@@ -1,0 +1,9 @@
+application:
+  port: "1111"
+
+database:
+  host: "localhost"
+  port: "5432"
+  username: "emenu"
+  dbname: "emenu"
+  sslmode: "disable"

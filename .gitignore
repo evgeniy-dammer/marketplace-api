@@ -6,4 +6,5 @@
 *.env
 *.test
 *.out
-.idea/
+.idea
+emenu-api

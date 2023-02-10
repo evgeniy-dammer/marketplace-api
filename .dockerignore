@@ -1,0 +1,8 @@
+.idea
+.env.example
+.gitignore
+.git
+docker-compose.yaml
+Makefile
+README.md
+emenu-api
