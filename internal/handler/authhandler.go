@@ -1,99 +1,106 @@
 package handler
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/internal/model"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/evgeniy-dammer/emenu-api/internal/model"
+	"github.com/gin-gonic/gin"
 )
 
-// signIn login a user in the system
-func (h *Handler) signIn(c *gin.Context) {
+// signIn login a user in the system.
+func (h *Handler) signIn(ctx *gin.Context) {
 	var input model.SignInInput
+
 	var tokens model.Tokens
+
 	var user model.User
 
-	// parsing JSON body
-	if err := c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err := ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	// check if user exists and create the token
 	user, tokens, err := h.services.Authorization.GenerateToken("", input.Phone, input.Password)
-
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
 	// if all is ok
-	c.JSON(http.StatusOK, model.ResponseData{User: user, Tokens: tokens})
+	ctx.JSON(http.StatusOK, model.ResponseData{User: user, Tokens: tokens})
 }
 
-// signUp register a user in the system
-func (h *Handler) signUp(c *gin.Context) {
+// signUp register a user in the system.
+func (h *Handler) signUp(ctx *gin.Context) {
 	var input model.User
 
-	// parsing JSON body
-	if err := c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err := ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	statusId, err := h.services.User.GetActiveStatusId("active")
-
+	statusID, err := h.services.User.GetActiveStatusID("active")
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
 	// creating the user
-	id, err := h.services.Authorization.CreateUser(input, statusId)
-
+	userID, err := h.services.Authorization.CreateUser(input, statusID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
 	// if all is ok
-	c.JSON(http.StatusOK, map[string]interface{}{"id": id})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"id": userID})
 }
 
-// refresh refreshes token
-func (h *Handler) refresh(c *gin.Context) {
+// refresh refreshes token.
+func (h *Handler) refresh(ctx *gin.Context) {
 	var input model.RefreshToken
+
 	var tokens model.Tokens
+
 	var user model.User
 
 	// parsing JSON body
-	if err := c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err := ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
 	headerParts := strings.Split(input.Authorization, " ")
 
-	if len(headerParts) != 2 {
-		model.NewErrorResponse(c, http.StatusUnauthorized, "invalid auth header")
+	if len(headerParts) != 2 { //nolint:gomnd
+		model.NewErrorResponse(ctx, http.StatusUnauthorized, "invalid auth header")
+
 		return
 	}
 
-	userId, err := h.services.Authorization.ParseToken(headerParts[1])
-
+	userID, err := h.services.Authorization.ParseToken(headerParts[1])
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusUnauthorized, err.Error())
+		model.NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+
 		return
 	}
 
 	// check if user exists and create the token
-	user, tokens, err = h.services.Authorization.GenerateToken(userId, "", "")
+	user, tokens, err = h.services.Authorization.GenerateToken(userID, "", "")
 
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
 	// if all is ok
-	c.JSON(http.StatusOK, model.ResponseData{User: user, Tokens: tokens})
+	ctx.JSON(http.StatusOK, model.ResponseData{User: user, Tokens: tokens})
 }

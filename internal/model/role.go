@@ -1,7 +1,7 @@
 package model
 
-// Role model
+// Role model.
 type Role struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }

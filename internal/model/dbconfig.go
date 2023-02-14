@@ -1,11 +1,11 @@
 package model
 
-// DbConfig is a database config
-type DbConfig struct {
+// DBConfig is a database config.
+type DBConfig struct {
 	Host     string
 	Port     string
 	Username string
 	Password string
-	DbName   string
+	DBName   string
 	SSLMode  string
 }

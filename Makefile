@@ -39,13 +39,13 @@ prune:
 	docker image prune
 
 
-protos: # execute from emenu-api directory
-	protoc -I internal/protos/ \
+protos: # execute from root directory
+	protoc -I proto/ \
 			--go_out=internal/protos \
 			--go_opt=paths=source_relative \
 			--go-grpc_out=internal/protos \
 			--go-grpc_opt=paths=source_relative \
-			internal/protos/item.proto
+			protos/item.proto
 
 test:
 	grpcurl --plaintext 0.0.0.0:1111 protos.ItemService.FindAll

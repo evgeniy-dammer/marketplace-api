@@ -1,126 +1,131 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
-// getOrganizations is a get all organizations handler
-func (h *Handler) getOrganizations(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// getOrganizations is a get all organizations' handler.
+func (h *Handler) getOrganizations(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	results, err := h.services.Organization.GetAll(userId)
+	results, err := h.services.Organization.GetAll(userID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	ctx.JSON(http.StatusOK, results)
 }
 
-// getOrganization is a get organization by id handler
-func (h *Handler) getOrganization(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// getOrganization is a get organization by id handler.
+func (h *Handler) getOrganization(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("id")
+	organizationID := ctx.Param("id")
 
-	if organizationId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "invalid id param")
+	if organizationID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+
 		return
 	}
 
-	list, err := h.services.Organization.GetOne(userId, organizationId)
+	list, err := h.services.Organization.GetOne(userID, organizationID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusCreated, list)
+	ctx.JSON(http.StatusCreated, list)
 }
 
-// createOrganization register a organization in the system
-func (h *Handler) createOrganization(c *gin.Context) {
+// createOrganization register an organization in the system.
+func (h *Handler) createOrganization(ctx *gin.Context) {
 	var input model.Organization
 
-	userId, _, err := h.getUserIdAndRole(c)
-
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	if err = c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	id, err := h.services.Organization.Create(userId, input)
-
+	organizationID, err := h.services.Organization.Create(userID, input)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{"id": id})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"id": organizationID})
 }
 
-// updateOrganization is an update organization by id handler
-func (h *Handler) updateOrganization(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// updateOrganization is an update organization by id handler.
+func (h *Handler) updateOrganization(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("id")
+	organizationID := ctx.Param("id")
 
-	if organizationId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "empty id param")
+	if organizationID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+
 		return
 	}
 
 	var input model.UpdateOrganizationInput
-	if err = c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	if err = h.services.Organization.Update(userId, organizationId, input); err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	if err = h.services.Organization.Update(userID, organizationID, input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
+	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }
 
-// deleteOrganization is delete organization by id handler
-func (h *Handler) deleteOrganization(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// deleteOrganization is delete organization by id handler.
+func (h *Handler) deleteOrganization(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("id")
+	organizationID := ctx.Param("id")
 
-	if userId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "empty id param")
+	if userID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+
 		return
 	}
 
-	err = h.services.Organization.Delete(userId, organizationId)
+	err = h.services.Organization.Delete(userID, organizationID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
+	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }

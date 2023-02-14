@@ -3,43 +3,54 @@ package service
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/evgeniy-dammer/emenu-api/internal/repository"
+	"github.com/pkg/errors"
 )
 
-// OrganizationService is a organization service
+// OrganizationService is a organization service.
 type OrganizationService struct {
 	repo repository.Organization
 }
 
-// NewOrganizationService is a constructor for OrganizationService
+// NewOrganizationService is a constructor for OrganizationService.
 func NewOrganizationService(repo repository.Organization) *OrganizationService {
 	return &OrganizationService{repo: repo}
 }
 
-// GetAll returns all organizations from the system
-func (s *OrganizationService) GetAll(userId string) ([]model.Organization, error) {
-	return s.repo.GetAll(userId)
+// GetAll returns all organizations from the system.
+func (s *OrganizationService) GetAll(userID string) ([]model.Organization, error) {
+	organizations, err := s.repo.GetAll(userID)
+
+	return organizations, errors.Wrap(err, "organization select error")
 }
 
-// GetOne returns organization by id from the system
-func (s *OrganizationService) GetOne(userId string, organizationId string) (model.Organization, error) {
-	return s.repo.GetOne(userId, organizationId)
+// GetOne returns organization by id from the system.
+func (s *OrganizationService) GetOne(userID string, organizationID string) (model.Organization, error) {
+	organization, err := s.repo.GetOne(userID, organizationID)
+
+	return organization, errors.Wrap(err, "organization select error")
 }
 
-// Create inserts organization into system
-func (s *OrganizationService) Create(userId string, organization model.Organization) (string, error) {
-	return s.repo.Create(userId, organization)
+// Create inserts organization into system.
+func (s *OrganizationService) Create(userID string, organization model.Organization) (string, error) {
+	organizationID, err := s.repo.Create(userID, organization)
+
+	return organizationID, errors.Wrap(err, "organization create error")
 }
 
-// Update updates organization by id in the system
-func (s *OrganizationService) Update(userId string, organizationId string, input model.UpdateOrganizationInput) error {
+// Update updates organization by id in the system.
+func (s *OrganizationService) Update(userID string, organizationID string, input model.UpdateOrganizationInput) error {
 	if err := input.Validate(); err != nil {
-		return err
+		return errors.Wrap(err, "validation error")
 	}
 
-	return s.repo.Update(userId, organizationId, input)
+	err := s.repo.Update(userID, organizationID, input)
+
+	return errors.Wrap(err, "organization update error")
 }
 
-// Delete deletes organization by id from the system
-func (s *OrganizationService) Delete(userId string, organizationId string) error {
-	return s.repo.Delete(userId, organizationId)
+// Delete deletes organization by id from the system.
+func (s *OrganizationService) Delete(userID string, organizationID string) error {
+	err := s.repo.Delete(userID, organizationID)
+
+	return errors.Wrap(err, "organization delete error")
 }

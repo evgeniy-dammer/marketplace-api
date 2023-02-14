@@ -1,9 +1,9 @@
 package model
 
-// Table model
+// Table model.
 type Table struct {
-	Id             string `json:"id"`
+	ID             string `json:"id"`
 	Name           string `json:"name"`
-	OrganisationId string `json:"organisationid"`
-	DepartmentId   string `json:"departmentid"`
+	OrganisationID string `json:"organisationid"`
+	DepartmentID   string `json:"departmentid"`
 }

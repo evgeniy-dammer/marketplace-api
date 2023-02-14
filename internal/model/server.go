@@ -4,28 +4,35 @@ import (
 	"context"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
-// Server is an http server
+const (
+	maxHeaderBytes = 1 << 20 // 1MB
+	readTimeout    = 10 * time.Second
+	writeTimeout   = 10 * time.Second
+)
+
+// Server is an http server.
 type Server struct {
 	httpServer *http.Server
 }
 
-// Run starts the http server
+// Run starts the http server.
 func (s *Server) Run(port string, handler http.Handler) error {
 	s.httpServer = &http.Server{
 		Addr:           ":" + port,
 		Handler:        handler,
-		MaxHeaderBytes: 1 << 20, // 1MB
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: maxHeaderBytes,
+		ReadTimeout:    readTimeout,
+		WriteTimeout:   writeTimeout,
 	}
-	
-	// start listening
-	return s.httpServer.ListenAndServe()
+
+	return errors.Wrap(s.httpServer.ListenAndServe(), "unable to start listening")
 }
 
-// Shutdown stops the http server
+// Shutdown stops the http server.
 func (s *Server) Shutdown(ctx context.Context) error {
-	return s.httpServer.Shutdown(ctx)
+	return errors.Wrap(s.httpServer.Shutdown(ctx), "unable to stop listening")
 }

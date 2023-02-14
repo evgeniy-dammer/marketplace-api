@@ -1,133 +1,139 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
-// getItems is a get all items handler
-func (h *Handler) getItems(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
+// getItems is a get all items handler.
+func (h *Handler) getItems(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 
-	organizationId := c.Param("org_id")
+	organizationID := ctx.Param("org_id")
 
 	if err != nil {
 		return
 	}
 
-	results, err := h.services.Item.GetAll(userId, organizationId)
+	results, err := h.services.Item.GetAll(userID, organizationID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	ctx.JSON(http.StatusOK, results)
 }
 
-// getItem is a get item by id handler
-func (h *Handler) getItem(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// getItem is a get item by id handler.
+func (h *Handler) getItem(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
-	itemId := c.Param("id")
+	organizationID := ctx.Param("org_id")
+	itemID := ctx.Param("id")
 
-	if organizationId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "invalid id param")
+	if organizationID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+
 		return
 	}
 
-	list, err := h.services.Item.GetOne(userId, organizationId, itemId)
+	list, err := h.services.Item.GetOne(userID, organizationID, itemID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusCreated, list)
+	ctx.JSON(http.StatusCreated, list)
 }
 
-// createItem register a item in the system
-func (h *Handler) createItem(c *gin.Context) {
+// createItem register an item in the system.
+func (h *Handler) createItem(ctx *gin.Context) {
 	var input model.Item
 
-	userId, _, err := h.getUserIdAndRole(c)
-
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
+	organizationID := ctx.Param("org_id")
 
-	if err = c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	id, err := h.services.Item.Create(userId, organizationId, input)
-
+	itemID, err := h.services.Item.Create(userID, organizationID, input)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{"id": id})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"id": itemID})
 }
 
-// updateItem is an update item by id handler
-func (h *Handler) updateItem(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// updateItem is an update item by id handler.
+func (h *Handler) updateItem(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
-	itemId := c.Param("id")
+	organizationID := ctx.Param("org_id")
+	itemID := ctx.Param("id")
 
-	if organizationId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "empty id param")
+	if organizationID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+
 		return
 	}
 
 	var input model.UpdateItemInput
-	if err = c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	if err = h.services.Item.Update(userId, organizationId, itemId, input); err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	if err = h.services.Item.Update(userID, organizationID, itemID, input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
+	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }
 
-// deleteItem is delete item by id handler
-func (h *Handler) deleteItem(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// deleteItem is delete item by id handler.
+func (h *Handler) deleteItem(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
-	itemId := c.Param("id")
+	organizationID := ctx.Param("org_id")
+	itemID := ctx.Param("id")
 
-	if userId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "empty id param")
+	if userID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+
 		return
 	}
 
-	err = h.services.Item.Delete(userId, organizationId, itemId)
+	err = h.services.Item.Delete(userID, organizationID, itemID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
+	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }

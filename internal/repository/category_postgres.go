@@ -2,96 +2,99 @@ package repository
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
-	"strings"
+	"github.com/pkg/errors"
 )
 
-// CategoryPostgresql repository
+// CategoryPostgresql repository.
 type CategoryPostgresql struct {
 	db *sqlx.DB
 }
 
-// NewCategoryPostgresql is a constructor for CategoryPostgresql
+// NewCategoryPostgresql is a constructor for CategoryPostgresql.
 func NewCategoryPostgresql(db *sqlx.DB) *CategoryPostgresql {
 	return &CategoryPostgresql{db: db}
 }
 
-// GetAll selects all categories from database
-func (r *CategoryPostgresql) GetAll(userId string, organizationId string) ([]model.Category, error) {
+// GetAll selects all categories from database.
+func (r *CategoryPostgresql) GetAll(userID string, organizationID string) ([]model.Category, error) {
 	var categories []model.Category
 
 	query := fmt.Sprintf("SELECT id, name, parent_id, level, organisation_id FROM %s WHERE organisation_id = $1",
 		categoryTable)
 
-	err := r.db.Select(&categories, query, organizationId)
+	err := r.db.Select(&categories, query, organizationID)
 
-	return categories, err
+	return categories, errors.Wrap(err, "categories select query error")
 }
 
-// GetOne select category by id from database
-func (r *CategoryPostgresql) GetOne(userId string, organizationId string, categoryId string) (model.Category, error) {
+// GetOne select category by id from database.
+func (r *CategoryPostgresql) GetOne(userID string, organizationID string, categoryID string) (model.Category, error) {
 	var user model.Category
 
-	query := fmt.Sprintf("SELECT id, name, parent_id, level, organisation_id FROM %s WHERE id = $1 AND organisation_id = $2",
-		categoryTable)
-	err := r.db.Get(&user, query, categoryId, organizationId)
+	query := fmt.Sprintf(
+		"SELECT id, name, parent_id, level, organisation_id FROM %s WHERE id = $1 AND organisation_id = $2",
+		categoryTable,
+	)
 
-	return user, err
+	err := r.db.Get(&user, query, categoryID, organizationID)
+
+	return user, errors.Wrap(err, "category select query error")
 }
 
-// Create insert category into database
-func (r *CategoryPostgresql) Create(userId string, organizationId string, category model.Category) (string, error) {
-	var id string
+// Create insert category into database.
+func (r *CategoryPostgresql) Create(userID string, organizationID string, category model.Category) (string, error) {
+	var categoryID string
 
 	query := fmt.Sprintf(
 		"INSERT INTO %s (name, parent_id, level, organisation_id) VALUES ($1, $2, $3, $4) RETURNING id",
 		categoryTable,
 	)
 
-	row := r.db.QueryRow(query, category.Name, category.Parent, category.Level, organizationId)
+	row := r.db.QueryRow(query, category.Name, category.Parent, category.Level, organizationID)
+	err := row.Scan(&categoryID)
 
-	err := row.Scan(&id)
-
-	return id, err
+	return categoryID, errors.Wrap(err, "category create query error")
 }
 
-// Update updates category by id in database
-func (r *CategoryPostgresql) Update(userId string, organizationId string, categoryId string, input model.UpdateCategoryInput) error {
+// Update updates category by id in database.
+func (r *CategoryPostgresql) Update(userID string, organizationID string, categoryID string, input model.UpdateCategoryInput) error { //nolint:lll
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
-	argId := 1
+	argID := 1
 
 	if input.Name != nil {
-		setValues = append(setValues, fmt.Sprintf("name=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("name=$%d", argID))
 		args = append(args, *input.Name)
-		argId++
+		argID++
 	}
 
 	if input.Parent != nil {
-		setValues = append(setValues, fmt.Sprintf("parent_id=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("parent_id=$%d", argID))
 		args = append(args, *input.Parent)
-		argId++
+		argID++
 	}
 
 	if input.Level != nil {
-		setValues = append(setValues, fmt.Sprintf("level=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("level=$%d", argID))
 		args = append(args, *input.Level)
-		argId++
 	}
 
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = '%s' AND organisation_id = '%s'",
-		categoryTable, setQuery, categoryId, organizationId)
+		categoryTable, setQuery, categoryID, organizationID)
 	_, err := r.db.Exec(query, args...)
 
-	return err
+	return errors.Wrap(err, "category update query error")
 }
 
-// Delete deletes category by id from database
-func (r *CategoryPostgresql) Delete(userId string, organizationId string, categoryId string) error {
+// Delete deletes category by id from database.
+func (r *CategoryPostgresql) Delete(userID string, organizationID string, categoryID string) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND organisation_id = $2", categoryTable)
-	_, err := r.db.Exec(query, categoryId, organizationId)
+	_, err := r.db.Exec(query, categoryID, organizationID)
 
-	return err
+	return errors.Wrap(err, "category delete query error")
 }

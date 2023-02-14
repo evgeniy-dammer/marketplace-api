@@ -1,13 +1,13 @@
 package model
 
-// Order model
+// Order model.
 type Order struct {
-	Id             string      `json:"id"`
+	ID             string      `json:"id"`
 	DateTime       string      `json:"datetime"`
-	TableId        string      `json:"tableid"`
+	TableID        string      `json:"tableid"`
 	Status         int         `json:"status"`
-	OrganisationId string      `json:"organisationid"`
-	DepartmentId   string      `json:"departmentid"`
+	OrganisationID string      `json:"organisationid"`
+	DepartmentID   string      `json:"departmentid"`
 	TotalSum       float32     `json:"totalsum"`
 	Items          []OrderItem `json:"orderitems"`
 }

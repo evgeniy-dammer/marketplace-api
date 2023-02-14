@@ -3,55 +3,62 @@ package service
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/evgeniy-dammer/emenu-api/internal/repository"
+	"github.com/pkg/errors"
 )
 
-// UserService is a user service
+// UserService is a user service.
 type UserService struct {
 	repo repository.User
 }
 
-// NewUserService is a constructor for UserService
+// NewUserService is a constructor for UserService.
 func NewUserService(repo repository.User) *UserService {
 	return &UserService{repo: repo}
 }
 
-// GetAll returns all users from the system
-func (s *UserService) GetAll(search string, status string, roleId string) ([]model.User, error) {
-	return s.repo.GetAll(search, status, roleId)
+// GetAll returns all users from the system.
+func (s *UserService) GetAll(search string, status string, roleID string) ([]model.User, error) {
+	users, err := s.repo.GetAll(search, status, roleID)
+
+	return users, errors.Wrap(err, "users select failed")
 }
 
-// GetAllRoles returns all user roles from the system
+// GetAllRoles returns all user roles from the system.
 func (s *UserService) GetAllRoles() ([]model.Role, error) {
-	return s.repo.GetAllRoles()
+	roles, err := s.repo.GetAllRoles()
+
+	return roles, errors.Wrap(err, "roles select failed")
 }
 
-// GetOne returns user by id from the system
-func (s *UserService) GetOne(userId string) (model.User, error) {
-	return s.repo.GetOne(userId)
+// GetOne returns user by id from the system.
+func (s *UserService) GetOne(userID string) (model.User, error) {
+	user, err := s.repo.GetOne(userID)
+
+	return user, errors.Wrap(err, "user select failed")
 }
 
-// Create hashes the password and insert User into system
-func (s *UserService) Create(user model.User, statusId string) (string, error) {
+// Create hashes the password and insert User into system.
+func (s *UserService) Create(user model.User, statusID string) (string, error) {
 	pass, err := generatePasswordHash(user.Password, params)
-
 	if err != nil {
 		return "", err
 	}
 
 	user.Password = pass
 
-	return s.repo.Create(user, statusId)
+	userID, err := s.repo.Create(user, statusID)
+
+	return userID, errors.Wrap(err, "user create failed")
 }
 
-// Update updates user by id in the system
-func (s *UserService) Update(userId string, input model.UpdateUserInput) error {
+// Update updates user by id in the system.
+func (s *UserService) Update(userID string, input model.UpdateUserInput) error {
 	if err := input.Validate(); err != nil {
-		return err
+		return errors.Wrap(err, "validation error")
 	}
 
 	if input.Password != nil {
 		pass, err := generatePasswordHash(*input.Password, params)
-
 		if err != nil {
 			return err
 		}
@@ -59,15 +66,19 @@ func (s *UserService) Update(userId string, input model.UpdateUserInput) error {
 		input.Password = &pass
 	}
 
-	return s.repo.Update(userId, input)
+	return errors.Wrap(s.repo.Update(userID, input), "user update failed")
 }
 
-// Delete deletes user by id from the system
-func (s *UserService) Delete(userId string) error {
-	return s.repo.Delete(userId)
+// Delete deletes user by id from the system.
+func (s *UserService) Delete(userID string) error {
+	err := s.repo.Delete(userID)
+
+	return errors.Wrap(err, "user delete failed")
 }
 
-// GetActiveStatusId returns ID for active status from the system
-func (s *UserService) GetActiveStatusId(name string) (string, error) {
-	return s.repo.GetActiveStatusId(name)
+// GetActiveStatusID returns ID for active status from the system.
+func (s *UserService) GetActiveStatusID(name string) (string, error) {
+	statusID, err := s.repo.GetActiveStatusID(name)
+
+	return statusID, errors.Wrap(err, "status id select failed")
 }

@@ -3,43 +3,54 @@ package service
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/evgeniy-dammer/emenu-api/internal/repository"
+	"github.com/pkg/errors"
 )
 
-// ItemService is a organization service
+// ItemService is an organization service.
 type ItemService struct {
 	repo repository.Item
 }
 
-// NewItemService is a constructor for ItemService
+// NewItemService is a constructor for ItemService.
 func NewItemService(repo repository.Item) *ItemService {
 	return &ItemService{repo: repo}
 }
 
-// GetAll returns all items from the system
-func (s *ItemService) GetAll(userId string, organizationId string) ([]model.Item, error) {
-	return s.repo.GetAll(userId, organizationId)
+// GetAll returns all items from the system.
+func (s *ItemService) GetAll(userID string, organizationID string) ([]model.Item, error) {
+	items, err := s.repo.GetAll(userID, organizationID)
+
+	return items, errors.Wrap(err, "items select error")
 }
 
-// GetOne returns item by id from the system
-func (s *ItemService) GetOne(userId string, organizationId string, itemId string) (model.Item, error) {
-	return s.repo.GetOne(userId, organizationId, itemId)
+// GetOne returns item by id from the system.
+func (s *ItemService) GetOne(userID string, organizationID string, itemID string) (model.Item, error) {
+	item, err := s.repo.GetOne(userID, organizationID, itemID)
+
+	return item, errors.Wrap(err, "item select error")
 }
 
-// Create inserts item into system
-func (s *ItemService) Create(userId string, organizationId string, item model.Item) (string, error) {
-	return s.repo.Create(userId, organizationId, item)
+// Create inserts item into system.
+func (s *ItemService) Create(userID string, organizationID string, item model.Item) (string, error) {
+	itemID, err := s.repo.Create(userID, organizationID, item)
+
+	return itemID, errors.Wrap(err, "item create error")
 }
 
-// Update updates item by id in the system
-func (s *ItemService) Update(userId string, organizationId string, itemId string, input model.UpdateItemInput) error {
+// Update updates item by id in the system.
+func (s *ItemService) Update(userID string, organizationID string, itemID string, input model.UpdateItemInput) error {
 	if err := input.Validate(); err != nil {
-		return err
+		return errors.Wrap(err, "validation error")
 	}
 
-	return s.repo.Update(userId, organizationId, itemId, input)
+	err := s.repo.Update(userID, organizationID, itemID, input)
+
+	return errors.Wrap(err, "item update error")
 }
 
-// Delete deletes item by id from the system
-func (s *ItemService) Delete(userId string, organizationId string, itemId string) error {
-	return s.repo.Delete(userId, organizationId, itemId)
+// Delete deletes item by id from the system.
+func (s *ItemService) Delete(userID string, organizationID string, itemID string) error {
+	err := s.repo.Delete(userID, organizationID, itemID)
+
+	return errors.Wrap(err, "item delete error")
 }

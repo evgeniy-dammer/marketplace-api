@@ -2,98 +2,99 @@ package repository
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
-	"strings"
+	"github.com/pkg/errors"
 )
 
-// OrganizationPostgresql repository
+// OrganizationPostgresql repository.
 type OrganizationPostgresql struct {
 	db *sqlx.DB
 }
 
-// NewOrganizationPostgresql is a constructor for OrganizationPostgresql
+// NewOrganizationPostgresql is a constructor for OrganizationPostgresql.
 func NewOrganizationPostgresql(db *sqlx.DB) *OrganizationPostgresql {
 	return &OrganizationPostgresql{db: db}
 }
 
-// GetAll selects all organizations from database
-func (r *OrganizationPostgresql) GetAll(userId string) ([]model.Organization, error) {
+// GetAll selects all organizations from database.
+func (r *OrganizationPostgresql) GetAll(userID string) ([]model.Organization, error) {
 	var organizations []model.Organization
 
 	query := fmt.Sprintf("SELECT id, name, user_id, address, phone FROM %s WHERE user_id = $1",
 		organisationTable)
 
-	err := r.db.Select(&organizations, query, userId)
+	err := r.db.Select(&organizations, query, userID)
 
-	return organizations, err
+	return organizations, errors.Wrap(err, "organizations select query error")
 }
 
-// GetOne select organization by id from database
-func (r *OrganizationPostgresql) GetOne(userId string, organizationId string) (model.Organization, error) {
+// GetOne select organization by id from database.
+func (r *OrganizationPostgresql) GetOne(userID string, organizationID string) (model.Organization, error) {
 	var organization model.Organization
 
 	query := fmt.Sprintf(
 		"SELECT id, name, user_id, address, phone FROM %s WHERE user_id = $1 AND id = $2",
 		organisationTable)
-	err := r.db.Get(&organization, query, userId, organizationId)
+	err := r.db.Get(&organization, query, userID, organizationID)
 
-	return organization, err
+	return organization, errors.Wrap(err, "organization select query error")
 }
 
-// Create insert organization into database
-func (r *OrganizationPostgresql) Create(userId string, organization model.Organization) (string, error) {
-	var id string
+// Create insert organization into database.
+func (r *OrganizationPostgresql) Create(userID string, organization model.Organization) (string, error) {
+	var organizationID string
 
 	createUserQuery := fmt.Sprintf(
 		"INSERT INTO %s (name, user_id, address, phone) VALUES ($1, $2, $3, $4) RETURNING id",
 		organisationTable)
 
-	row := r.db.QueryRow(createUserQuery, organization.Name, userId, organization.Address, organization.Phone)
+	row := r.db.QueryRow(createUserQuery, organization.Name, userID, organization.Address, organization.Phone)
 
-	err := row.Scan(&id)
+	err := row.Scan(&organizationID)
 
-	return id, err
+	return organizationID, errors.Wrap(err, "organization create query error")
 }
 
-// Update updates organization by id in database
-func (r *OrganizationPostgresql) Update(userId string, organizationId string, input model.UpdateOrganizationInput) error {
+// Update updates organization by id in database.
+func (r *OrganizationPostgresql) Update(userID string, organizationID string, input model.UpdateOrganizationInput) error { //nolint:lll
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
-	argId := 1
+	argID := 1
 
 	if input.Name != nil {
-		setValues = append(setValues, fmt.Sprintf("name=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("name=$%d", argID))
 		args = append(args, *input.Name)
-		argId++
+		argID++
 	}
 
 	if input.Address != nil {
-		setValues = append(setValues, fmt.Sprintf("address=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("address=$%d", argID))
 		args = append(args, *input.Address)
-		argId++
+		argID++
 	}
 
 	if input.Phone != nil {
-		setValues = append(setValues, fmt.Sprintf("phone=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("phone=$%d", argID))
 		args = append(args, *input.Phone)
-		argId++
 	}
 
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf(
 		"UPDATE %s SET %s WHERE id = '%s' AND user_id = '%s'",
-		organisationTable, setQuery, organizationId, userId)
+		organisationTable, setQuery, organizationID, userID)
 
 	_, err := r.db.Exec(query, args...)
 
-	return err
+	return errors.Wrap(err, "organization update query error")
 }
 
-// Delete deletes organization by id from database
-func (r *OrganizationPostgresql) Delete(userId string, organizationId string) error {
+// Delete deletes organization by id from database.
+func (r *OrganizationPostgresql) Delete(userID string, organizationID string) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND user_id = $2", organisationTable)
-	_, err := r.db.Exec(query, organizationId, userId)
+	_, err := r.db.Exec(query, organizationID, userID)
 
-	return err
+	return errors.Wrap(err, "organization delete query error")
 }

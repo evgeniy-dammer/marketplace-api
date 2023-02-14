@@ -2,18 +2,18 @@ package main
 
 import (
 	"context"
-	"github.com/evgeniy-dammer/emenu-api/internal/handler"
-	"github.com/evgeniy-dammer/emenu-api/internal/model"
-	"github.com/evgeniy-dammer/emenu-api/internal/repository"
-	"github.com/evgeniy-dammer/emenu-api/internal/service"
-	"github.com/spf13/viper"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/config"
+	"github.com/evgeniy-dammer/emenu-api/internal/handler"
+	"github.com/evgeniy-dammer/emenu-api/internal/model"
+	"github.com/evgeniy-dammer/emenu-api/internal/repository"
+	"github.com/evgeniy-dammer/emenu-api/internal/service"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 func main() {
@@ -31,23 +31,22 @@ func main() {
 	}
 
 	// establishing database connection
-	db, err := repository.NewPostgresDB(
-		model.DbConfig{
+	database, err := repository.NewPostgresDB(
+		model.DBConfig{
 			Host:     viper.GetString("database.host"),
 			Port:     viper.GetString("database.port"),
 			Username: viper.GetString("database.username"),
 			Password: os.Getenv("DB_PASSWORD"),
-			DbName:   viper.GetString("database.dbname"),
+			DBName:   viper.GetString("database.dbname"),
 			SSLMode:  viper.GetString("database.sslmode"),
 		},
 	)
-
 	if err != nil {
 		logrus.Fatalf("failed to initialize database: %s", err)
 	}
 
 	// dependency injections
-	repos := repository.NewRepository(db)
+	repos := repository.NewRepository(database)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
@@ -57,7 +56,7 @@ func main() {
 	go func() {
 		// run server
 		if err = srv.Run(viper.GetString("application.port"), handlers.InitRoutes()); err != nil {
-			logrus.Fatalf("error occured while running http server: %s", err.Error())
+			logrus.Fatalf("error occurred while running http server: %s", err.Error())
 		}
 	}()
 

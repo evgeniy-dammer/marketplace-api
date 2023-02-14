@@ -3,43 +3,54 @@ package service
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/evgeniy-dammer/emenu-api/internal/repository"
+	"github.com/pkg/errors"
 )
 
-// CategoryService is a category service
+// CategoryService is a category service.
 type CategoryService struct {
 	repo repository.Category
 }
 
-// NewCategoryService is a constructor for CategoryService
+// NewCategoryService is a constructor for CategoryService.
 func NewCategoryService(repo repository.Category) *CategoryService {
 	return &CategoryService{repo: repo}
 }
 
-// GetAll returns all categories from the system
-func (s *CategoryService) GetAll(userId string, organizationId string) ([]model.Category, error) {
-	return s.repo.GetAll(userId, organizationId)
+// GetAll returns all categories from the system.
+func (s *CategoryService) GetAll(userID string, organizationID string) ([]model.Category, error) {
+	categories, err := s.repo.GetAll(userID, organizationID)
+
+	return categories, errors.Wrap(err, "categories select error")
 }
 
-// GetOne returns category by id from the system
-func (s *CategoryService) GetOne(userId string, organizationId string, categoryId string) (model.Category, error) {
-	return s.repo.GetOne(userId, organizationId, categoryId)
+// GetOne returns category by id from the system.
+func (s *CategoryService) GetOne(userID string, organizationID string, categoryID string) (model.Category, error) {
+	category, err := s.repo.GetOne(userID, organizationID, categoryID)
+
+	return category, errors.Wrap(err, "category select error")
 }
 
-// Create inserts category into system
-func (s *CategoryService) Create(userId string, organizationId string, category model.Category) (string, error) {
-	return s.repo.Create(userId, organizationId, category)
+// Create inserts category into system.
+func (s *CategoryService) Create(userID string, organizationID string, category model.Category) (string, error) {
+	categoryID, err := s.repo.Create(userID, organizationID, category)
+
+	return categoryID, errors.Wrap(err, "category create error")
 }
 
-// Update updates category by id in the system
-func (s *CategoryService) Update(userId string, organizationId string, categoryId string, input model.UpdateCategoryInput) error {
+// Update updates category by id in the system.
+func (s *CategoryService) Update(userID string, organizationID string, categoryID string, input model.UpdateCategoryInput) error { //nolint:lll
 	if err := input.Validate(); err != nil {
-		return err
+		return errors.Wrap(err, "validation error")
 	}
 
-	return s.repo.Update(userId, organizationId, categoryId, input)
+	err := s.repo.Update(userID, organizationID, categoryID, input)
+
+	return errors.Wrap(err, "category update error")
 }
 
-// Delete deletes category by id from the system
-func (s *CategoryService) Delete(userId string, organizationId string, categoryId string) error {
-	return s.repo.Delete(userId, organizationId, categoryId)
+// Delete deletes category by id from the system.
+func (s *CategoryService) Delete(userID string, organizationID string, categoryID string) error {
+	err := s.repo.Delete(userID, organizationID, categoryID)
+
+	return errors.Wrap(err, "category delete error")
 }

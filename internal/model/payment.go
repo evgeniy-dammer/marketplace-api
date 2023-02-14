@@ -1,12 +1,12 @@
 package model
 
-// Payment model
+// Payment model.
 type Payment struct {
-	Id             string  `json:"id"`
+	ID             string  `json:"id"`
 	DateTime       string  `json:"datetime"`
 	Sum            float32 `json:"sum"`
-	OrderId        string  `json:"orderid"`
-	DepartmentId   string  `json:"departmentid"`
-	OrganisationId string  `json:"organisationid"`
+	OrderID        string  `json:"orderid"`
+	DepartmentID   string  `json:"departmentid"`
+	OrganisationID string  `json:"organisationid"`
 	Status         int     `json:"status"`
 }

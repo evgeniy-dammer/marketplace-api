@@ -2,97 +2,100 @@ package repository
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
-	"strings"
+	"github.com/pkg/errors"
 )
 
-// ItemPostgresql repository
+// ItemPostgresql repository.
 type ItemPostgresql struct {
 	db *sqlx.DB
 }
 
-// NewItemPostgresql is a constructor for ItemPostgresql
+// NewItemPostgresql is a constructor for ItemPostgresql.
 func NewItemPostgresql(db *sqlx.DB) *ItemPostgresql {
 	return &ItemPostgresql{db: db}
 }
 
-// GetAll selects all items from database
-func (r *ItemPostgresql) GetAll(userId string, organizationId string) ([]model.Item, error) {
+// GetAll selects all items from database.
+func (r *ItemPostgresql) GetAll(userID string, organizationID string) ([]model.Item, error) {
 	var items []model.Item
 
 	query := fmt.Sprintf("SELECT id, name, price, category_id, organisation_id FROM %s WHERE organisation_id = $1 ",
 		itemTable)
-	err := r.db.Select(&items, query, organizationId)
+	err := r.db.Select(&items, query, organizationID)
 
-	return items, err
+	return items, errors.Wrap(err, "items select query error")
 }
 
-// GetOne select item by id from database
-func (r *ItemPostgresql) GetOne(userId string, organizationId string, itemId string) (model.Item, error) {
+// GetOne select item by id from database.
+func (r *ItemPostgresql) GetOne(userID string, organizationID string, itemID string) (model.Item, error) {
 	var item model.Item
 
-	query := fmt.Sprintf("SELECT id, name, price, category_id, organisation_id FROM %s WHERE organisation_id = $1 AND id = $2 ",
-		itemTable)
-	err := r.db.Get(&item, query, organizationId, itemId)
+	query := fmt.Sprintf(
+		"SELECT id, name, price, category_id, organisation_id FROM %s WHERE organisation_id = $1 AND id = $2 ",
+		itemTable,
+	)
+	err := r.db.Get(&item, query, organizationID, itemID)
 
-	return item, err
+	return item, errors.Wrap(err, "item select query error")
 }
 
-// Create insert item into database
-func (r *ItemPostgresql) Create(userId string, organizationId string, item model.Item) (string, error) {
-	var id string
+// Create insert item into database.
+func (r *ItemPostgresql) Create(userID string, organizationID string, item model.Item) (string, error) {
+	var itemID string
 
 	query := fmt.Sprintf("INSERT INTO %s (name, price, category_id, organisation_id) VALUES ($1, $2, $3, $4) RETURNING id",
 		itemTable)
-	row := r.db.QueryRow(query, item.Name, item.Price, item.CategoryId, organizationId)
-	err := row.Scan(&id)
+	row := r.db.QueryRow(query, item.Name, item.Price, item.CategoryID, organizationID)
+	err := row.Scan(&itemID)
 
-	return id, err
+	return itemID, errors.Wrap(err, "item create query error")
 }
 
-// Update updates item by id in database
-func (r *ItemPostgresql) Update(userId string, organizationId string, itemId string, input model.UpdateItemInput) error {
+// Update updates item by id in database.
+func (r *ItemPostgresql) Update(userID string, organizationID string, itemID string, input model.UpdateItemInput) error { //nolint:lll
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
-	argId := 1
+	argID := 1
 
 	if input.Name != nil {
-		setValues = append(setValues, fmt.Sprintf("name=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("name=$%d", argID))
 		args = append(args, *input.Name)
-		argId++
+		argID++
 	}
 
 	if input.Price != nil {
-		setValues = append(setValues, fmt.Sprintf("price=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("price=$%d", argID))
 		args = append(args, *input.Price)
-		argId++
+		argID++
 	}
 
-	if input.CategoryId != nil {
-		setValues = append(setValues, fmt.Sprintf("category_id=$%d", argId))
-		args = append(args, *input.CategoryId)
-		argId++
+	if input.CategoryID != nil {
+		setValues = append(setValues, fmt.Sprintf("category_id=$%d", argID))
+		args = append(args, *input.CategoryID)
+		argID++
 	}
 
-	if input.OrganisationId != nil {
-		setValues = append(setValues, fmt.Sprintf("organisation_id=$%d", argId))
-		args = append(args, *input.OrganisationId)
-		argId++
+	if input.OrganisationID != nil {
+		setValues = append(setValues, fmt.Sprintf("organisation_id=$%d", argID))
+		args = append(args, *input.OrganisationID)
 	}
 
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE organisation_id = '%s' AND id = '%s'",
-		itemTable, setQuery, organizationId, itemId)
+		itemTable, setQuery, organizationID, itemID)
 	_, err := r.db.Exec(query, args...)
 
-	return err
+	return errors.Wrap(err, "item update query error")
 }
 
-// Delete deletes item by id from database
-func (r *ItemPostgresql) Delete(userId string, organizationId string, itemId string) error {
+// Delete deletes item by id from database.
+func (r *ItemPostgresql) Delete(userID string, organizationID string, itemID string) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE organisation_id = $1 AND id = $2", itemTable)
-	_, err := r.db.Exec(query, organizationId, itemId)
+	_, err := r.db.Exec(query, organizationID, itemID)
 
-	return err
+	return errors.Wrap(err, "item delete query error")
 }

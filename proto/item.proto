@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "./internal/proto";
+option go_package = "./proto";
 
-package protos;
+package proto;
 
 service ItemService {
   rpc FindAll (FindAllRequest) returns (FindAllResponse);

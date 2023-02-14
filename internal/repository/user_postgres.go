@@ -2,59 +2,71 @@ package repository
 
 import (
 	"fmt"
-	"github.com/evgeniy-dammer/emenu-api/internal/model"
-	"github.com/jmoiron/sqlx"
 	"strings"
 	"time"
+
+	"github.com/evgeniy-dammer/emenu-api/internal/model"
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
-// UserPostgresql repository
+// UserPostgresql repository.
 type UserPostgresql struct {
 	db *sqlx.DB
 }
 
-// NewUserPostgresql is a constructor for UserPostgresql
+// NewUserPostgresql is a constructor for UserPostgresql.
 func NewUserPostgresql(db *sqlx.DB) *UserPostgresql {
 	return &UserPostgresql{db: db}
 }
 
-// GetAll selects all users from database
-func (r *UserPostgresql) GetAll(search string, status string, roleId string) ([]model.User, error) {
+// GetAll selects all users from database.
+func (r *UserPostgresql) GetAll(search string, status string, roleID string) ([]model.User, error) {
 	var users []model.User
 
 	if search != "" {
-		search = fmt.Sprint("WHERE (us.phone LIKE '%", search, "%' OR us.first_name LIKE '%", search, "%' OR us.first_name LIKE '%", search, "%') ")
+		search = fmt.Sprint(
+			"WHERE (us.phone LIKE '%",
+			search,
+			"%' OR us.first_name LIKE '%",
+			search,
+			"%' OR us.first_name LIKE '%",
+			search,
+			"%') ",
+		)
 	}
 
-	if roleId != "" {
+	if roleID != "" {
 		if search == "" {
-			roleId = fmt.Sprint("WHERE ur.role_id = ", roleId, " ")
+			roleID = fmt.Sprint("WHERE ur.role_id = ", roleID, " ")
 		} else {
-			roleId = fmt.Sprint(" AND ur.role_id = ", roleId, " ")
+			roleID = fmt.Sprint(" AND ur.role_id = ", roleID, " ")
 		}
 	}
 
 	if status != "" {
-		if search == "" && roleId == "" {
+		if search == "" && roleID == "" {
 			status = fmt.Sprint("WHERE us.status_id = '", status, "' ")
 		} else {
 			status = fmt.Sprint(" AND us.status_id = '", status, "' ")
 		}
 	}
 
-	query := fmt.Sprintf("SELECT us.id, us.phone, us.first_name, us.last_name, ro.name AS role, st.name AS status FROM %s us "+
-		"INNER JOIN %s ur ON ur.user_id = us.id "+
-		"INNER JOIN %s ro ON ur.role_id = ro.id "+
-		"INNER JOIN %s st ON st.id = us.status_id "+
-		"%s %s %s ",
-		userTable, userRoleTable, roleTable, statusTable, search, roleId, status)
+	query := fmt.Sprintf(
+		"SELECT us.id, us.phone, us.first_name, us.last_name, ro.name AS role, st.name AS status FROM %s us "+
+			"INNER JOIN %s ur ON ur.user_id = us.id "+
+			"INNER JOIN %s ro ON ur.role_id = ro.id "+
+			"INNER JOIN %s st ON st.id = us.status_id "+
+			"%s %s %s ",
+		userTable, userRoleTable, roleTable, statusTable, search, roleID, status,
+	)
 
 	err := r.db.Select(&users, query)
 
-	return users, err
+	return users, errors.Wrap(err, "users select query error")
 }
 
-// GetAllRoles selects all user roles from database
+// GetAllRoles selects all user roles from database.
 func (r *UserPostgresql) GetAllRoles() ([]model.Role, error) {
 	var roles []model.Role
 
@@ -62,11 +74,11 @@ func (r *UserPostgresql) GetAllRoles() ([]model.Role, error) {
 
 	err := r.db.Select(&roles, query)
 
-	return roles, err
+	return roles, errors.Wrap(err, "roles select query error")
 }
 
-// GetOne select user by id from database
-func (r *UserPostgresql) GetOne(userId string) (model.User, error) {
+// GetOne select user by id from database.
+func (r *UserPostgresql) GetOne(userID string) (model.User, error) {
 	var user model.User
 
 	query := fmt.Sprintf(
@@ -75,96 +87,96 @@ func (r *UserPostgresql) GetOne(userId string) (model.User, error) {
 			"INNER JOIN %s ro ON ur.role_id = ro.id "+
 			"INNER JOIN %s st ON st.id = us.status_id "+
 			"WHERE us.id = $1", userTable, userRoleTable, roleTable, statusTable)
-	err := r.db.Get(&user, query, userId)
+	err := r.db.Get(&user, query, userID)
 
-	return user, err
+	return user, errors.Wrap(err, "user select query error")
 }
 
-// Create insert User into database
-func (r *UserPostgresql) Create(user model.User, statusId string) (string, error) {
-	var id string
+// Create insert user into database.
+func (r *UserPostgresql) Create(user model.User, statusID string) (string, error) {
+	var userID string
 
-	tx, err := r.db.Begin()
-
+	trx, err := r.db.Begin()
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "transaction begin error")
 	}
 
-	var createUserQuery = fmt.Sprintf(
+	createUserQuery := fmt.Sprintf(
 		"INSERT INTO %s (phone, password, first_name, last_name, status_id) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		userTable,
 	)
-	row := tx.QueryRow(createUserQuery, user.Phone, user.Password, user.FirstName, user.LastName, statusId)
+	row := trx.QueryRow(createUserQuery, user.Phone, user.Password, user.FirstName, user.LastName, statusID)
 
-	if err = row.Scan(&id); err != nil {
-		if err = tx.Rollback(); err != nil {
-			return "", err
+	if err = row.Scan(&userID); err != nil {
+		if err = trx.Rollback(); err != nil {
+			return "", errors.Wrap(err, "user rollback error")
 		}
-		return "", err
+
+		return "", errors.Wrap(err, "user id scan error")
 	}
 
 	createUsersRoleQuery := fmt.Sprintf("INSERT INTO %s (user_id, role_id) VALUES ($1, $2)", userRoleTable)
 
-	if _, err = tx.Exec(createUsersRoleQuery, id, user.RoleId); err != nil {
-		if err = tx.Rollback(); err != nil {
-			return "", err
+	if _, err = trx.Exec(createUsersRoleQuery, userID, user.RoleID); err != nil {
+		if err = trx.Rollback(); err != nil {
+			return "", errors.Wrap(err, "role rollback error")
 		}
-		return "", err
+
+		return "", errors.Wrap(err, "role query execution error")
 	}
 
-	return id, tx.Commit()
+	return userID, errors.Wrap(trx.Commit(), "create transaction commit error")
 }
 
-// Update updates list by id in database
-func (r *UserPostgresql) Update(userId string, input model.UpdateUserInput) error {
+// Update updates user by id in database.
+func (r *UserPostgresql) Update(userID string, input model.UpdateUserInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
-	argId := 1
+	argID := 1
 
 	if input.FirstName != nil {
-		setValues = append(setValues, fmt.Sprintf("first_name=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("first_name=$%d", argID))
 		args = append(args, *input.FirstName)
-		argId++
+		argID++
 	}
 
 	if input.LastName != nil {
-		setValues = append(setValues, fmt.Sprintf("last_name=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("last_name=$%d", argID))
 		args = append(args, *input.LastName)
-		argId++
+		argID++
 	}
 
 	if input.Password != nil {
-		setValues = append(setValues, fmt.Sprintf("password=$%d", argId))
+		setValues = append(setValues, fmt.Sprintf("password=$%d", argID))
 		args = append(args, *input.Password)
-		argId++
+		argID++
 	}
 
-	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argId))
+	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
 	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
-	argId++
 
 	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = '%s'", userTable, setQuery, userId)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = '%s'", userTable, setQuery, userID)
 	_, err := r.db.Exec(query, args...)
 
-	return err
+	return errors.Wrap(err, "user update query error")
 }
 
-// Delete deletes user by id from database
-func (r *UserPostgresql) Delete(userId string) error {
+// Delete deletes user by id from database.
+func (r *UserPostgresql) Delete(userID string) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", userTable)
-	_, err := r.db.Exec(query, userId)
+	_, err := r.db.Exec(query, userID)
 
-	return err
+	return errors.Wrap(err, "user delete query error")
 }
 
-// GetActiveStatusId select status ID by name from database
-func (r *UserPostgresql) GetActiveStatusId(name string) (string, error) {
-	var statusId string
+// GetActiveStatusID select status ID by name from database.
+func (r *UserPostgresql) GetActiveStatusID(name string) (string, error) {
+	var statusID string
 
 	query := fmt.Sprintf("SELECT id FROM %s WHERE name = '%s'", statusTable, name)
 
-	err := r.db.Get(&statusId, query)
+	err := r.db.Get(&statusID, query)
 
-	return statusId, err
+	return statusID, errors.Wrap(err, "active status select query error")
 }

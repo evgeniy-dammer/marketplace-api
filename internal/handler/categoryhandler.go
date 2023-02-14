@@ -1,133 +1,138 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
-// getCategories is a get all categories handler
-func (h *Handler) getCategories(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// getCategories is a get all categories handler.
+func (h *Handler) getCategories(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
+	organizationID := ctx.Param("org_id")
 
-	results, err := h.services.Category.GetAll(userId, organizationId)
+	results, err := h.services.Category.GetAll(userID, organizationID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	ctx.JSON(http.StatusOK, results)
 }
 
-// getCategory is a get category by id handler
-func (h *Handler) getCategory(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// getCategory is a get category by id handler.
+func (h *Handler) getCategory(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
-	categoryId := c.Param("id")
+	organizationID := ctx.Param("org_id")
+	categoryID := ctx.Param("id")
 
-	if categoryId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "invalid id param")
+	if categoryID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+
 		return
 	}
 
-	list, err := h.services.Category.GetOne(userId, organizationId, categoryId)
+	list, err := h.services.Category.GetOne(userID, organizationID, categoryID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusCreated, list)
+	ctx.JSON(http.StatusCreated, list)
 }
 
-// createCategory register a category in the system
-func (h *Handler) createCategory(c *gin.Context) {
+// createCategory register a category in the system.
+func (h *Handler) createCategory(ctx *gin.Context) {
 	var input model.Category
 
-	userId, _, err := h.getUserIdAndRole(c)
-
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
+	organizationID := ctx.Param("org_id")
 
-	if err = c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	id, err := h.services.Category.Create(userId, organizationId, input)
-
+	categoryID, err := h.services.Category.Create(userID, organizationID, input)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{"id": id})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"id": categoryID})
 }
 
-// updateCategory is an update category by id handler
-func (h *Handler) updateCategory(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// updateCategory is an update category by id handler.
+func (h *Handler) updateCategory(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
-	categoryId := c.Param("id")
+	organizationID := ctx.Param("org_id")
+	categoryID := ctx.Param("id")
 
-	if categoryId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "empty id param")
+	if categoryID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+
 		return
 	}
 
 	var input model.UpdateCategoryInput
-	if err = c.BindJSON(&input); err != nil {
-		model.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
-	if err = h.services.Category.Update(userId, organizationId, categoryId, input); err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	if err = h.services.Category.Update(userID, organizationID, categoryID, input); err != nil {
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
+	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }
 
-// deleteCategory is a delete category by id handler
-func (h *Handler) deleteCategory(c *gin.Context) {
-	userId, _, err := h.getUserIdAndRole(c)
-
+// deleteCategory is a delete category by id handler.
+func (h *Handler) deleteCategory(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	organizationId := c.Param("org_id")
-	categoryId := c.Param("id")
+	organizationID := ctx.Param("org_id")
+	categoryID := ctx.Param("id")
 
-	if userId == "" {
-		model.NewErrorResponse(c, http.StatusBadRequest, "empty id param")
+	if userID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+
 		return
 	}
 
-	err = h.services.Category.Delete(userId, organizationId, categoryId)
+	err = h.services.Category.Delete(userID, organizationID, categoryID)
 	if err != nil {
-		model.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
 		return
 	}
 
-	c.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
+	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }

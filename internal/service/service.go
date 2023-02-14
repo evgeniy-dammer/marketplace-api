@@ -5,54 +5,54 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/repository"
 )
 
-// Authorization interface
+// Authorization interface.
 type Authorization interface {
 	GenerateToken(id string, username string, password string) (model.User, model.Tokens, error)
 	ParseToken(token string) (string, error)
-	CreateUser(user model.User, statusId string) (string, error)
+	CreateUser(user model.User, statusID string) (string, error)
 	GetUserRole(id string) (string, error)
 }
 
-// User interface
+// User interface.
 type User interface {
-	GetAll(search string, status string, roleId string) ([]model.User, error)
-	GetOne(userId string) (model.User, error)
-	Create(user model.User, statusId string) (string, error)
-	Update(userId string, input model.UpdateUserInput) error
-	Delete(userId string) error
+	GetAll(search string, status string, roleID string) ([]model.User, error)
+	GetOne(userID string) (model.User, error)
+	Create(user model.User, statusID string) (string, error)
+	Update(userID string, input model.UpdateUserInput) error
+	Delete(userID string) error
 
 	GetAllRoles() ([]model.Role, error)
-	GetActiveStatusId(name string) (string, error)
+	GetActiveStatusID(name string) (string, error)
 }
 
-// Organization interface
+// Organization interface.
 type Organization interface {
-	GetAll(userId string) ([]model.Organization, error)
-	GetOne(userId string, organizationId string) (model.Organization, error)
-	Create(userId string, organization model.Organization) (string, error)
-	Update(userId string, organizationId string, input model.UpdateOrganizationInput) error
-	Delete(userId string, organizationId string) error
+	GetAll(userID string) ([]model.Organization, error)
+	GetOne(userID string, organizationID string) (model.Organization, error)
+	Create(userID string, organization model.Organization) (string, error)
+	Update(userID string, organizationID string, input model.UpdateOrganizationInput) error
+	Delete(userID string, organizationID string) error
 }
 
-// Category interface
+// Category interface.
 type Category interface {
-	GetAll(userId string, organizationId string) ([]model.Category, error)
-	GetOne(userId string, organizationId string, categoryId string) (model.Category, error)
-	Create(userId string, organizationId string, category model.Category) (string, error)
-	Update(userId string, organizationId string, categoryId string, input model.UpdateCategoryInput) error
-	Delete(userId string, organizationId string, categoryId string) error
+	GetAll(userID string, organizationID string) ([]model.Category, error)
+	GetOne(userID string, organizationID string, categoryID string) (model.Category, error)
+	Create(userID string, organizationID string, category model.Category) (string, error)
+	Update(userID string, organizationID string, categoryID string, input model.UpdateCategoryInput) error
+	Delete(userID string, organizationID string, categoryID string) error
 }
 
-// Item interface
+// Item interface.
 type Item interface {
-	GetAll(userId string, organizationId string) ([]model.Item, error)
-	GetOne(userId string, organizationId string, itemId string) (model.Item, error)
-	Create(userId string, organizationId string, item model.Item) (string, error)
-	Update(userId string, organizationId string, itemId string, input model.UpdateItemInput) error
-	Delete(userId string, organizationId string, itemId string) error
+	GetAll(userID string, organizationID string) ([]model.Item, error)
+	GetOne(userID string, organizationID string, itemID string) (model.Item, error)
+	Create(userID string, organizationID string, item model.Item) (string, error)
+	Update(userID string, organizationID string, itemID string, input model.UpdateItemInput) error
+	Delete(userID string, organizationID string, itemID string) error
 }
 
-// Service interface
+// Service interface.
 type Service struct {
 	Authorization
 	User
@@ -61,7 +61,7 @@ type Service struct {
 	Item
 }
 
-// NewService constructor for Service
+// NewService constructor for Service.
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),

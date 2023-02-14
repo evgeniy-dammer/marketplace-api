@@ -5,20 +5,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler
+// Handler handler.
 type Handler struct {
 	services *service.Service
 }
 
-// NewHandler constructor for Handler
+// NewHandler constructor for Handler.
 func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
-// InitRoutes crete routes
+// InitRoutes crete routes.
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
-
 	router.Use(h.corsMiddleware())
 
 	auth := router.Group("/auth")
@@ -30,9 +29,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api", h.userIdentity)
 	{
-		v1 := api.Group("/v1")
+		version1 := api.Group("/v1")
 		{
-			users := v1.Group("/users")
+			users := version1.Group("/users")
 			{
 				users.GET("/", h.getAllUsers)
 				users.GET("/:id", h.getUser)
@@ -42,7 +41,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				users.GET("/roles", h.getAllRoles)
 			}
 
-			organizations := v1.Group("/organizations")
+			organizations := version1.Group("/organizations")
 			{
 				organizations.GET("/", h.getOrganizations)
 				organizations.GET("/:id", h.getOrganization)
@@ -51,7 +50,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				organizations.DELETE("/:id", h.deleteOrganization)
 			}
 
-			categories := v1.Group("/categories")
+			categories := version1.Group("/categories")
 			{
 				categories.GET("/:org_id", h.getCategories)
 				categories.GET("/:org_id/:id", h.getCategory)
@@ -60,7 +59,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				categories.DELETE("/:org_id/:id", h.deleteCategory)
 			}
 
-			items := v1.Group("/items")
+			items := version1.Group("/items")
 			{
 				items.GET("/:org_id", h.getItems)
 				items.GET("/:org_id/:id", h.getItem)
@@ -68,7 +67,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				items.PATCH("/:org_id/:id", h.updateItem)
 				items.DELETE("/:org_id/:id", h.deleteItem)
 			}
-
 		}
 	}
 
