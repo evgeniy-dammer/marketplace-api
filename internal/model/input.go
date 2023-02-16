@@ -74,3 +74,18 @@ func (i UpdateItemInput) Validate() error {
 
 	return nil
 }
+
+// UpdateTableInput is an input data for updating organization.
+type UpdateTableInput struct {
+	Name           *string `json:"name"`
+	OrganisationID *string `json:"organisation"`
+}
+
+// Validate checks if update input is nil.
+func (i UpdateTableInput) Validate() error {
+	if i.Name == nil && i.OrganisationID == nil {
+		return errStructHasNoValues
+	}
+
+	return nil
+}

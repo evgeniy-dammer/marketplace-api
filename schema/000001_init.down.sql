@@ -6,3 +6,4 @@ DROP TABLE organisations;
 DROP TABLE categories_items;
 DROP TABLE items;
 DROP TABLE categories;
+DROP TABLE tables;

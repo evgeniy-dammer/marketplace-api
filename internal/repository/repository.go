@@ -51,6 +51,15 @@ type Item interface {
 	Delete(userID string, organizationID string, itemID string) error
 }
 
+// Table interface.
+type Table interface {
+	GetAll(userID string, organizationID string) ([]model.Table, error)
+	GetOne(userID string, organizationID string, tableID string) (model.Table, error)
+	Create(userID string, organizationID string, table model.Table) (string, error)
+	Update(userID string, organizationID string, tableID string, input model.UpdateTableInput) error
+	Delete(userID string, organizationID string, tableID string) error
+}
+
 // Repository interface.
 type Repository struct {
 	Authorization
@@ -58,6 +67,7 @@ type Repository struct {
 	Organization
 	Category
 	Item
+	Table
 }
 
 // NewRepository constructor for Repository.
@@ -68,5 +78,6 @@ func NewRepository(database *sqlx.DB) *Repository {
 		Organization:  NewOrganizationPostgresql(database),
 		Category:      NewCategoryPostgresql(database),
 		Item:          NewItemPostgresql(database),
+		Table:         NewTablePostgresql(database),
 	}
 }

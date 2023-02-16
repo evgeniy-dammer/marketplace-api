@@ -50,6 +50,12 @@ func (h *Handler) signUp(ctx *gin.Context) {
 		return
 	}
 
+	if statusID == "" {
+		model.NewErrorResponse(ctx, http.StatusInternalServerError, "empty role id")
+
+		return
+	}
+
 	// creating the user
 	userID, err := h.services.Authorization.CreateUser(input, statusID)
 	if err != nil {

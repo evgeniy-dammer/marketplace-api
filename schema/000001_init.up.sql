@@ -81,6 +81,13 @@ CREATE TABLE categories_items
     items_id UUID REFERENCES items(id) ON DELETE CASCADE NOT NULL
 );
 
+CREATE TABLE tables
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    organisation_id UUID NOT NULL
+);
+
 -- DATA --
 
 INSERT INTO statuses (name) VALUES ('active'), ('inactive'), ('blocked');

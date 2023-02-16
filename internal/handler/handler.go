@@ -67,6 +67,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				items.PATCH("/:org_id/:id", h.updateItem)
 				items.DELETE("/:org_id/:id", h.deleteItem)
 			}
+
+			tables := version1.Group("/tables")
+			{
+				tables.GET("/:org_id", h.getTables)
+				tables.GET("/:org_id/:id", h.getTable)
+				tables.POST("/:org_id", h.createTable)
+				tables.PATCH("/:org_id/:id", h.updateTable)
+				tables.DELETE("/:org_id/:id", h.deleteTable)
+			}
 		}
 	}
 

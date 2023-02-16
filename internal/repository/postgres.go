@@ -18,7 +18,9 @@ const (
 	organisationTable = "organisations"
 	categoryTable     = "categories"
 	itemTable         = "items"
-	categoryItemTable = "categories_items"
+	tableTable        = "tables"
+
+	// categoryItemTable = "categories_items"
 )
 
 // NewPostgresDB create connection to database.
