@@ -69,7 +69,7 @@ func (s *AuthService) GenerateToken(userID string, username string, password str
 	}
 
 	user.Password = ""
-	user.RoleID = ""
+	user.RoleID = 0
 
 	issuedAt := time.Now().Unix()
 	expiresAt := time.Now().Add(tokenTTL).Unix()
@@ -130,7 +130,7 @@ func (s *AuthService) ParseToken(accessToken string) (string, error) {
 }
 
 // CreateUser hashes the password and insert User into system.
-func (s *AuthService) CreateUser(user model.User, statusID string) (string, error) {
+func (s *AuthService) CreateUser(user model.User) (string, error) {
 	pass, err := generatePasswordHash(user.Password, params)
 	if err != nil {
 		return "", err
@@ -138,7 +138,7 @@ func (s *AuthService) CreateUser(user model.User, statusID string) (string, erro
 
 	user.Password = pass
 
-	userID, err := s.repo.CreateUser(user, statusID)
+	userID, err := s.repo.CreateUser(user)
 
 	return userID, errors.Wrap(err, "can not create user")
 }

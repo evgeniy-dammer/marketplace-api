@@ -15,6 +15,12 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- TABLES --
 
+CREATE TABLE users_statuses
+(
+    id SMALLSERIAL PRIMARY KEY,
+    name CHARACTER VARYING (50) NOT NULL UNIQUE
+);
+
 CREATE TABLE users
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -22,21 +28,20 @@ CREATE TABLE users
     password TEXT NOT NULL,
     first_name CHARACTER VARYING (255),
     last_name CHARACTER VARYING (255),
-    status_id UUID NOT NULL,
+    status_id SMALLINT REFERENCES users_statuses(id) DEFAULT 1,
     image_id UUID,
-    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'utc'),
-    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'utc')
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
 );
 
 CREATE TABLE roles
 (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name CHARACTER VARYING (50) NOT NULL UNIQUE
-);
-
-CREATE TABLE statuses
-(
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SMALLSERIAL PRIMARY KEY NOT NULL,
     name CHARACTER VARYING (50) NOT NULL UNIQUE
 );
 
@@ -44,16 +49,23 @@ CREATE TABLE users_roles
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    role_id UUID REFERENCES roles(id) ON DELETE CASCADE NOT NULL
+    role_id SMALLINT REFERENCES roles(id) ON DELETE CASCADE NOT NULL
 );
 
-CREATE TABLE organisations
+CREATE TABLE organizations
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    user_id UUID NOT NULL,
+    user_id UUID REFERENCES users(id) NOT NULL,
     address TEXT,
-    phone CHARACTER VARYING (255)
+    phone CHARACTER VARYING (255),
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
 );
 
 CREATE TABLE categories
@@ -62,7 +74,14 @@ CREATE TABLE categories
     name CHARACTER VARYING (255) NOT NULL,
     parent_id TEXT,
     level SMALLINT NOT NULL DEFAULT 0,
-    organisation_id UUID NOT NULL
+    organization_id UUID REFERENCES organizations(id) NOT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
 );
 
 CREATE TABLE items
@@ -71,7 +90,14 @@ CREATE TABLE items
     name TEXT NOT NULL,
     price DOUBLE PRECISION DEFAULT 0,
     category_id UUID NOT NULL,
-    organisation_id UUID NOT NULL
+    organization_id UUID REFERENCES organizations(id) NOT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
 );
 
 CREATE TABLE categories_items
@@ -85,13 +111,61 @@ CREATE TABLE tables
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    organisation_id UUID NOT NULL
+    organization_id UUID REFERENCES organizations(id) NOT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE orders_statuses
+(
+    id SMALLSERIAL PRIMARY KEY,
+    name CHARACTER VARYING (50) NOT NULL UNIQUE
+);
+
+CREATE TABLE orders
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    organization_id UUID REFERENCES organizations(id) NOT NULL,
+    table_id UUID REFERENCES tables(id),
+    status_id SMALLINT REFERENCES orders_statuses(id) DEFAULT 1,
+    totalsum DOUBLE PRECISION DEFAULT 0,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
+
+    CONSTRAINT valid_totalsum CHECK ( totalsum >= 0 )
+);
+
+CREATE TABLE orders_items
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID REFERENCES orders(id) NOT NULL,
+    item_id UUID REFERENCES items(id) NOT NULL,
+    quantity DOUBLE PRECISION NOT NULL,
+    unitprise DOUBLE PRECISION NOT NULL,
+    totalprice DOUBLE PRECISION NOT NULL
+
+    CONSTRAINT valid_quantity CHECK ( quantity >= 0 )
+    CONSTRAINT valid_unitprise CHECK ( unitprise >= 0 )
+    CONSTRAINT valid_totalprice CHECK ( totalprice >= 0 )
 );
 
 -- DATA --
 
-INSERT INTO statuses (name) VALUES ('active'), ('inactive'), ('blocked');
+INSERT INTO users_statuses (name) VALUES ('active'), ('inactive'), ('blocked');
 
 INSERT INTO roles (name) VALUES ('admin'), ('manager'), ('user');
+
+INSERT INTO orders_statuses (name) VALUES ('new'), ('approved'), ('in process'), ('on the way'), ('shipped'), ('payed');
 
 COMMIT;

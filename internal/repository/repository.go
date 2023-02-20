@@ -8,7 +8,7 @@ import (
 // Authorization interface.
 type Authorization interface {
 	GetUser(id string, username string) (model.User, error)
-	CreateUser(user model.User, statusID string) (string, error)
+	CreateUser(user model.User) (string, error)
 	GetUserRole(id string) (string, error)
 }
 
@@ -16,12 +16,11 @@ type Authorization interface {
 type User interface {
 	GetAll(search string, status string, roleID string) ([]model.User, error)
 	GetOne(userID string) (model.User, error)
-	Create(user model.User, statusID string) (string, error)
+	Create(userID string, user model.User) (string, error)
 	Update(userID string, input model.UpdateUserInput) error
-	Delete(userID string) error
+	Delete(userID string, dUserID string) error
 
 	GetAllRoles() ([]model.Role, error)
-	GetActiveStatusID(name string) (string, error)
 }
 
 // Organization interface.
@@ -29,7 +28,7 @@ type Organization interface {
 	GetAll(userID string) ([]model.Organization, error)
 	GetOne(userID string, organizationID string) (model.Organization, error)
 	Create(userID string, organization model.Organization) (string, error)
-	Update(userID string, organizationID string, input model.UpdateOrganizationInput) error
+	Update(userID string, input model.UpdateOrganizationInput) error
 	Delete(userID string, organizationID string) error
 }
 
@@ -37,8 +36,8 @@ type Organization interface {
 type Category interface {
 	GetAll(userID string, organizationID string) ([]model.Category, error)
 	GetOne(userID string, organizationID string, categoryID string) (model.Category, error)
-	Create(userID string, organizationID string, category model.Category) (string, error)
-	Update(userID string, organizationID string, categoryID string, input model.UpdateCategoryInput) error
+	Create(userID string, category model.Category) (string, error)
+	Update(userID string, input model.UpdateCategoryInput) error
 	Delete(userID string, organizationID string, categoryID string) error
 }
 
@@ -46,8 +45,8 @@ type Category interface {
 type Item interface {
 	GetAll(userID string, organizationID string) ([]model.Item, error)
 	GetOne(userID string, organizationID string, itemID string) (model.Item, error)
-	Create(userID string, organizationID string, item model.Item) (string, error)
-	Update(userID string, organizationID string, itemID string, input model.UpdateItemInput) error
+	Create(userID string, item model.Item) (string, error)
+	Update(userID string, input model.UpdateItemInput) error
 	Delete(userID string, organizationID string, itemID string) error
 }
 
@@ -55,9 +54,18 @@ type Item interface {
 type Table interface {
 	GetAll(userID string, organizationID string) ([]model.Table, error)
 	GetOne(userID string, organizationID string, tableID string) (model.Table, error)
-	Create(userID string, organizationID string, table model.Table) (string, error)
-	Update(userID string, organizationID string, tableID string, input model.UpdateTableInput) error
+	Create(userID string, table model.Table) (string, error)
+	Update(userID string, input model.UpdateTableInput) error
 	Delete(userID string, organizationID string, tableID string) error
+}
+
+// Order interface.
+type Order interface {
+	GetAll(userID string, organizationID string) ([]model.Order, error)
+	GetOne(userID string, organizationID string, orderID string) (model.Order, error)
+	Create(userID string, order model.Order) (string, error)
+	Update(userID string, input model.UpdateOrderInput) error
+	Delete(userID string, organizationID string, orderID string) error
 }
 
 // Repository interface.
@@ -68,6 +76,7 @@ type Repository struct {
 	Category
 	Item
 	Table
+	Order
 }
 
 // NewRepository constructor for Repository.
@@ -79,5 +88,6 @@ func NewRepository(database *sqlx.DB) *Repository {
 		Category:      NewCategoryPostgresql(database),
 		Item:          NewItemPostgresql(database),
 		Table:         NewTablePostgresql(database),
+		Order:         NewOrderPostgresql(database),
 	}
 }

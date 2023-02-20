@@ -35,16 +35,17 @@ func (r *AuthPostgres) GetUser(userID string, username string) (model.User, erro
 			"INNER JOIN %s ur ON ur.user_id = us.id "+
 			"INNER JOIN %s ro ON ur.role_id = ro.id "+
 			"INNER JOIN %s st ON st.id = us.status_id "+
-			" %s ",
+			" %s AND us.is_deleted = false",
 		userTable, userRoleTable, roleTable, statusTable, where,
 	)
+
 	err := r.db.Get(&user, query)
 
 	return user, errors.Wrap(err, "user select error")
 }
 
 // CreateUser insert user into database.
-func (r *AuthPostgres) CreateUser(user model.User, statusID string) (string, error) {
+func (r *AuthPostgres) CreateUser(user model.User) (string, error) {
 	var userID string
 
 	trx, err := r.db.Begin()
@@ -53,11 +54,11 @@ func (r *AuthPostgres) CreateUser(user model.User, statusID string) (string, err
 	}
 
 	createUserQuery := fmt.Sprintf(
-		"INSERT INTO %s (phone, password, first_name, last_name, status_id) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO %s (phone, password, first_name, last_name) VALUES ($1, $2, $3, $4) RETURNING id",
 		userTable,
 	)
 
-	row := trx.QueryRow(createUserQuery, user.Phone, user.Password, user.FirstName, user.LastName, statusID)
+	row := trx.QueryRow(createUserQuery, user.Phone, user.Password, user.FirstName, user.LastName)
 
 	if err = row.Scan(&userID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -80,6 +81,7 @@ func (r *AuthPostgres) CreateUser(user model.User, statusID string) (string, err
 	return userID, errors.Wrap(trx.Commit(), "transaction commit error")
 }
 
+// GetUserRole returns users role name
 func (r *AuthPostgres) GetUserRole(userID string) (string, error) {
 	var name string
 

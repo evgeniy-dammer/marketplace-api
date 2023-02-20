@@ -31,19 +31,19 @@ func (s *TableService) GetOne(userID string, organizationID string, tableID stri
 }
 
 // Create inserts table into system.
-func (s *TableService) Create(userID string, organizationID string, table model.Table) (string, error) {
-	tableID, err := s.repo.Create(userID, organizationID, table)
+func (s *TableService) Create(userID string, table model.Table) (string, error) {
+	tableID, err := s.repo.Create(userID, table)
 
 	return tableID, errors.Wrap(err, "table create error")
 }
 
 // Update updates table by id in the system.
-func (s *TableService) Update(userID string, organizationID string, tableID string, input model.UpdateTableInput) error {
+func (s *TableService) Update(userID string, input model.UpdateTableInput) error {
 	if err := input.Validate(); err != nil {
 		return errors.Wrap(err, "validation error")
 	}
 
-	err := s.repo.Update(userID, organizationID, tableID, input)
+	err := s.repo.Update(userID, input)
 
 	return errors.Wrap(err, "table update error")
 }

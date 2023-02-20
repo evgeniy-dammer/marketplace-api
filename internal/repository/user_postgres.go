@@ -57,7 +57,7 @@ func (r *UserPostgresql) GetAll(search string, status string, roleID string) ([]
 			"INNER JOIN %s ur ON ur.user_id = us.id "+
 			"INNER JOIN %s ro ON ur.role_id = ro.id "+
 			"INNER JOIN %s st ON st.id = us.status_id "+
-			"%s %s %s ",
+			"%s %s %s AND us.is_deleted = false",
 		userTable, userRoleTable, roleTable, statusTable, search, roleID, status,
 	)
 
@@ -86,15 +86,15 @@ func (r *UserPostgresql) GetOne(userID string) (model.User, error) {
 			"INNER JOIN %s ur ON ur.user_id = us.id "+
 			"INNER JOIN %s ro ON ur.role_id = ro.id "+
 			"INNER JOIN %s st ON st.id = us.status_id "+
-			"WHERE us.id = $1", userTable, userRoleTable, roleTable, statusTable)
+			"WHERE is_deleted = false AND us.id = $1", userTable, userRoleTable, roleTable, statusTable)
 	err := r.db.Get(&user, query, userID)
 
 	return user, errors.Wrap(err, "user select query error")
 }
 
 // Create insert user into database.
-func (r *UserPostgresql) Create(user model.User, statusID string) (string, error) {
-	var userID string
+func (r *UserPostgresql) Create(userID string, user model.User) (string, error) {
+	var insertID string
 
 	trx, err := r.db.Begin()
 	if err != nil {
@@ -102,12 +102,12 @@ func (r *UserPostgresql) Create(user model.User, statusID string) (string, error
 	}
 
 	createUserQuery := fmt.Sprintf(
-		"INSERT INTO %s (phone, password, first_name, last_name, status_id) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO %s (phone, password, first_name, last_name, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		userTable,
 	)
-	row := trx.QueryRow(createUserQuery, user.Phone, user.Password, user.FirstName, user.LastName, statusID)
+	row := trx.QueryRow(createUserQuery, user.Phone, user.Password, user.FirstName, user.LastName, userID)
 
-	if err = row.Scan(&userID); err != nil {
+	if err = row.Scan(&insertID); err != nil {
 		if err = trx.Rollback(); err != nil {
 			return "", errors.Wrap(err, "user rollback error")
 		}
@@ -117,7 +117,7 @@ func (r *UserPostgresql) Create(user model.User, statusID string) (string, error
 
 	createUsersRoleQuery := fmt.Sprintf("INSERT INTO %s (user_id, role_id) VALUES ($1, $2)", userRoleTable)
 
-	if _, err = trx.Exec(createUsersRoleQuery, userID, user.RoleID); err != nil {
+	if _, err = trx.Exec(createUsersRoleQuery, insertID, user.RoleID); err != nil {
 		if err = trx.Rollback(); err != nil {
 			return "", errors.Wrap(err, "role rollback error")
 		}
@@ -125,7 +125,7 @@ func (r *UserPostgresql) Create(user model.User, statusID string) (string, error
 		return "", errors.Wrap(err, "role query execution error")
 	}
 
-	return userID, errors.Wrap(trx.Commit(), "create transaction commit error")
+	return insertID, errors.Wrap(trx.Commit(), "create transaction commit error")
 }
 
 // Update updates user by id in database.
@@ -152,31 +152,28 @@ func (r *UserPostgresql) Update(userID string, input model.UpdateUserInput) erro
 		argID++
 	}
 
+	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
+	args = append(args, userID)
+	argID++
+
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
 	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
 
 	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = '%s'", userTable, setQuery, userID)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND id = '%s'", userTable, setQuery, *input.ID)
 	_, err := r.db.Exec(query, args...)
 
 	return errors.Wrap(err, "user update query error")
 }
 
 // Delete deletes user by id from database.
-func (r *UserPostgresql) Delete(userID string) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", userTable)
-	_, err := r.db.Exec(query, userID)
+func (r *UserPostgresql) Delete(userID string, dUserID string) error {
+	query := fmt.Sprintf(
+		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 WHERE is_deleted = false AND id = $3",
+		userTable,
+	)
+
+	_, err := r.db.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, dUserID)
 
 	return errors.Wrap(err, "user delete query error")
-}
-
-// GetActiveStatusID select status ID by name from database.
-func (r *UserPostgresql) GetActiveStatusID(name string) (string, error) {
-	var statusID string
-
-	query := fmt.Sprintf("SELECT id FROM %s WHERE name = '%s'", statusTable, name)
-
-	err := r.db.Get(&statusID, query)
-
-	return statusID, errors.Wrap(err, "active status select query error")
 }

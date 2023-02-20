@@ -81,14 +81,6 @@ func (h *Handler) updateOrganization(ctx *gin.Context) {
 		return
 	}
 
-	organizationID := ctx.Param("id")
-
-	if organizationID == "" {
-		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
-
-		return
-	}
-
 	var input model.UpdateOrganizationInput
 	if err = ctx.BindJSON(&input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
@@ -96,7 +88,13 @@ func (h *Handler) updateOrganization(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.services.Organization.Update(userID, organizationID, input); err != nil {
+	if *input.ID == "" {
+		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+
+		return
+	}
+
+	if err = h.services.Organization.Update(userID, input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
 		return

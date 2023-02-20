@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getItems is a get all items handler.
-func (h *Handler) getItems(ctx *gin.Context) {
+// getOrders is a get all orders handler.
+func (h *Handler) getOrders(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 
 	organizationID := ctx.Param("org_id")
@@ -17,7 +17,7 @@ func (h *Handler) getItems(ctx *gin.Context) {
 		return
 	}
 
-	results, err := h.services.Item.GetAll(userID, organizationID)
+	results, err := h.services.Order.GetAll(userID, organizationID)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -27,15 +27,15 @@ func (h *Handler) getItems(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, results)
 }
 
-// getItem is a get item by id handler.
-func (h *Handler) getItem(ctx *gin.Context) {
+// getOrder is a get order by id handler.
+func (h *Handler) getOrder(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
 	organizationID := ctx.Param("org_id")
-	itemID := ctx.Param("id")
+	orderID := ctx.Param("id")
 
 	if organizationID == "" {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
@@ -43,7 +43,7 @@ func (h *Handler) getItem(ctx *gin.Context) {
 		return
 	}
 
-	list, err := h.services.Item.GetOne(userID, organizationID, itemID)
+	list, err := h.services.Order.GetOne(userID, organizationID, orderID)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -53,9 +53,9 @@ func (h *Handler) getItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, list)
 }
 
-// createItem register an item in the system.
-func (h *Handler) createItem(ctx *gin.Context) {
-	var input model.Item
+// createOrder register an order in the system.
+func (h *Handler) createOrder(ctx *gin.Context) {
+	var input model.Order
 
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
@@ -68,31 +68,31 @@ func (h *Handler) createItem(ctx *gin.Context) {
 		return
 	}
 
-	itemID, err := h.services.Item.Create(userID, input)
+	orderID, err := h.services.Order.Create(userID, input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": itemID})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"id": orderID})
 }
 
-// updateItem is an update item by id handler.
-func (h *Handler) updateItem(ctx *gin.Context) {
+// updateOrder is an update order by id handler.
+func (h *Handler) updateOrder(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	var input model.UpdateItemInput
+	var input model.UpdateOrderInput
 	if err = ctx.BindJSON(&input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 
 		return
 	}
 
-	if err = h.services.Item.Update(userID, input); err != nil {
+	if err = h.services.Order.Update(userID, input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
 		return
@@ -101,15 +101,15 @@ func (h *Handler) updateItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }
 
-// deleteItem is delete item by id handler.
-func (h *Handler) deleteItem(ctx *gin.Context) {
+// deleteOrder is delete order by id handler.
+func (h *Handler) deleteOrder(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
 	organizationID := ctx.Param("org_id")
-	itemID := ctx.Param("id")
+	orderID := ctx.Param("id")
 
 	if userID == "" {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
@@ -117,7 +117,7 @@ func (h *Handler) deleteItem(ctx *gin.Context) {
 		return
 	}
 
-	err = h.services.Item.Delete(userID, organizationID, itemID)
+	err = h.services.Order.Delete(userID, organizationID, orderID)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 

@@ -62,15 +62,13 @@ func (h *Handler) createTable(ctx *gin.Context) {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
-
 	if err = ctx.BindJSON(&input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 
 		return
 	}
 
-	tableID, err := h.services.Table.Create(userID, organizationID, input)
+	tableID, err := h.services.Table.Create(userID, input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -87,15 +85,6 @@ func (h *Handler) updateTable(ctx *gin.Context) {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
-	tableID := ctx.Param("id")
-
-	if organizationID == "" {
-		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
-
-		return
-	}
-
 	var input model.UpdateTableInput
 	if err = ctx.BindJSON(&input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
@@ -103,7 +92,7 @@ func (h *Handler) updateTable(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.services.Table.Update(userID, organizationID, tableID, input); err != nil {
+	if err = h.services.Table.Update(userID, input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
 		return

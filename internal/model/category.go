@@ -6,5 +6,5 @@ type Category struct {
 	Name           string `json:"name" db:"name" binding:"required"`
 	Parent         string `json:"parent" db:"parent_id"`
 	Level          int    `json:"level" db:"level"`
-	OrganisationID string `json:"organisation" db:"organisation_id" binding:"required"`
+	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
 }

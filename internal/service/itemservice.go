@@ -31,19 +31,19 @@ func (s *ItemService) GetOne(userID string, organizationID string, itemID string
 }
 
 // Create inserts item into system.
-func (s *ItemService) Create(userID string, organizationID string, item model.Item) (string, error) {
-	itemID, err := s.repo.Create(userID, organizationID, item)
+func (s *ItemService) Create(userID string, item model.Item) (string, error) {
+	itemID, err := s.repo.Create(userID, item)
 
 	return itemID, errors.Wrap(err, "item create error")
 }
 
 // Update updates item by id in the system.
-func (s *ItemService) Update(userID string, organizationID string, itemID string, input model.UpdateItemInput) error {
+func (s *ItemService) Update(userID string, input model.UpdateItemInput) error {
 	if err := input.Validate(); err != nil {
 		return errors.Wrap(err, "validation error")
 	}
 
-	err := s.repo.Update(userID, organizationID, itemID, input)
+	err := s.repo.Update(userID, input)
 
 	return errors.Wrap(err, "item update error")
 }

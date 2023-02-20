@@ -6,5 +6,5 @@ type Item struct {
 	Name           string  `json:"name" db:"name" binding:"required"`
 	Price          float32 `json:"price" db:"price"`
 	CategoryID     string  `json:"category" db:"category_id" binding:"required"`
-	OrganisationID string  `json:"organisation" db:"organisation_id" binding:"required"`
+	OrganizationID string  `json:"organization" db:"organization_id" binding:"required"`
 }

@@ -38,12 +38,12 @@ func (s *OrganizationService) Create(userID string, organization model.Organizat
 }
 
 // Update updates organization by id in the system.
-func (s *OrganizationService) Update(userID string, organizationID string, input model.UpdateOrganizationInput) error {
+func (s *OrganizationService) Update(userID string, input model.UpdateOrganizationInput) error {
 	if err := input.Validate(); err != nil {
 		return errors.Wrap(err, "validation error")
 	}
 
-	err := s.repo.Update(userID, organizationID, input)
+	err := s.repo.Update(userID, input)
 
 	return errors.Wrap(err, "organization update error")
 }

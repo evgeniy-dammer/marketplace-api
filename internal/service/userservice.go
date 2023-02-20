@@ -38,7 +38,7 @@ func (s *UserService) GetOne(userID string) (model.User, error) {
 }
 
 // Create hashes the password and insert User into system.
-func (s *UserService) Create(user model.User, statusID string) (string, error) {
+func (s *UserService) Create(userID string, user model.User) (string, error) {
 	pass, err := generatePasswordHash(user.Password, params)
 	if err != nil {
 		return "", err
@@ -46,9 +46,9 @@ func (s *UserService) Create(user model.User, statusID string) (string, error) {
 
 	user.Password = pass
 
-	userID, err := s.repo.Create(user, statusID)
+	ID, err := s.repo.Create(userID, user)
 
-	return userID, errors.Wrap(err, "user create failed")
+	return ID, errors.Wrap(err, "user create failed")
 }
 
 // Update updates user by id in the system.
@@ -70,15 +70,8 @@ func (s *UserService) Update(userID string, input model.UpdateUserInput) error {
 }
 
 // Delete deletes user by id from the system.
-func (s *UserService) Delete(userID string) error {
-	err := s.repo.Delete(userID)
+func (s *UserService) Delete(userID string, dUserID string) error {
+	err := s.repo.Delete(userID, dUserID)
 
 	return errors.Wrap(err, "user delete failed")
-}
-
-// GetActiveStatusID returns ID for active status from the system.
-func (s *UserService) GetActiveStatusID(name string) (string, error) {
-	statusID, err := s.repo.GetActiveStatusID(name)
-
-	return statusID, errors.Wrap(err, "status id select failed")
 }

@@ -36,7 +36,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				users.GET("/", h.getAllUsers)
 				users.GET("/:id", h.getUser)
 				users.POST("/", h.createUser)
-				users.PATCH("/:id", h.updateUser)
+				users.PATCH("/", h.updateUser)
 				users.DELETE("/:id", h.deleteUser)
 				users.GET("/roles", h.getAllRoles)
 			}
@@ -46,7 +46,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				organizations.GET("/", h.getOrganizations)
 				organizations.GET("/:id", h.getOrganization)
 				organizations.POST("/", h.createOrganization)
-				organizations.PATCH("/:id", h.updateOrganization)
+				organizations.PATCH("/", h.updateOrganization)
 				organizations.DELETE("/:id", h.deleteOrganization)
 			}
 
@@ -54,8 +54,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				categories.GET("/:org_id", h.getCategories)
 				categories.GET("/:org_id/:id", h.getCategory)
-				categories.POST("/:org_id", h.createCategory)
-				categories.PATCH("/:org_id/:id", h.updateCategory)
+				categories.POST("/", h.createCategory)
+				categories.PATCH("/", h.updateCategory)
 				categories.DELETE("/:org_id/:id", h.deleteCategory)
 			}
 
@@ -63,8 +63,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				items.GET("/:org_id", h.getItems)
 				items.GET("/:org_id/:id", h.getItem)
-				items.POST("/:org_id", h.createItem)
-				items.PATCH("/:org_id/:id", h.updateItem)
+				items.POST("/", h.createItem)
+				items.PATCH("/", h.updateItem)
 				items.DELETE("/:org_id/:id", h.deleteItem)
 			}
 
@@ -72,9 +72,18 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				tables.GET("/:org_id", h.getTables)
 				tables.GET("/:org_id/:id", h.getTable)
-				tables.POST("/:org_id", h.createTable)
-				tables.PATCH("/:org_id/:id", h.updateTable)
+				tables.POST("/", h.createTable)
+				tables.PATCH("/", h.updateTable)
 				tables.DELETE("/:org_id/:id", h.deleteTable)
+			}
+
+			orders := version1.Group("/orders")
+			{
+				orders.GET("/:org_id", h.getOrders)
+				orders.GET("/:org_id/:id", h.getOrder)
+				orders.POST("/", h.createOrder)
+				orders.PATCH("/", h.updateOrder)
+				orders.DELETE("/:org_id/:id", h.deleteOrder)
 			}
 		}
 	}

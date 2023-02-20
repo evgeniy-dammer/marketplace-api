@@ -13,12 +13,14 @@ import (
 const (
 	userTable         = "users"
 	roleTable         = "roles"
-	statusTable       = "statuses"
+	statusTable       = "users_statuses"
 	userRoleTable     = "users_roles"
-	organisationTable = "organisations"
+	organizationTable = "organizations"
 	categoryTable     = "categories"
 	itemTable         = "items"
 	tableTable        = "tables"
+	orderTable        = "orders"
+	orderItemTable    = "orders_items"
 
 	// categoryItemTable = "categories_items"
 )

@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
@@ -23,7 +24,7 @@ func NewTablePostgresql(db *sqlx.DB) *TablePostgresql {
 func (r *TablePostgresql) GetAll(userID string, organizationID string) ([]model.Table, error) {
 	var tables []model.Table
 
-	query := fmt.Sprintf("SELECT id, name, organisation_id FROM %s WHERE organisation_id = $1 ",
+	query := fmt.Sprintf("SELECT id, name, organization_id FROM %s WHERE is_deleted = false AND organization_id = $1 ",
 		tableTable)
 	err := r.db.Select(&tables, query, organizationID)
 
@@ -35,7 +36,7 @@ func (r *TablePostgresql) GetOne(userID string, organizationID string, tableID s
 	var table model.Table
 
 	query := fmt.Sprintf(
-		"SELECT id, name, organisation_id FROM %s WHERE organisation_id = $1 AND id = $2 ",
+		"SELECT id, name, organization_id FROM %s WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		tableTable,
 	)
 	err := r.db.Get(&table, query, organizationID, tableID)
@@ -44,19 +45,19 @@ func (r *TablePostgresql) GetOne(userID string, organizationID string, tableID s
 }
 
 // Create insert table into database.
-func (r *TablePostgresql) Create(userID string, organizationID string, table model.Table) (string, error) {
+func (r *TablePostgresql) Create(userID string, table model.Table) (string, error) {
 	var tableID string
 
-	query := fmt.Sprintf("INSERT INTO %s (name, organisation_id) VALUES ($1, $2) RETURNING id",
+	query := fmt.Sprintf("INSERT INTO %s (name, organization_id, user_created) VALUES ($1, $2, $3) RETURNING id",
 		tableTable)
-	row := r.db.QueryRow(query, table.Name, organizationID)
+	row := r.db.QueryRow(query, table.Name, table.OrganizationID, userID)
 	err := row.Scan(&tableID)
 
 	return tableID, errors.Wrap(err, "table create query error")
 }
 
 // Update updates table by id in database.
-func (r *TablePostgresql) Update(userID string, organizationID string, tableID string, input model.UpdateTableInput) error { //nolint:lll
+func (r *TablePostgresql) Update(userID string, input model.UpdateTableInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argID := 1
@@ -67,14 +68,22 @@ func (r *TablePostgresql) Update(userID string, organizationID string, tableID s
 		argID++
 	}
 
-	if input.OrganisationID != nil {
-		setValues = append(setValues, fmt.Sprintf("organisation_id=$%d", argID))
-		args = append(args, *input.OrganisationID)
+	if input.OrganizationID != nil {
+		setValues = append(setValues, fmt.Sprintf("organization_id=$%d", argID))
+		args = append(args, *input.OrganizationID)
+		argID++
 	}
 
+	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
+	args = append(args, userID)
+	argID++
+
+	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
+	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
+
 	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE organisation_id = '%s' AND id = '%s'",
-		tableTable, setQuery, organizationID, tableID)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
+		tableTable, setQuery, *input.OrganizationID, *input.ID)
 	_, err := r.db.Exec(query, args...)
 
 	return errors.Wrap(err, "table update query error")
@@ -82,8 +91,13 @@ func (r *TablePostgresql) Update(userID string, organizationID string, tableID s
 
 // Delete deletes table by id from database.
 func (r *TablePostgresql) Delete(userID string, organizationID string, tableID string) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE organisation_id = $1 AND id = $2", tableTable)
-	_, err := r.db.Exec(query, organizationID, tableID)
+	query := fmt.Sprintf(
+		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
+			"WHERE is_deleted = false AND id = $3 AND organization_id = $4",
+		tableTable,
+	)
+
+	_, err := r.db.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, tableID, organizationID)
 
 	return errors.Wrap(err, "table delete query error")
 }

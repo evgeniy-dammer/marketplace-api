@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
@@ -23,8 +24,8 @@ func NewOrganizationPostgresql(db *sqlx.DB) *OrganizationPostgresql {
 func (r *OrganizationPostgresql) GetAll(userID string) ([]model.Organization, error) {
 	var organizations []model.Organization
 
-	query := fmt.Sprintf("SELECT id, name, user_id, address, phone FROM %s WHERE user_id = $1",
-		organisationTable)
+	query := fmt.Sprintf("SELECT id, name, user_id, address, phone FROM %s WHERE is_deleted = false AND user_id = $1",
+		organizationTable)
 
 	err := r.db.Select(&organizations, query, userID)
 
@@ -36,8 +37,8 @@ func (r *OrganizationPostgresql) GetOne(userID string, organizationID string) (m
 	var organization model.Organization
 
 	query := fmt.Sprintf(
-		"SELECT id, name, user_id, address, phone FROM %s WHERE user_id = $1 AND id = $2",
-		organisationTable)
+		"SELECT id, name, user_id, address, phone FROM %s WHERE is_deleted = false AND user_id = $1 AND id = $2",
+		organizationTable)
 	err := r.db.Get(&organization, query, userID, organizationID)
 
 	return organization, errors.Wrap(err, "organization select query error")
@@ -48,10 +49,10 @@ func (r *OrganizationPostgresql) Create(userID string, organization model.Organi
 	var organizationID string
 
 	createUserQuery := fmt.Sprintf(
-		"INSERT INTO %s (name, user_id, address, phone) VALUES ($1, $2, $3, $4) RETURNING id",
-		organisationTable)
+		"INSERT INTO %s (name, user_id, address, phone, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		organizationTable)
 
-	row := r.db.QueryRow(createUserQuery, organization.Name, userID, organization.Address, organization.Phone)
+	row := r.db.QueryRow(createUserQuery, organization.Name, userID, organization.Address, organization.Phone, userID)
 
 	err := row.Scan(&organizationID)
 
@@ -59,7 +60,7 @@ func (r *OrganizationPostgresql) Create(userID string, organization model.Organi
 }
 
 // Update updates organization by id in database.
-func (r *OrganizationPostgresql) Update(userID string, organizationID string, input model.UpdateOrganizationInput) error { //nolint:lll
+func (r *OrganizationPostgresql) Update(userID string, input model.UpdateOrganizationInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argID := 1
@@ -79,12 +80,20 @@ func (r *OrganizationPostgresql) Update(userID string, organizationID string, in
 	if input.Phone != nil {
 		setValues = append(setValues, fmt.Sprintf("phone=$%d", argID))
 		args = append(args, *input.Phone)
+		argID++
 	}
+
+	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
+	args = append(args, userID)
+	argID++
+
+	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
+	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
 
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf(
-		"UPDATE %s SET %s WHERE id = '%s' AND user_id = '%s'",
-		organisationTable, setQuery, organizationID, userID)
+		"UPDATE %s SET %s WHERE is_deleted = false AND id = '%s' AND user_id = '%s'",
+		organizationTable, setQuery, *input.ID, userID)
 
 	_, err := r.db.Exec(query, args...)
 
@@ -93,8 +102,12 @@ func (r *OrganizationPostgresql) Update(userID string, organizationID string, in
 
 // Delete deletes organization by id from database.
 func (r *OrganizationPostgresql) Delete(userID string, organizationID string) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND user_id = $2", organisationTable)
-	_, err := r.db.Exec(query, organizationID, userID)
+	query := fmt.Sprintf(
+		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 WHERE is_deleted = false AND id = $3",
+		organizationTable,
+	)
+
+	_, err := r.db.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, organizationID)
 
 	return errors.Wrap(err, "organization delete query error")
 }

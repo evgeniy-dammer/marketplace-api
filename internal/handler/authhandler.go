@@ -43,21 +43,8 @@ func (h *Handler) signUp(ctx *gin.Context) {
 		return
 	}
 
-	statusID, err := h.services.User.GetActiveStatusID("active")
-	if err != nil {
-		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
-
-		return
-	}
-
-	if statusID == "" {
-		model.NewErrorResponse(ctx, http.StatusInternalServerError, "empty role id")
-
-		return
-	}
-
 	// creating the user
-	userID, err := h.services.Authorization.CreateUser(input, statusID)
+	userID, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 

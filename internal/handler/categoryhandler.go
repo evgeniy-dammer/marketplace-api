@@ -61,15 +61,13 @@ func (h *Handler) createCategory(ctx *gin.Context) {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
-
 	if err = ctx.BindJSON(&input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 
 		return
 	}
 
-	categoryID, err := h.services.Category.Create(userID, organizationID, input)
+	categoryID, err := h.services.Category.Create(userID, input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -86,15 +84,6 @@ func (h *Handler) updateCategory(ctx *gin.Context) {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
-	categoryID := ctx.Param("id")
-
-	if categoryID == "" {
-		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
-
-		return
-	}
-
 	var input model.UpdateCategoryInput
 	if err = ctx.BindJSON(&input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
@@ -102,7 +91,7 @@ func (h *Handler) updateCategory(ctx *gin.Context) {
 		return
 	}
 
-	if err = h.services.Category.Update(userID, organizationID, categoryID, input); err != nil {
+	if err = h.services.Category.Update(userID, input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
 		return

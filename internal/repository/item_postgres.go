@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
@@ -23,8 +24,12 @@ func NewItemPostgresql(db *sqlx.DB) *ItemPostgresql {
 func (r *ItemPostgresql) GetAll(userID string, organizationID string) ([]model.Item, error) {
 	var items []model.Item
 
-	query := fmt.Sprintf("SELECT id, name, price, category_id, organisation_id FROM %s WHERE organisation_id = $1 ",
-		itemTable)
+	query := fmt.Sprintf(
+		"SELECT id, name, price, category_id, organization_id FROM %s "+
+			"WHERE is_deleted = false AND organization_id = $1 ",
+		itemTable,
+	)
+
 	err := r.db.Select(&items, query, organizationID)
 
 	return items, errors.Wrap(err, "items select query error")
@@ -35,7 +40,8 @@ func (r *ItemPostgresql) GetOne(userID string, organizationID string, itemID str
 	var item model.Item
 
 	query := fmt.Sprintf(
-		"SELECT id, name, price, category_id, organisation_id FROM %s WHERE organisation_id = $1 AND id = $2 ",
+		"SELECT id, name, price, category_id, organization_id FROM %s "+
+			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		itemTable,
 	)
 	err := r.db.Get(&item, query, organizationID, itemID)
@@ -44,19 +50,22 @@ func (r *ItemPostgresql) GetOne(userID string, organizationID string, itemID str
 }
 
 // Create insert item into database.
-func (r *ItemPostgresql) Create(userID string, organizationID string, item model.Item) (string, error) {
+func (r *ItemPostgresql) Create(userID string, item model.Item) (string, error) {
 	var itemID string
 
-	query := fmt.Sprintf("INSERT INTO %s (name, price, category_id, organisation_id) VALUES ($1, $2, $3, $4) RETURNING id",
-		itemTable)
-	row := r.db.QueryRow(query, item.Name, item.Price, item.CategoryID, organizationID)
+	query := fmt.Sprintf(
+		"INSERT INTO %s (name, price, category_id, organization_id, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		itemTable,
+	)
+
+	row := r.db.QueryRow(query, item.Name, item.Price, item.CategoryID, item.OrganizationID, userID)
 	err := row.Scan(&itemID)
 
 	return itemID, errors.Wrap(err, "item create query error")
 }
 
 // Update updates item by id in database.
-func (r *ItemPostgresql) Update(userID string, organizationID string, itemID string, input model.UpdateItemInput) error { //nolint:lll
+func (r *ItemPostgresql) Update(userID string, input model.UpdateItemInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argID := 1
@@ -79,14 +88,23 @@ func (r *ItemPostgresql) Update(userID string, organizationID string, itemID str
 		argID++
 	}
 
-	if input.OrganisationID != nil {
-		setValues = append(setValues, fmt.Sprintf("organisation_id=$%d", argID))
-		args = append(args, *input.OrganisationID)
+	if input.OrganizationID != nil {
+		setValues = append(setValues, fmt.Sprintf("organization_id=$%d", argID))
+		args = append(args, *input.OrganizationID)
+		argID++
 	}
 
+	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
+	args = append(args, userID)
+	argID++
+
+	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
+	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
+
 	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE organisation_id = '%s' AND id = '%s'",
-		itemTable, setQuery, organizationID, itemID)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
+		itemTable, setQuery, *input.OrganizationID, *input.ID)
+
 	_, err := r.db.Exec(query, args...)
 
 	return errors.Wrap(err, "item update query error")
@@ -94,8 +112,13 @@ func (r *ItemPostgresql) Update(userID string, organizationID string, itemID str
 
 // Delete deletes item by id from database.
 func (r *ItemPostgresql) Delete(userID string, organizationID string, itemID string) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE organisation_id = $1 AND id = $2", itemTable)
-	_, err := r.db.Exec(query, organizationID, itemID)
+	query := fmt.Sprintf(
+		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
+			"WHERE is_deleted = false AND id = $3 AND organization_id = $4",
+		itemTable,
+	)
+
+	_, err := r.db.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, itemID, organizationID)
 
 	return errors.Wrap(err, "item delete query error")
 }

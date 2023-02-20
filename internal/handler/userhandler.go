@@ -57,6 +57,11 @@ func (h *Handler) getAllRoles(ctx *gin.Context) {
 
 // createUser register a user in the system.
 func (h *Handler) createUser(ctx *gin.Context) {
+	userID, _, err := h.getUserIDAndRole(ctx)
+	if err != nil {
+		return
+	}
+
 	var input model.User
 
 	// parsing JSON body
@@ -66,14 +71,7 @@ func (h *Handler) createUser(ctx *gin.Context) {
 		return
 	}
 
-	statusID, err := h.services.User.GetActiveStatusID("active")
-	if err != nil {
-		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
-
-		return
-	}
-
-	userID, err := h.services.User.Create(input, statusID)
+	insertID, err := h.services.User.Create(userID, input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -81,16 +79,13 @@ func (h *Handler) createUser(ctx *gin.Context) {
 	}
 
 	// if all is ok
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": userID})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"id": insertID})
 }
 
 // updateUser is an update user by id handler.
 func (h *Handler) updateUser(ctx *gin.Context) {
-	userID := ctx.Param("id")
-
-	if userID == "" {
-		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
-
+	userID, _, err := h.getUserIDAndRole(ctx)
+	if err != nil {
 		return
 	}
 
@@ -112,7 +107,12 @@ func (h *Handler) updateUser(ctx *gin.Context) {
 
 // deleteUser is a delete user by id handler.
 func (h *Handler) deleteUser(ctx *gin.Context) {
-	userID := ctx.Param("id")
+	userID, _, err := h.getUserIDAndRole(ctx)
+	if err != nil {
+		return
+	}
+
+	dUserID := ctx.Param("id")
 
 	if userID == "" {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
@@ -120,7 +120,7 @@ func (h *Handler) deleteUser(ctx *gin.Context) {
 		return
 	}
 
-	err := h.services.User.Delete(userID)
+	err = h.services.User.Delete(userID, dUserID)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 

@@ -12,6 +12,7 @@ type SignInInput struct {
 
 // UpdateUserInput is an input data for updating user.
 type UpdateUserInput struct {
+	ID        *string `json:"id"`
 	FirstName *string `json:"firstname"`
 	LastName  *string `json:"lastname"`
 	Password  *string `json:"password"`
@@ -19,7 +20,7 @@ type UpdateUserInput struct {
 
 // Validate checks if update input is nil.
 func (i UpdateUserInput) Validate() error {
-	if i.FirstName == nil && i.LastName == nil {
+	if i.ID == nil && i.FirstName == nil && i.LastName == nil {
 		return errStructHasNoValues
 	}
 
@@ -28,6 +29,7 @@ func (i UpdateUserInput) Validate() error {
 
 // UpdateOrganizationInput is an input data for updating organization.
 type UpdateOrganizationInput struct {
+	ID      *string `json:"id"`
 	Name    *string `json:"name"`
 	Address *string `json:"address"`
 	Phone   *string `json:"phone"`
@@ -35,7 +37,7 @@ type UpdateOrganizationInput struct {
 
 // Validate checks if update input is nil.
 func (i UpdateOrganizationInput) Validate() error {
-	if i.Name == nil {
+	if i.ID == nil && i.Name == nil {
 		return errStructHasNoValues
 	}
 
@@ -44,46 +46,69 @@ func (i UpdateOrganizationInput) Validate() error {
 
 // UpdateCategoryInput is an input data for updating category.
 type UpdateCategoryInput struct {
-	Name   *string `json:"name"`
-	Parent *string `json:"parent"`
-	Level  *int    `json:"level"`
+	ID             *string `json:"id"`
+	Name           *string `json:"name"`
+	Parent         *string `json:"parent"`
+	Level          *int    `json:"level"`
+	OrganizationID *string `json:"organisation"`
 }
 
 // Validate checks if update input is nil.
 func (i UpdateCategoryInput) Validate() error {
-	if i.Name == nil && i.Level == nil {
+	if i.ID == nil && i.Name == nil && i.Level == nil && i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
 
 	return nil
 }
 
-// UpdateItemInput is an input data for updating organization.
+// UpdateItemInput is an input data for updating item.
 type UpdateItemInput struct {
+	ID             *string  `json:"id"`
 	Name           *string  `json:"name"`
 	Price          *float32 `json:"price"`
 	CategoryID     *string  `json:"category"`
-	OrganisationID *string  `json:"organisation"`
+	OrganizationID *string  `json:"organisation"`
 }
 
 // Validate checks if update input is nil.
 func (i UpdateItemInput) Validate() error {
-	if i.Name == nil && i.OrganisationID == nil {
+	if i.ID == nil && i.Name == nil && i.CategoryID == nil && i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
 
 	return nil
 }
 
-// UpdateTableInput is an input data for updating organization.
+// UpdateTableInput is an input data for updating table.
 type UpdateTableInput struct {
+	ID             *string `json:"id"`
 	Name           *string `json:"name"`
-	OrganisationID *string `json:"organisation"`
+	OrganizationID *string `json:"organisation"`
 }
 
 // Validate checks if update input is nil.
 func (i UpdateTableInput) Validate() error {
-	if i.Name == nil && i.OrganisationID == nil {
+	if i.ID == nil && i.Name == nil && i.OrganizationID == nil {
+		return errStructHasNoValues
+	}
+
+	return nil
+}
+
+// UpdateOrderInput is an input data for updating order.
+type UpdateOrderInput struct {
+	ID             *string      `json:"id"`
+	TableID        *string      `json:"table"`
+	Status         *int         `json:"status"`
+	OrganizationID *string      `json:"organization"`
+	TotalSum       *float32     `json:"totalsum"`
+	Items          *[]OrderItem `json:"orderitems"`
+}
+
+// Validate checks if update input is nil.
+func (i UpdateOrderInput) Validate() error {
+	if i.ID == nil && i.TableID == nil && i.OrganizationID == nil && i.TotalSum == nil && i.Items == nil {
 		return errStructHasNoValues
 	}
 
