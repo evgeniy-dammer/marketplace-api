@@ -23,7 +23,7 @@ func (i UpdateUserInput) Validate() error {
 	if i.ID == nil && i.FirstName == nil && i.LastName == nil {
 		return errStructHasNoValues
 	}
-
+	
 	return nil
 }
 
@@ -40,14 +40,17 @@ func (i UpdateOrganizationInput) Validate() error {
 	if i.ID == nil && i.Name == nil {
 		return errStructHasNoValues
 	}
-
+	
 	return nil
 }
 
 // UpdateCategoryInput is an input data for updating category.
 type UpdateCategoryInput struct {
 	ID             *string `json:"id"`
-	Name           *string `json:"name"`
+	NameTm         *string `json:"nametm"`
+	NameRu         *string `json:"nameru"`
+	NameTr         *string `json:"nametr"`
+	NameEn         *string `json:"nameen"`
 	Parent         *string `json:"parent"`
 	Level          *int    `json:"level"`
 	OrganizationID *string `json:"organisation"`
@@ -55,17 +58,26 @@ type UpdateCategoryInput struct {
 
 // Validate checks if update input is nil.
 func (i UpdateCategoryInput) Validate() error {
-	if i.ID == nil && i.Name == nil && i.Level == nil && i.OrganizationID == nil {
+	if i.ID == nil &&
+		i.NameTm == nil &&
+		i.NameRu == nil &&
+		i.NameTr == nil &&
+		i.NameEn == nil &&
+		i.Level == nil &&
+		i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
-
+	
 	return nil
 }
 
 // UpdateItemInput is an input data for updating item.
 type UpdateItemInput struct {
 	ID             *string  `json:"id"`
-	Name           *string  `json:"name"`
+	NameTm         *string  `json:"nametm"`
+	NameRu         *string  `json:"nameru"`
+	NameTr         *string  `json:"nametr"`
+	NameEn         *string  `json:"nameen"`
 	Price          *float32 `json:"price"`
 	CategoryID     *string  `json:"category"`
 	OrganizationID *string  `json:"organisation"`
@@ -73,10 +85,16 @@ type UpdateItemInput struct {
 
 // Validate checks if update input is nil.
 func (i UpdateItemInput) Validate() error {
-	if i.ID == nil && i.Name == nil && i.CategoryID == nil && i.OrganizationID == nil {
+	if i.ID == nil &&
+		i.NameTm == nil &&
+		i.NameRu == nil &&
+		i.NameTr == nil &&
+		i.NameEn == nil &&
+		i.CategoryID == nil &&
+		i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
-
+	
 	return nil
 }
 
@@ -92,7 +110,7 @@ func (i UpdateTableInput) Validate() error {
 	if i.ID == nil && i.Name == nil && i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
-
+	
 	return nil
 }
 
@@ -111,6 +129,6 @@ func (i UpdateOrderInput) Validate() error {
 	if i.ID == nil && i.TableID == nil && i.OrganizationID == nil && i.TotalSum == nil && i.Items == nil {
 		return errStructHasNoValues
 	}
-
+	
 	return nil
 }

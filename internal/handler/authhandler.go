@@ -43,7 +43,6 @@ func (h *Handler) signUp(ctx *gin.Context) {
 		return
 	}
 
-	// creating the user
 	userID, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())

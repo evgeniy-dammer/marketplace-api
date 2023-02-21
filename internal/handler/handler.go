@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/service"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +20,7 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 	router.Use(h.corsMiddleware())
+	router.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	auth := router.Group("/auth")
 	{

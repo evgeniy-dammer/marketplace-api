@@ -71,7 +71,10 @@ CREATE TABLE organizations
 CREATE TABLE categories
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name CHARACTER VARYING (255) NOT NULL,
+    name_tm CHARACTER VARYING (255) NOT NULL,
+    name_ru CHARACTER VARYING (255) NOT NULL,
+    name_tr CHARACTER VARYING (255) NOT NULL,
+    name_en CHARACTER VARYING (255) NOT NULL,
     parent_id TEXT,
     level SMALLINT NOT NULL DEFAULT 0,
     organization_id UUID REFERENCES organizations(id) NOT NULL,
@@ -87,7 +90,10 @@ CREATE TABLE categories
 CREATE TABLE items
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
+    name_tm TEXT NOT NULL,
+    name_ru TEXT NOT NULL,
+    name_tr TEXT NOT NULL,
+    name_en TEXT NOT NULL,
     price DOUBLE PRECISION DEFAULT 0,
     category_id UUID NOT NULL,
     organization_id UUID REFERENCES organizations(id) NOT NULL,
@@ -164,8 +170,8 @@ CREATE TABLE orders_items
 
 INSERT INTO users_statuses (name) VALUES ('active'), ('inactive'), ('blocked');
 
-INSERT INTO roles (name) VALUES ('admin'), ('manager'), ('user');
+INSERT INTO roles (name) VALUES ('admin'), ('analyst'), ('vendor'), ('operator'), ('customer');
 
-INSERT INTO orders_statuses (name) VALUES ('new'), ('approved'), ('in process'), ('on the way'), ('shipped'), ('payed');
+INSERT INTO orders_statuses (name) VALUES ('new'), ('approved'), ('canceled'), ('in process'), ('on the way'), ('shipped'), ('returned'), ('payed');
 
 COMMIT;

@@ -25,7 +25,7 @@ func (r *ItemPostgresql) GetAll(userID string, organizationID string) ([]model.I
 	var items []model.Item
 
 	query := fmt.Sprintf(
-		"SELECT id, name, price, category_id, organization_id FROM %s "+
+		"SELECT id, name_tm, name_ru, name_tr, name_en, price, category_id, organization_id FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1 ",
 		itemTable,
 	)
@@ -40,7 +40,7 @@ func (r *ItemPostgresql) GetOne(userID string, organizationID string, itemID str
 	var item model.Item
 
 	query := fmt.Sprintf(
-		"SELECT id, name, price, category_id, organization_id FROM %s "+
+		"SELECT id, name_tm, name_ru, name_tr, name_en, price, category_id, organization_id FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		itemTable,
 	)
@@ -54,11 +54,23 @@ func (r *ItemPostgresql) Create(userID string, item model.Item) (string, error) 
 	var itemID string
 
 	query := fmt.Sprintf(
-		"INSERT INTO %s (name, price, category_id, organization_id, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO %s (name_tm, name_ru, name_tr, name_en, price, category_id, organization_id, user_created) "+
+			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
 		itemTable,
 	)
 
-	row := r.db.QueryRow(query, item.Name, item.Price, item.CategoryID, item.OrganizationID, userID)
+	row := r.db.QueryRow(
+		query,
+		item.NameTm,
+		item.NameRu,
+		item.NameTr,
+		item.NameEn,
+		item.Price,
+		item.CategoryID,
+		item.OrganizationID,
+		userID,
+	)
+
 	err := row.Scan(&itemID)
 
 	return itemID, errors.Wrap(err, "item create query error")
@@ -70,9 +82,27 @@ func (r *ItemPostgresql) Update(userID string, input model.UpdateItemInput) erro
 	args := make([]interface{}, 0)
 	argID := 1
 
-	if input.Name != nil {
-		setValues = append(setValues, fmt.Sprintf("name=$%d", argID))
-		args = append(args, *input.Name)
+	if input.NameTm != nil {
+		setValues = append(setValues, fmt.Sprintf("name_tm=$%d", argID))
+		args = append(args, *input.NameTm)
+		argID++
+	}
+
+	if input.NameRu != nil {
+		setValues = append(setValues, fmt.Sprintf("name_ru=$%d", argID))
+		args = append(args, *input.NameRu)
+		argID++
+	}
+
+	if input.NameTr != nil {
+		setValues = append(setValues, fmt.Sprintf("name_tr=$%d", argID))
+		args = append(args, *input.NameTr)
+		argID++
+	}
+
+	if input.NameEn != nil {
+		setValues = append(setValues, fmt.Sprintf("name_en=$%d", argID))
+		args = append(args, *input.NameEn)
 		argID++
 	}
 
