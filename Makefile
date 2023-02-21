@@ -23,6 +23,10 @@ clean:
 run:
 	go run cmd/main.go
 
+lint:
+	gofumpt -w . && gci write --skip-generated -s standard,default .
+
+
 image: rmimage
 	docker build -t emenu-api .
 

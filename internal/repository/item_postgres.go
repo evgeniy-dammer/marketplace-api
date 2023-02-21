@@ -32,6 +32,15 @@ func (r *ItemPostgresql) GetAll(userID string, organizationID string) ([]model.I
 
 	err := r.db.Select(&items, query, organizationID)
 
+	for i := 0; i < len(items); i++ {
+		queryImages := fmt.Sprintf(
+			"SELECT id, object_id, type, origin, middle, small, organization_id FROM %s WHERE object_id = $1 ",
+			imageTable,
+		)
+
+		err = r.db.Select(&items[i].Images, queryImages, items[i].ID)
+	}
+
 	return items, errors.Wrap(err, "items select query error")
 }
 
@@ -45,6 +54,13 @@ func (r *ItemPostgresql) GetOne(userID string, organizationID string, itemID str
 		itemTable,
 	)
 	err := r.db.Get(&item, query, organizationID, itemID)
+
+	queryImages := fmt.Sprintf(
+		"SELECT id, object_id, type, origin, middle, small FROM %s WHERE object_id = $1 ",
+		imageTable,
+	)
+
+	err = r.db.Select(&item.Images, queryImages, item.ID)
 
 	return item, errors.Wrap(err, "item select query error")
 }

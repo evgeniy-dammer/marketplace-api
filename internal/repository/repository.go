@@ -68,6 +68,15 @@ type Order interface {
 	Delete(userID string, organizationID string, orderID string) error
 }
 
+// Image interface.
+type Image interface {
+	GetAll(userID string, organizationID string) ([]model.Image, error)
+	GetOne(userID string, organizationID string, imageID string) (model.Image, error)
+	Create(userID string, image model.Image) (string, error)
+	Update(userID string, input model.UpdateImageInput) error
+	Delete(userID string, organizationID string, imageID string) error
+}
+
 // Repository interface.
 type Repository struct {
 	Authorization
@@ -77,6 +86,7 @@ type Repository struct {
 	Item
 	Table
 	Order
+	Image
 }
 
 // NewRepository constructor for Repository.
@@ -89,5 +99,6 @@ func NewRepository(database *sqlx.DB) *Repository {
 		Item:          NewItemPostgresql(database),
 		Table:         NewTablePostgresql(database),
 		Order:         NewOrderPostgresql(database),
+		Image:         NewImagePostgresql(database),
 	}
 }

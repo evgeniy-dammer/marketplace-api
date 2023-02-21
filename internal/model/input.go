@@ -23,7 +23,7 @@ func (i UpdateUserInput) Validate() error {
 	if i.ID == nil && i.FirstName == nil && i.LastName == nil {
 		return errStructHasNoValues
 	}
-	
+
 	return nil
 }
 
@@ -40,7 +40,7 @@ func (i UpdateOrganizationInput) Validate() error {
 	if i.ID == nil && i.Name == nil {
 		return errStructHasNoValues
 	}
-	
+
 	return nil
 }
 
@@ -67,7 +67,7 @@ func (i UpdateCategoryInput) Validate() error {
 		i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
-	
+
 	return nil
 }
 
@@ -94,7 +94,7 @@ func (i UpdateItemInput) Validate() error {
 		i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
-	
+
 	return nil
 }
 
@@ -110,7 +110,7 @@ func (i UpdateTableInput) Validate() error {
 	if i.ID == nil && i.Name == nil && i.OrganizationID == nil {
 		return errStructHasNoValues
 	}
-	
+
 	return nil
 }
 
@@ -129,6 +129,26 @@ func (i UpdateOrderInput) Validate() error {
 	if i.ID == nil && i.TableID == nil && i.OrganizationID == nil && i.TotalSum == nil && i.Items == nil {
 		return errStructHasNoValues
 	}
-	
+
+	return nil
+}
+
+// UpdateImageInput is an input data for updating image.
+type UpdateImageInput struct {
+	ID             *string `json:"id"`
+	ObjectID       *string `json:"object"`
+	ObjectType     *int    `json:"type"`
+	Origin         *string `json:"origin"`
+	Middle         *string `json:"middle"`
+	Small          *string `json:"small"`
+	OrganizationID *string `json:"organization"`
+}
+
+// Validate checks if update input is nil.
+func (i UpdateImageInput) Validate() error {
+	if i.ID == nil && i.ObjectID == nil && i.ObjectType == nil && i.OrganizationID == nil {
+		return errStructHasNoValues
+	}
+
 	return nil
 }

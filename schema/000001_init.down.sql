@@ -9,8 +9,11 @@ DROP TABLE orders;
 DROP TABLE orders_statuses;
 DROP TABLE items;
 DROP TABLE tables;
+DROP TABLE images;
+DROP TABLE images_types;
 DROP TABLE organizations;
 DROP TABLE users;
 DROP TABLE users_statuses;
+
 
 COMMIT;

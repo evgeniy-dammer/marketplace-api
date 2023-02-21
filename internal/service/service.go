@@ -69,6 +69,15 @@ type Order interface {
 	Delete(userID string, organizationID string, orderID string) error
 }
 
+// Image interface.
+type Image interface {
+	GetAll(userID string, organizationID string) ([]model.Image, error)
+	GetOne(userID string, organizationID string, imageID string) (model.Image, error)
+	Create(userID string, image model.Image) (string, error)
+	Update(userID string, input model.UpdateImageInput) error
+	Delete(userID string, organizationID string, imageID string) error
+}
+
 // Service interface.
 type Service struct {
 	Authorization
@@ -78,6 +87,7 @@ type Service struct {
 	Item
 	Table
 	Order
+	Image
 }
 
 // NewService constructor for Service.
@@ -90,5 +100,6 @@ func NewService(repos *repository.Repository) *Service {
 		Item:          NewItemService(repos.Item),
 		Table:         NewTableService(repos.Table),
 		Order:         NewOrderService(repos.Order),
+		Image:         NewImageService(repos.Image),
 	}
 }

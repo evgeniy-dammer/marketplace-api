@@ -21,6 +21,7 @@ const (
 	tableTable        = "tables"
 	orderTable        = "orders"
 	orderItemTable    = "orders_items"
+	imageTable        = "images"
 
 	// categoryItemTable = "categories_items"
 )

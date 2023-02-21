@@ -15,6 +15,8 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- TABLES --
 
+
+
 CREATE TABLE users_statuses
 (
     id SMALLSERIAL PRIMARY KEY,
@@ -29,7 +31,6 @@ CREATE TABLE users
     first_name CHARACTER VARYING (255),
     last_name CHARACTER VARYING (255),
     status_id SMALLINT REFERENCES users_statuses(id) DEFAULT 1,
-    image_id UUID,
     is_deleted BOOLEAN DEFAULT FALSE,
     user_created UUID REFERENCES users(id),
     user_updated UUID REFERENCES users(id),
@@ -52,6 +53,8 @@ CREATE TABLE users_roles
     role_id SMALLINT REFERENCES roles(id) ON DELETE CASCADE NOT NULL
 );
 
+
+
 CREATE TABLE organizations
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -59,6 +62,30 @@ CREATE TABLE organizations
     user_id UUID REFERENCES users(id) NOT NULL,
     address TEXT,
     phone CHARACTER VARYING (255),
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
+);
+
+CREATE TABLE images_types
+(
+    id SMALLSERIAL PRIMARY KEY,
+    name CHARACTER VARYING (50) NOT NULL UNIQUE
+);
+
+CREATE TABLE images
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    object_id UUID NOT NULL,
+    type SMALLINT REFERENCES images_types(id) ON DELETE CASCADE NOT NULL,
+    origin UUID,
+    middle UUID,
+    small UUID,
+    organization_id UUID REFERENCES organizations(id) NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     user_created UUID REFERENCES users(id),
     user_updated UUID REFERENCES users(id),
@@ -94,6 +121,7 @@ CREATE TABLE items
     name_ru TEXT NOT NULL,
     name_tr TEXT NOT NULL,
     name_en TEXT NOT NULL,
+    image_id UUID REFERENCES images(id),
     price DOUBLE PRECISION DEFAULT 0,
     category_id UUID NOT NULL,
     organization_id UUID REFERENCES organizations(id) NOT NULL,
@@ -166,6 +194,8 @@ CREATE TABLE orders_items
     CONSTRAINT valid_totalprice CHECK ( totalprice >= 0 )
 );
 
+
+
 -- DATA --
 
 INSERT INTO users_statuses (name) VALUES ('active'), ('inactive'), ('blocked');
@@ -173,5 +203,7 @@ INSERT INTO users_statuses (name) VALUES ('active'), ('inactive'), ('blocked');
 INSERT INTO roles (name) VALUES ('admin'), ('analyst'), ('vendor'), ('operator'), ('customer');
 
 INSERT INTO orders_statuses (name) VALUES ('new'), ('approved'), ('canceled'), ('in process'), ('on the way'), ('shipped'), ('returned'), ('payed');
+
+INSERT INTO images_types (name) VALUES ('user'), ('item');
 
 COMMIT;

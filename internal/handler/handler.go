@@ -87,6 +87,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				orders.PATCH("/", h.updateOrder)
 				orders.DELETE("/:org_id/:id", h.deleteOrder)
 			}
+
+			images := version1.Group("/images")
+			{
+				images.GET("/:org_id", h.getImages)
+				images.GET("/:org_id/:id", h.getImage)
+				images.POST("/", h.createImage)
+				images.PATCH("/", h.updateImage)
+				images.DELETE("/:org_id/:id", h.deleteImage)
+			}
 		}
 	}
 

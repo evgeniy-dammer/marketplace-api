@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getItems is a get all items handler.
-func (h *Handler) getItems(ctx *gin.Context) {
+// getImages is a get all images handler.
+func (h *Handler) getImages(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 
 	organizationID := ctx.Param("org_id")
@@ -17,7 +17,7 @@ func (h *Handler) getItems(ctx *gin.Context) {
 		return
 	}
 
-	results, err := h.services.Item.GetAll(userID, organizationID)
+	results, err := h.services.Image.GetAll(userID, organizationID)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -29,15 +29,15 @@ func (h *Handler) getItems(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, results)
 }
 
-// getItem is a get item by id handler.
-func (h *Handler) getItem(ctx *gin.Context) {
+// getImage is a get image by id handler.
+func (h *Handler) getImage(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
 	organizationID := ctx.Param("org_id")
-	itemID := ctx.Param("id")
+	imageID := ctx.Param("id")
 
 	if organizationID == "" {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
@@ -45,7 +45,7 @@ func (h *Handler) getItem(ctx *gin.Context) {
 		return
 	}
 
-	list, err := h.services.Item.GetOne(userID, organizationID, itemID)
+	list, err := h.services.Image.GetOne(userID, organizationID, imageID)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -55,9 +55,9 @@ func (h *Handler) getItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, list)
 }
 
-// createItem register an item in the system.
-func (h *Handler) createItem(ctx *gin.Context) {
-	var input model.Item
+// createImage register an image in the system.
+func (h *Handler) createImage(ctx *gin.Context) {
+	var input model.Image
 
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
@@ -70,31 +70,31 @@ func (h *Handler) createItem(ctx *gin.Context) {
 		return
 	}
 
-	itemID, err := h.services.Item.Create(userID, input)
+	imageID, err := h.services.Image.Create(userID, input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": itemID})
+	ctx.JSON(http.StatusOK, map[string]interface{}{"id": imageID})
 }
 
-// updateItem is an update item by id handler.
-func (h *Handler) updateItem(ctx *gin.Context) {
+// updateImage is an update image by id handler.
+func (h *Handler) updateImage(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
-	var input model.UpdateItemInput
+	var input model.UpdateImageInput
 	if err = ctx.BindJSON(&input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 
 		return
 	}
 
-	if err = h.services.Item.Update(userID, input); err != nil {
+	if err = h.services.Image.Update(userID, input); err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
 		return
@@ -103,15 +103,15 @@ func (h *Handler) updateItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.StatusResponse{Status: "ok"})
 }
 
-// deleteItem is delete item by id handler.
-func (h *Handler) deleteItem(ctx *gin.Context) {
+// deleteImage is delete image by id handler.
+func (h *Handler) deleteImage(ctx *gin.Context) {
 	userID, _, err := h.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
 	organizationID := ctx.Param("org_id")
-	itemID := ctx.Param("id")
+	imageID := ctx.Param("id")
 
 	if userID == "" {
 		model.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
@@ -119,7 +119,7 @@ func (h *Handler) deleteItem(ctx *gin.Context) {
 		return
 	}
 
-	err = h.services.Item.Delete(userID, organizationID, itemID)
+	err = h.services.Image.Delete(userID, organizationID, imageID)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
