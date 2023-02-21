@@ -24,8 +24,6 @@ func (h *Handler) getItems(ctx *gin.Context) {
 		return
 	}
 
-	// fmt.Println("image ", results[0].Images[0].ID)
-
 	ctx.JSON(http.StatusOK, results)
 }
 

@@ -15,8 +15,6 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- TABLES --
 
-
-
 CREATE TABLE users_statuses
 (
     id SMALLSERIAL PRIMARY KEY,
@@ -52,8 +50,6 @@ CREATE TABLE users_roles
     user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     role_id SMALLINT REFERENCES roles(id) ON DELETE CASCADE NOT NULL
 );
-
-
 
 CREATE TABLE organizations
 (
@@ -194,7 +190,27 @@ CREATE TABLE orders_items
     CONSTRAINT valid_totalprice CHECK ( totalprice >= 0 )
 );
 
+CREATE TABLE comments_statuses
+(
+    id SMALLSERIAL PRIMARY KEY,
+    name CHARACTER VARYING (50) NOT NULL UNIQUE
+);
 
+CREATE TABLE comments
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    item_id UUID REFERENCES items(id) NOT NULL,
+    organization_id UUID REFERENCES organizations(id) NOT NULL,
+    content TEXT NOT NULL,
+    status_id SMALLINT REFERENCES comments_statuses(id) DEFAULT 1,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    user_created UUID REFERENCES users(id),
+    user_updated UUID REFERENCES users(id),
+    user_deleted UUID REFERENCES users(id),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    updated_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    deleted_at TIMESTAMPTZ
+);
 
 -- DATA --
 
@@ -205,5 +221,7 @@ INSERT INTO roles (name) VALUES ('admin'), ('analyst'), ('vendor'), ('operator')
 INSERT INTO orders_statuses (name) VALUES ('new'), ('approved'), ('canceled'), ('in process'), ('on the way'), ('shipped'), ('returned'), ('payed');
 
 INSERT INTO images_types (name) VALUES ('user'), ('item');
+
+INSERT INTO comments_statuses (name) VALUES ('new'), ('approved'), ('canceled');
 
 COMMIT;

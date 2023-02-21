@@ -1,9 +1,13 @@
 package model
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
+
+var errStructHasNoValues = errors.New("update structure has no values")
 
 // MyError my custom error.
 type MyError struct {

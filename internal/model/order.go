@@ -12,3 +12,22 @@ type Order struct {
 	UpdatedAt      string      `json:"updated,omitempty" db:"updated_at"`
 	Items          []OrderItem `json:"orderitems,omitempty"`
 }
+
+// UpdateOrderInput is an input data for updating order.
+type UpdateOrderInput struct {
+	ID             *string      `json:"id"`
+	TableID        *string      `json:"table"`
+	Status         *int         `json:"status"`
+	OrganizationID *string      `json:"organization"`
+	TotalSum       *float32     `json:"totalsum"`
+	Items          *[]OrderItem `json:"orderitems"`
+}
+
+// Validate checks if update input is nil.
+func (i UpdateOrderInput) Validate() error {
+	if i.ID == nil && i.TableID == nil && i.OrganizationID == nil && i.TotalSum == nil && i.Items == nil {
+		return errStructHasNoValues
+	}
+
+	return nil
+}

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
+	"github.com/evgeniy-dammer/emenu-api/internal/repository/postgres"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -77,6 +78,15 @@ type Image interface {
 	Delete(userID string, organizationID string, imageID string) error
 }
 
+// Comment interface.
+type Comment interface {
+	GetAll(userID string, organizationID string) ([]model.Comment, error)
+	GetOne(userID string, organizationID string, commentID string) (model.Comment, error)
+	Create(userID string, comment model.Comment) (string, error)
+	Update(userID string, input model.UpdateCommentInput) error
+	Delete(userID string, organizationID string, commentID string) error
+}
+
 // Repository interface.
 type Repository struct {
 	Authorization
@@ -87,18 +97,20 @@ type Repository struct {
 	Table
 	Order
 	Image
+	Comment
 }
 
 // NewRepository constructor for Repository.
 func NewRepository(database *sqlx.DB) *Repository {
 	return &Repository{
-		Authorization: NewAuthPostgres(database),
-		User:          NewUserPostgresql(database),
-		Organization:  NewOrganizationPostgresql(database),
-		Category:      NewCategoryPostgresql(database),
-		Item:          NewItemPostgresql(database),
-		Table:         NewTablePostgresql(database),
-		Order:         NewOrderPostgresql(database),
-		Image:         NewImagePostgresql(database),
+		Authorization: postgres.NewAuthPostgres(database),
+		User:          postgres.NewUserPostgresql(database),
+		Organization:  postgres.NewOrganizationPostgresql(database),
+		Category:      postgres.NewCategoryPostgresql(database),
+		Item:          postgres.NewItemPostgresql(database),
+		Table:         postgres.NewTablePostgresql(database),
+		Order:         postgres.NewOrderPostgresql(database),
+		Image:         postgres.NewImagePostgresql(database),
+		Comment:       postgres.NewCommentPostgresql(database),
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/handler"
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/evgeniy-dammer/emenu-api/internal/repository"
+	"github.com/evgeniy-dammer/emenu-api/internal/repository/postgres"
 	"github.com/evgeniy-dammer/emenu-api/internal/service"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
@@ -31,7 +32,7 @@ func main() {
 	}
 
 	// establishing database connection
-	database, err := repository.NewPostgresDB(
+	database, err := postgres.NewPostgresDB(
 		model.DBConfig{
 			Host:     viper.GetString("database.host"),
 			Port:     viper.GetString("database.port"),

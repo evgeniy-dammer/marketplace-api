@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ const (
 	orderTable        = "orders"
 	orderItemTable    = "orders_items"
 	imageTable        = "images"
-
+	commentTable      = "comments"
 	// categoryItemTable = "categories_items"
 )
 

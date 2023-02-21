@@ -11,3 +11,26 @@ type User struct {
 	RoleID    int    `json:"roleid,omitempty"`
 	Status    string `json:"status" db:"status"`
 }
+
+// SignInInput is an input data for signing in.
+type SignInInput struct {
+	Phone    string `json:"phone" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// UpdateUserInput is an input data for updating user.
+type UpdateUserInput struct {
+	ID        *string `json:"id"`
+	FirstName *string `json:"firstname"`
+	LastName  *string `json:"lastname"`
+	Password  *string `json:"password"`
+}
+
+// Validate checks if update input is nil.
+func (i UpdateUserInput) Validate() error {
+	if i.ID == nil && i.FirstName == nil && i.LastName == nil {
+		return errStructHasNoValues
+	}
+
+	return nil
+}
