@@ -243,6 +243,13 @@ CREATE TABLE comments
     deleted_at TIMESTAMPTZ
 );
 
+CREATE TABLE users_favorites
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    item_id UUID REFERENCES items(id) ON DELETE CASCADE NOT NULL
+);
+
 -- DATA --
 
 INSERT INTO users_statuses (name) VALUES ('active'), ('inactive'), ('blocked');

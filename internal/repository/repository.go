@@ -96,6 +96,12 @@ type Specification interface {
 	Delete(userID string, organizationID string, specificationID string) error
 }
 
+// Favorite interface.
+type Favorite interface {
+	Create(userID string, favorite model.Favorite) error
+	Delete(userID string, itemID string) error
+}
+
 // Repository interface.
 type Repository struct {
 	Authorization
@@ -108,6 +114,7 @@ type Repository struct {
 	Image
 	Comment
 	Specification
+	Favorite
 }
 
 // NewRepository constructor for Repository.
@@ -123,5 +130,6 @@ func NewRepository(database *sqlx.DB) *Repository {
 		Image:         postgres.NewImagePostgresql(database),
 		Comment:       postgres.NewCommentPostgresql(database),
 		Specification: postgres.NewSpecificationPostgresql(database),
+		Favorite:      postgres.NewFavoritePostgresql(database),
 	}
 }

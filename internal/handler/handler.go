@@ -114,6 +114,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				specifications.PATCH("/", h.updateSpecification)
 				specifications.DELETE("/:org_id/:id", h.deleteSpecification)
 			}
+
+			favorites := version1.Group("/favorites")
+			{
+				favorites.POST("/", h.createFavorite)
+				favorites.DELETE("/:item_id", h.deleteFavorite)
+			}
 		}
 	}
 

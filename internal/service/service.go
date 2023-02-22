@@ -96,6 +96,12 @@ type Specification interface {
 	Delete(userID string, organizationID string, specificationID string) error
 }
 
+// Favorite interface.
+type Favorite interface {
+	Create(userID string, favorite model.Favorite) error
+	Delete(userID string, itemID string) error
+}
+
 // Service interface.
 type Service struct {
 	Authorization
@@ -108,6 +114,7 @@ type Service struct {
 	Image
 	Comment
 	Specification
+	Favorite
 }
 
 // NewService constructor for Service.
@@ -123,5 +130,6 @@ func NewService(repos *repository.Repository) *Service {
 		Image:         NewImageService(repos.Image),
 		Comment:       NewCommentService(repos.Comment),
 		Specification: NewSpecificationService(repos.Specification),
+		Favorite:      NewFavoriteService(repos.Favorite),
 	}
 }

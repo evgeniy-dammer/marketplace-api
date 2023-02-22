@@ -24,6 +24,7 @@ const (
 	imageTable         = "images"
 	commentTable       = "comments"
 	specificationTable = "specification"
+	favoriteTable      = "users_favorites"
 	// categoryItemTable = "categories_items"
 )
 
