@@ -105,6 +105,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				comments.PATCH("/", h.updateComment)
 				comments.DELETE("/:org_id/:id", h.deleteComment)
 			}
+
+			specifications := version1.Group("/specifications")
+			{
+				specifications.GET("/:org_id", h.getSpecifications)
+				specifications.GET("/:org_id/:id", h.getSpecification)
+				specifications.POST("/", h.createSpecification)
+				specifications.PATCH("/", h.updateSpecification)
+				specifications.DELETE("/:org_id/:id", h.deleteSpecification)
+			}
 		}
 	}
 

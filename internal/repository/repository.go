@@ -87,6 +87,15 @@ type Comment interface {
 	Delete(userID string, organizationID string, commentID string) error
 }
 
+// Specification interface.
+type Specification interface {
+	GetAll(userID string, organizationID string) ([]model.Specification, error)
+	GetOne(userID string, organizationID string, specificationID string) (model.Specification, error)
+	Create(userID string, specification model.Specification) (string, error)
+	Update(userID string, input model.UpdateSpecificationInput) error
+	Delete(userID string, organizationID string, specificationID string) error
+}
+
 // Repository interface.
 type Repository struct {
 	Authorization
@@ -98,6 +107,7 @@ type Repository struct {
 	Order
 	Image
 	Comment
+	Specification
 }
 
 // NewRepository constructor for Repository.
@@ -112,5 +122,6 @@ func NewRepository(database *sqlx.DB) *Repository {
 		Order:         postgres.NewOrderPostgresql(database),
 		Image:         postgres.NewImagePostgresql(database),
 		Comment:       postgres.NewCommentPostgresql(database),
+		Specification: postgres.NewSpecificationPostgresql(database),
 	}
 }

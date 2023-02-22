@@ -8,6 +8,7 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 // ItemPostgresql repository.
@@ -24,22 +25,36 @@ func NewItemPostgresql(db *sqlx.DB) *ItemPostgresql {
 func (r *ItemPostgresql) GetAll(userID string, organizationID string) ([]model.Item, error) {
 	var items []model.Item
 
+	egroup := &errgroup.Group{}
+
 	query := fmt.Sprintf(
-		"SELECT id, name_tm, name_ru, name_tr, name_en, price, category_id, organization_id FROM %s "+
-			"WHERE is_deleted = false AND organization_id = $1 ",
+		"SELECT "+
+			"id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, description_tr, description_en, "+
+			"internal_id, price, rating, comments_qty, category_id, organization_id, brand_id, created_at "+
+			"FROM %s WHERE is_deleted = false AND organization_id = $1 ",
 		itemTable,
 	)
 
 	err := r.db.Select(&items, query, organizationID)
 
 	for i := 0; i < len(items); i++ {
-		queryImages := fmt.Sprintf(
-			"SELECT id, object_id, type, origin, middle, small, organization_id FROM %s WHERE object_id = $1 ",
-			imageTable,
-		)
+		index := i
 
-		err = r.db.Select(&items[i].Images, queryImages, items[i].ID)
+		egroup.Go(func() error {
+			queryImages := fmt.Sprintf(
+				"SELECT id, object_id, type, origin, middle, small, organization_id, is_main FROM %s "+
+					"WHERE is_main = true AND object_id = $1 ",
+				imageTable,
+			)
+
+			err = r.db.Select(&items[index].Images, queryImages, items[index].ID)
+
+			return errors.Wrap(err, "images select query error")
+		})
+
 	}
+
+	err = egroup.Wait()
 
 	return items, errors.Wrap(err, "items select query error")
 }
@@ -48,21 +63,59 @@ func (r *ItemPostgresql) GetAll(userID string, organizationID string) ([]model.I
 func (r *ItemPostgresql) GetOne(userID string, organizationID string, itemID string) (model.Item, error) {
 	var item model.Item
 
+	egroup := &errgroup.Group{}
+
 	query := fmt.Sprintf(
-		"SELECT id, name_tm, name_ru, name_tr, name_en, price, category_id, organization_id FROM %s "+
-			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
+		"SELECT "+
+			"id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, description_tr, description_en, "+
+			"internal_id, price, rating, comments_qty, category_id, organization_id, brand_id, created_at "+
+			"FROM %s WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		itemTable,
 	)
+
 	err := r.db.Get(&item, query, organizationID, itemID)
+	if err != nil {
+		return item, errors.Wrap(err, "item select query error")
+	}
 
-	queryImages := fmt.Sprintf(
-		"SELECT id, object_id, type, origin, middle, small FROM %s WHERE object_id = $1 ",
-		imageTable,
-	)
+	egroup.Go(func() error {
+		queryImages := fmt.Sprintf(
+			"SELECT id, object_id, type, origin, middle, small, organization_id, is_main FROM %s WHERE object_id = $1 ",
+			imageTable,
+		)
 
-	err = r.db.Select(&item.Images, queryImages, item.ID)
+		err = r.db.Select(&item.Images, queryImages, item.ID)
 
-	return item, errors.Wrap(err, "item select query error")
+		return errors.Wrap(err, "images select query error")
+	})
+
+	egroup.Go(func() error {
+		querySpecifications := fmt.Sprintf(
+			"SELECT id, item_id, organization_id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, "+
+				"description_tr, description_en, value FROM %s WHERE item_id = $1 ",
+			specificationTable,
+		)
+
+		err = r.db.Select(&item.Specification, querySpecifications, item.ID)
+
+		return errors.Wrap(err, "specification select query error")
+	})
+
+	egroup.Go(func() error {
+		queryComments := fmt.Sprintf(
+			"SELECT id, item_id, organization_id, content, status_id, rating, user_created, created_at FROM %s "+
+				"WHERE is_deleted = false AND item_id = $1 ",
+			commentTable,
+		)
+
+		err = r.db.Select(&item.Comments, queryComments, item.ID)
+
+		return errors.Wrap(err, "comments select query error")
+	})
+
+	err = egroup.Wait()
+
+	return item, errors.Wrap(err, "images select query error")
 }
 
 // Create insert item into database.
@@ -70,8 +123,10 @@ func (r *ItemPostgresql) Create(userID string, item model.Item) (string, error) 
 	var itemID string
 
 	query := fmt.Sprintf(
-		"INSERT INTO %s (name_tm, name_ru, name_tr, name_en, price, category_id, organization_id, user_created) "+
-			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+		"INSERT INTO %s "+
+			"(name_tm, name_ru, name_tr, name_en,  description_tm, description_ru, description_tr, description_en, "+
+			"internal_id, price, category_id, organization_id, brand_id, user_created) "+
+			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id",
 		itemTable,
 	)
 
@@ -81,9 +136,15 @@ func (r *ItemPostgresql) Create(userID string, item model.Item) (string, error) 
 		item.NameRu,
 		item.NameTr,
 		item.NameEn,
+		item.DescriptionTm,
+		item.DescriptionRu,
+		item.DescriptionTr,
+		item.DescriptionEn,
+		item.InternalID,
 		item.Price,
 		item.CategoryID,
 		item.OrganizationID,
+		item.BrandID,
 		userID,
 	)
 
@@ -122,6 +183,36 @@ func (r *ItemPostgresql) Update(userID string, input model.UpdateItemInput) erro
 		argID++
 	}
 
+	if input.DescriptionTm != nil {
+		setValues = append(setValues, fmt.Sprintf("description_tm=$%d", argID))
+		args = append(args, *input.DescriptionTm)
+		argID++
+	}
+
+	if input.DescriptionRu != nil {
+		setValues = append(setValues, fmt.Sprintf("description_ru=$%d", argID))
+		args = append(args, *input.DescriptionRu)
+		argID++
+	}
+
+	if input.DescriptionTr != nil {
+		setValues = append(setValues, fmt.Sprintf("description_tr=$%d", argID))
+		args = append(args, *input.DescriptionTr)
+		argID++
+	}
+
+	if input.DescriptionEn != nil {
+		setValues = append(setValues, fmt.Sprintf("description_en=$%d", argID))
+		args = append(args, *input.DescriptionEn)
+		argID++
+	}
+
+	if input.InternalID != nil {
+		setValues = append(setValues, fmt.Sprintf("internal_id=$%d", argID))
+		args = append(args, *input.InternalID)
+		argID++
+	}
+
 	if input.Price != nil {
 		setValues = append(setValues, fmt.Sprintf("price=$%d", argID))
 		args = append(args, *input.Price)
@@ -137,6 +228,12 @@ func (r *ItemPostgresql) Update(userID string, input model.UpdateItemInput) erro
 	if input.OrganizationID != nil {
 		setValues = append(setValues, fmt.Sprintf("organization_id=$%d", argID))
 		args = append(args, *input.OrganizationID)
+		argID++
+	}
+
+	if input.BrandID != nil {
+		setValues = append(setValues, fmt.Sprintf("brand_id=$%d", argID))
+		args = append(args, *input.BrandID)
 		argID++
 	}
 

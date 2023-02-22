@@ -25,7 +25,7 @@ func (r *CommentPostgresql) GetAll(userID string, organizationID string) ([]mode
 	var comments []model.Comment
 
 	query := fmt.Sprintf(
-		"SELECT id, item_id, organization_id, content, status_id, user_created, created_at FROM %s "+
+		"SELECT id, item_id, organization_id, content, status_id, rating, user_created, created_at FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1 ",
 		commentTable,
 	)
@@ -40,7 +40,7 @@ func (r *CommentPostgresql) GetOne(userID string, organizationID string, comment
 	var comment model.Comment
 
 	query := fmt.Sprintf(
-		"SELECT id, item_id, organization_id, content, status_id, user_created, created_at FROM %s "+
+		"SELECT id, item_id, organization_id, content, status_id, rating, user_created, created_at FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		commentTable,
 	)
@@ -54,8 +54,8 @@ func (r *CommentPostgresql) Create(userID string, comment model.Comment) (string
 	var commentID string
 
 	query := fmt.Sprintf(
-		"INSERT INTO %s (item_id, organization_id, content, status_id, user_created) "+
-			"VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO %s (item_id, organization_id, content, status_id, rating, user_created) "+
+			"VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
 		commentTable,
 	)
 
@@ -65,6 +65,7 @@ func (r *CommentPostgresql) Create(userID string, comment model.Comment) (string
 		comment.OrganizationID,
 		comment.Content,
 		comment.Status,
+		comment.Rating,
 		userID,
 	)
 
@@ -94,6 +95,12 @@ func (r *CommentPostgresql) Update(userID string, input model.UpdateCommentInput
 	if input.Status != nil {
 		setValues = append(setValues, fmt.Sprintf("status_id=$%d", argID))
 		args = append(args, *input.Status)
+		argID++
+	}
+
+	if input.Rating != nil {
+		setValues = append(setValues, fmt.Sprintf("rating=$%d", argID))
+		args = append(args, *input.Rating)
 		argID++
 	}
 

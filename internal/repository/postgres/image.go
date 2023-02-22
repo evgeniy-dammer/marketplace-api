@@ -25,7 +25,7 @@ func (r *ImagePostgresql) GetAll(userID string, organizationID string) ([]model.
 	var images []model.Image
 
 	query := fmt.Sprintf(
-		"SELECT id, object_id, type, origin, middle, small, organization_id FROM %s "+
+		"SELECT id, object_id, type, origin, middle, small, organization_id, is_main FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1 ",
 		imageTable,
 	)
@@ -40,7 +40,7 @@ func (r *ImagePostgresql) GetOne(userID string, organizationID string, imageID s
 	var image model.Image
 
 	query := fmt.Sprintf(
-		"SELECT id, object_id, type, origin, middle, small, organization_id FROM %s "+
+		"SELECT id, object_id, type, origin, middle, small, organization_id, is_main FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		imageTable,
 	)
@@ -54,8 +54,8 @@ func (r *ImagePostgresql) Create(userID string, image model.Image) (string, erro
 	var imageID string
 
 	query := fmt.Sprintf(
-		"INSERT INTO %s (object_id, type, origin, middle, small, organization_id, user_created) "+
-			"VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+		"INSERT INTO %s (object_id, type, origin, middle, small, organization_id, is_main, user_created) "+
+			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
 		imageTable,
 	)
 
@@ -67,6 +67,7 @@ func (r *ImagePostgresql) Create(userID string, image model.Image) (string, erro
 		image.Middle,
 		image.Small,
 		image.OrganizationID,
+		image.IsMain,
 		userID,
 	)
 
@@ -114,6 +115,12 @@ func (r *ImagePostgresql) Update(userID string, input model.UpdateImageInput) er
 	if input.OrganizationID != nil {
 		setValues = append(setValues, fmt.Sprintf("organization_id=$%d", argID))
 		args = append(args, *input.OrganizationID)
+		argID++
+	}
+
+	if input.IsMain != nil {
+		setValues = append(setValues, fmt.Sprintf("is_main=$%d", argID))
+		args = append(args, *input.IsMain)
 		argID++
 	}
 

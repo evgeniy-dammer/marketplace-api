@@ -9,6 +9,7 @@ type Image struct {
 	Middle         string `json:"middle" db:"middle" binding:"required"`
 	Small          string `json:"small" db:"small" binding:"required"`
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
+	IsMain         bool   `json:"main" db:"is_main" binding:"required"`
 }
 
 // UpdateImageInput is an input data for updating image.
@@ -20,6 +21,7 @@ type UpdateImageInput struct {
 	Middle         *string `json:"middle"`
 	Small          *string `json:"small"`
 	OrganizationID *string `json:"organization"`
+	IsMain         *bool   `json:"main"`
 }
 
 // Validate checks if update input is nil.

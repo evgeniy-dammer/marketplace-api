@@ -11,18 +11,19 @@ import (
 
 // database table names.
 const (
-	userTable         = "users"
-	roleTable         = "roles"
-	statusTable       = "users_statuses"
-	userRoleTable     = "users_roles"
-	organizationTable = "organizations"
-	categoryTable     = "categories"
-	itemTable         = "items"
-	tableTable        = "tables"
-	orderTable        = "orders"
-	orderItemTable    = "orders_items"
-	imageTable        = "images"
-	commentTable      = "comments"
+	userTable          = "users"
+	roleTable          = "roles"
+	statusTable        = "users_statuses"
+	userRoleTable      = "users_roles"
+	organizationTable  = "organizations"
+	categoryTable      = "categories"
+	itemTable          = "items"
+	tableTable         = "tables"
+	orderTable         = "orders"
+	orderItemTable     = "orders_items"
+	imageTable         = "images"
+	commentTable       = "comments"
+	specificationTable = "specification"
 	// categoryItemTable = "categories_items"
 )
 

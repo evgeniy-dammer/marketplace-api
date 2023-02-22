@@ -17,7 +17,7 @@ import (
 
 const (
 	signingKey      = "jndc83uhf3fdoenfoe0iededf9uecijnuche9cc"
-	tokenTTL        = 30 * time.Minute
+	tokenTTL        = 30 * time.Hour // replace with time.Minute
 	refreshTokenTTL = 12 * time.Hour
 	valuesNum       = 6
 )

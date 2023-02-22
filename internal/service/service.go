@@ -87,6 +87,15 @@ type Comment interface {
 	Delete(userID string, organizationID string, commentID string) error
 }
 
+// Specification interface.
+type Specification interface {
+	GetAll(userID string, organizationID string) ([]model.Specification, error)
+	GetOne(userID string, organizationID string, specificationID string) (model.Specification, error)
+	Create(userID string, specification model.Specification) (string, error)
+	Update(userID string, input model.UpdateSpecificationInput) error
+	Delete(userID string, organizationID string, specificationID string) error
+}
+
 // Service interface.
 type Service struct {
 	Authorization
@@ -98,6 +107,7 @@ type Service struct {
 	Order
 	Image
 	Comment
+	Specification
 }
 
 // NewService constructor for Service.
@@ -112,5 +122,6 @@ func NewService(repos *repository.Repository) *Service {
 		Order:         NewOrderService(repos.Order),
 		Image:         NewImageService(repos.Image),
 		Comment:       NewCommentService(repos.Comment),
+		Specification: NewSpecificationService(repos.Specification),
 	}
 }
