@@ -102,6 +102,15 @@ type Favorite interface {
 	Delete(userID string, itemID string) error
 }
 
+// Rule interface.
+type Rule interface {
+	GetAll(userID string) ([]model.Rule, error)
+	GetOne(userID string, ruleID string) (model.Rule, error)
+	Create(userID string, rule model.Rule) (string, error)
+	Update(userID string, input model.UpdateRuleInput) error
+	Delete(userID string, ruleID string) error
+}
+
 // Repository interface.
 type Repository struct {
 	Authorization
@@ -115,6 +124,7 @@ type Repository struct {
 	Comment
 	Specification
 	Favorite
+	Rule
 }
 
 // NewRepository constructor for Repository.
@@ -131,5 +141,6 @@ func NewRepository(database *sqlx.DB) *Repository {
 		Comment:       postgres.NewCommentPostgresql(database),
 		Specification: postgres.NewSpecificationPostgresql(database),
 		Favorite:      postgres.NewFavoritePostgresql(database),
+		Rule:          postgres.NewRulePostgresql(database),
 	}
 }

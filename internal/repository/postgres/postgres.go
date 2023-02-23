@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"fmt"
+	"net"
 
+	"github.com/casbin/casbin-pg-adapter"
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -25,11 +27,12 @@ const (
 	commentTable       = "comments"
 	specificationTable = "specification"
 	favoriteTable      = "users_favorites"
+	ruleTable          = "casbin_rule"
 	// categoryItemTable = "categories_items"
 )
 
 // NewPostgresDB create connection to database.
-func NewPostgresDB(cfg model.DBConfig) (*sqlx.DB, error) {
+func NewPostgresDB(cfg model.DBConfig) (*sqlx.DB, *pgadapter.Adapter, error) {
 	database, err := sqlx.Open(
 		"postgres",
 		fmt.Sprintf(
@@ -38,15 +41,25 @@ func NewPostgresDB(cfg model.DBConfig) (*sqlx.DB, error) {
 		),
 	)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to open connection to database")
+		return nil, nil, errors.Wrap(err, "unable to open connection to database")
 	}
 
-	// verify connection
+	adapter, err := pgadapter.NewAdapter(
+		fmt.Sprintf(
+			"postgresql://%s:%s@%s/%s?sslmode=%s",
+			cfg.Username, cfg.Password, net.JoinHostPort(cfg.Host, cfg.Port), cfg.DBName, cfg.SSLMode,
+		),
+		cfg.DBName,
+	)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "unable to open adapter connection to database")
+	}
+
 	err = database.Ping()
 
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to ping connection to database")
+		return nil, nil, errors.Wrap(err, "unable to ping connection to database")
 	}
 
-	return database, nil
+	return database, adapter, nil
 }

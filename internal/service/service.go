@@ -102,6 +102,15 @@ type Favorite interface {
 	Delete(userID string, itemID string) error
 }
 
+// Rule interface.
+type Rule interface {
+	GetAll(userID string) ([]model.Rule, error)
+	GetOne(userID string, ruleID string) (model.Rule, error)
+	Create(userID string, rule model.Rule) (string, error)
+	Update(userID string, input model.UpdateRuleInput) error
+	Delete(userID string, ruleID string) error
+}
+
 // Service interface.
 type Service struct {
 	Authorization
@@ -115,6 +124,7 @@ type Service struct {
 	Comment
 	Specification
 	Favorite
+	Rule
 }
 
 // NewService constructor for Service.
@@ -131,5 +141,6 @@ func NewService(repos *repository.Repository) *Service {
 		Comment:       NewCommentService(repos.Comment),
 		Specification: NewSpecificationService(repos.Specification),
 		Favorite:      NewFavoriteService(repos.Favorite),
+		Rule:          NewRuleService(repos.Rule),
 	}
 }

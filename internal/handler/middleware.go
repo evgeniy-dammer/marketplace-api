@@ -2,10 +2,13 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v2/persist"
 	"github.com/evgeniy-dammer/emenu-api/internal/model"
 	"github.com/gin-gonic/gin"
 	cors "github.com/itsjamie/gin-cors"
@@ -87,4 +90,47 @@ func (h *Handler) corsMiddleware() gin.HandlerFunc {
 		Credentials:     false,
 		ValidateHeaders: true,
 	})
+}
+
+// Authorize determines if current subject has been authorized to take an action on an object.
+func (h *Handler) Authorize(obj string, act string, adapter persist.Adapter) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		_, userRole, err := h.getUserIDAndRole(ctx)
+		if err != nil {
+			return
+		}
+
+		enforced, err := enforce(userRole, obj, act, adapter)
+		if err != nil {
+			model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+
+			return
+		}
+
+		if !enforced {
+			model.NewErrorResponse(ctx, http.StatusForbidden, "forbidden")
+
+			return
+		}
+
+		ctx.Next()
+	}
+}
+
+func enforce(sub string, obj string, act string, adapter persist.Adapter) (bool, error) {
+	enforcer, err := casbin.NewEnforcer("configs/rbac_model.conf", adapter)
+	if err != nil {
+		return false, fmt.Errorf("failed to create enforcer: %w", err)
+	}
+
+	if err = enforcer.LoadPolicy(); err != nil {
+		return false, fmt.Errorf("failed to load policy: %w", err)
+	}
+
+	ok, err := enforcer.Enforce(sub, obj, act)
+	if err != nil {
+		return false, fmt.Errorf("failed enforcing: %w", err)
+	}
+
+	return ok, nil
 }

@@ -32,7 +32,7 @@ func main() {
 	}
 
 	// establishing database connection
-	database, err := postgres.NewPostgresDB(
+	database, adapter, err := postgres.NewPostgresDB(
 		model.DBConfig{
 			Host:     viper.GetString("database.host"),
 			Port:     viper.GetString("database.port"),
@@ -46,10 +46,9 @@ func main() {
 		logrus.Fatalf("failed to initialize database: %s", err)
 	}
 
-	// dependency injections
 	repos := repository.NewRepository(database)
 	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
+	handlers := handler.NewHandler(services, adapter)
 
 	// create new server
 	srv := new(model.Server)

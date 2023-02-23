@@ -21,5 +21,6 @@ DROP TABLE organizations;
 DROP TABLE brands;
 DROP TABLE users;
 DROP TABLE users_statuses;
+DROP TABLE casbin_rule;
 
 COMMIT;
