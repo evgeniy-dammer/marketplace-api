@@ -33,11 +33,11 @@ var (
 
 // AuthService is an authentication service.
 type AuthService struct {
-	repo repository.Authorization
+	repo repository.Authentication
 }
 
 // NewAuthService constructor for AuthService.
-func NewAuthService(repo repository.Authorization) *AuthService {
+func NewAuthService(repo repository.Authentication) *AuthService {
 	return &AuthService{repo: repo}
 }
 

@@ -5,8 +5,8 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/repository"
 )
 
-// Authorization interface.
-type Authorization interface {
+// Authentication interface.
+type Authentication interface {
 	GenerateToken(id string, username string, password string) (model.User, model.Tokens, error)
 	ParseToken(token string) (string, error)
 	CreateUser(user model.User) (string, error)
@@ -113,7 +113,7 @@ type Rule interface {
 
 // Service interface.
 type Service struct {
-	Authorization
+	Authentication
 	User
 	Organization
 	Category
@@ -130,17 +130,17 @@ type Service struct {
 // NewService constructor for Service.
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization),
-		User:          NewUserService(repos.User),
-		Organization:  NewOrganizationService(repos.Organization),
-		Category:      NewCategoryService(repos.Category),
-		Item:          NewItemService(repos.Item),
-		Table:         NewTableService(repos.Table),
-		Order:         NewOrderService(repos.Order),
-		Image:         NewImageService(repos.Image),
-		Comment:       NewCommentService(repos.Comment),
-		Specification: NewSpecificationService(repos.Specification),
-		Favorite:      NewFavoriteService(repos.Favorite),
-		Rule:          NewRuleService(repos.Rule),
+		Authentication: NewAuthService(repos.Authentication),
+		User:           NewUserService(repos.User),
+		Organization:   NewOrganizationService(repos.Organization),
+		Category:       NewCategoryService(repos.Category),
+		Item:           NewItemService(repos.Item),
+		Table:          NewTableService(repos.Table),
+		Order:          NewOrderService(repos.Order),
+		Image:          NewImageService(repos.Image),
+		Comment:        NewCommentService(repos.Comment),
+		Specification:  NewSpecificationService(repos.Specification),
+		Favorite:       NewFavoriteService(repos.Favorite),
+		Rule:           NewRuleService(repos.Rule),
 	}
 }

@@ -22,7 +22,7 @@ func (h *Handler) signIn(ctx *gin.Context) {
 		return
 	}
 
-	user, tokens, err := h.services.Authorization.GenerateToken("", input.Phone, input.Password)
+	user, tokens, err := h.services.Authentication.GenerateToken("", input.Phone, input.Password)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -43,7 +43,7 @@ func (h *Handler) signUp(ctx *gin.Context) {
 		return
 	}
 
-	userID, err := h.services.Authorization.CreateUser(input)
+	userID, err := h.services.Authentication.CreateUser(input)
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 
@@ -77,7 +77,7 @@ func (h *Handler) refresh(ctx *gin.Context) {
 		return
 	}
 
-	userID, err := h.services.Authorization.ParseToken(headerParts[1])
+	userID, err := h.services.Authentication.ParseToken(headerParts[1])
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
 
@@ -85,7 +85,7 @@ func (h *Handler) refresh(ctx *gin.Context) {
 	}
 
 	// check if user exists and create the token
-	user, tokens, err = h.services.Authorization.GenerateToken(userID, "", "")
+	user, tokens, err = h.services.Authentication.GenerateToken(userID, "", "")
 
 	if err != nil {
 		model.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())

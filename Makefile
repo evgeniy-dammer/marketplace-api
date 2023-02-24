@@ -15,13 +15,13 @@ migrdown:
 
 build: clean
 	go mod download
-	go build -o emenu-api cmd/main.go
+	go build -tags=jsoniter -o emenu-api cmd/main.go
 
 clean:
 	rm -f emenu-api
 
 run:
-	go run cmd/main.go
+	go run -tags=jsoniter cmd/main.go
 
 lint:
 	gofumpt -w . && gci write --skip-generated -s standard,default .

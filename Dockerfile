@@ -2,7 +2,7 @@ FROM golang:alpine AS builder
 WORKDIR /app
 COPY go.* ./
 COPY . ./
-RUN go mod download && go build -o emenu-api cmd/main.go
+RUN go mod download && go build -tags=jsoniter -o emenu-api cmd/main.go
 
 FROM alpine:3.17.0
 WORKDIR /app

@@ -6,8 +6,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// Authorization interface.
-type Authorization interface {
+// Authentication interface.
+type Authentication interface {
 	GetUser(id string, username string) (model.User, error)
 	CreateUser(user model.User) (string, error)
 	GetUserRole(id string) (string, error)
@@ -113,7 +113,7 @@ type Rule interface {
 
 // Repository interface.
 type Repository struct {
-	Authorization
+	Authentication
 	User
 	Organization
 	Category
@@ -130,17 +130,17 @@ type Repository struct {
 // NewRepository constructor for Repository.
 func NewRepository(database *sqlx.DB) *Repository {
 	return &Repository{
-		Authorization: postgres.NewAuthPostgres(database),
-		User:          postgres.NewUserPostgresql(database),
-		Organization:  postgres.NewOrganizationPostgresql(database),
-		Category:      postgres.NewCategoryPostgresql(database),
-		Item:          postgres.NewItemPostgresql(database),
-		Table:         postgres.NewTablePostgresql(database),
-		Order:         postgres.NewOrderPostgresql(database),
-		Image:         postgres.NewImagePostgresql(database),
-		Comment:       postgres.NewCommentPostgresql(database),
-		Specification: postgres.NewSpecificationPostgresql(database),
-		Favorite:      postgres.NewFavoritePostgresql(database),
-		Rule:          postgres.NewRulePostgresql(database),
+		Authentication: postgres.NewAuthPostgres(database),
+		User:           postgres.NewUserPostgresql(database),
+		Organization:   postgres.NewOrganizationPostgresql(database),
+		Category:       postgres.NewCategoryPostgresql(database),
+		Item:           postgres.NewItemPostgresql(database),
+		Table:          postgres.NewTablePostgresql(database),
+		Order:          postgres.NewOrderPostgresql(database),
+		Image:          postgres.NewImagePostgresql(database),
+		Comment:        postgres.NewCommentPostgresql(database),
+		Specification:  postgres.NewSpecificationPostgresql(database),
+		Favorite:       postgres.NewFavoritePostgresql(database),
+		Rule:           postgres.NewRulePostgresql(database),
 	}
 }

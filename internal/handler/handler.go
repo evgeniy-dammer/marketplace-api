@@ -23,6 +23,7 @@ func (h *Handler) InitRoutes(mode string) *gin.Engine {
 	gin.SetMode(mode)
 
 	router := gin.New()
+	router.Use(gin.Recovery())
 	router.Use(h.corsMiddleware())
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 
