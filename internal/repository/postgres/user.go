@@ -130,8 +130,8 @@ func (r *UserPostgresql) Create(userID string, user model.User) (string, error) 
 
 // Update updates user by id in database.
 func (r *UserPostgresql) Update(userID string, input model.UpdateUserInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 4)
+	args := make([]interface{}, 0, 4)
 	argID := 1
 
 	if input.FirstName != nil {

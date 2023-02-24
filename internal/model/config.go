@@ -16,8 +16,8 @@ type DBConfig struct {
 
 // ServerConfig is a server config.
 type ServerConfig struct {
-	Port           string
 	Handler        http.Handler
+	Port           string
 	ReadTimeout    int
 	WriteTimeout   int
 	IdleTimeout    int

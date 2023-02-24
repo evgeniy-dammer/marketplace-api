@@ -2,9 +2,10 @@ package model
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // Server is an http server.

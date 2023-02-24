@@ -155,8 +155,8 @@ func (r *ItemPostgresql) Create(userID string, item model.Item) (string, error) 
 
 // Update updates item by id in database.
 func (r *ItemPostgresql) Update(userID string, input model.UpdateItemInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 14)
+	args := make([]interface{}, 0, 14)
 	argID := 1
 
 	if input.NameTm != nil {

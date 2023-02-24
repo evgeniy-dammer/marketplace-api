@@ -8,8 +8,8 @@ type User struct {
 	FirstName string `json:"firstname" db:"first_name" binding:"required"`
 	LastName  string `json:"lastname" db:"last_name" binding:"required"`
 	RoleName  string `json:"role,omitempty" db:"role"`
-	RoleID    int    `json:"roleid,omitempty"`
 	Status    string `json:"status" db:"status"`
+	RoleID    int    `json:"roleid,omitempty"`
 }
 
 // SignInInput is an input data for signing in.

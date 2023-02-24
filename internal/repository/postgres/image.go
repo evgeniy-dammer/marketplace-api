@@ -78,8 +78,8 @@ func (r *ImagePostgresql) Create(userID string, image model.Image) (string, erro
 
 // Update updates image by id in database.
 func (r *ImagePostgresql) Update(userID string, input model.UpdateImageInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 8)
+	args := make([]interface{}, 0, 8)
 	argID := 1
 
 	if input.ObjectID != nil {

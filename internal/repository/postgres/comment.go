@@ -76,8 +76,8 @@ func (r *CommentPostgresql) Create(userID string, comment model.Comment) (string
 
 // Update updates comment by id in database.
 func (r *CommentPostgresql) Update(userID string, input model.UpdateCommentInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 7)
+	args := make([]interface{}, 0, 7)
 	argID := 1
 
 	if input.ItemID != nil {

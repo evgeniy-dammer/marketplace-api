@@ -6,8 +6,8 @@ import "github.com/golang-jwt/jwt"
 type Tokens struct {
 	TokenType          string `json:"tokenType"`
 	AccessToken        string `json:"accessToken"`
-	AccessTokenExpires int64  `json:"accessTokenExpires"`
 	RefreshToken       string `json:"refreshToken"`
+	AccessTokenExpires int64  `json:"accessTokenExpires"`
 }
 
 // RefreshToken is a refresh token input.
@@ -25,7 +25,7 @@ type TokenClaims struct {
 type HashParams struct {
 	Memory      uint32
 	Iterations  uint32
-	Parallelism uint8
 	SaltLength  uint32
 	KeyLength   uint32
+	Parallelism uint8
 }

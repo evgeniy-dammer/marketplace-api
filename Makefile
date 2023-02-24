@@ -24,7 +24,7 @@ run:
 	go run -tags=jsoniter cmd/main.go
 
 lint:
-	gofumpt -w . && gci write --skip-generated -s standard,default .
+	gofumpt -w . && gci write --skip-generated -s standard,default . && fieldalignment -fix ./internal/model
 
 
 image: rmimage

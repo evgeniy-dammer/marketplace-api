@@ -77,9 +77,9 @@ func (r *CategoryPostgresql) Create(userID string, category model.Category) (str
 }
 
 // Update updates category by id in database.
-func (r *CategoryPostgresql) Update(userID string, input model.UpdateCategoryInput) error { //nolint:lll
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+func (r *CategoryPostgresql) Update(userID string, input model.UpdateCategoryInput) error {
+	setValues := make([]string, 0, 8)
+	args := make([]interface{}, 0, 8)
 	argID := 1
 
 	if input.NameTm != nil {

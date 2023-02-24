@@ -93,9 +93,9 @@ func (r *OrderPostgresql) Create(userID string, order model.Order) (string, erro
 }
 
 // Update updates order by id in database.
-func (r *OrderPostgresql) Update(userID string, input model.UpdateOrderInput) error { //nolint:lll
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+func (r *OrderPostgresql) Update(userID string, input model.UpdateOrderInput) error {
+	setValues := make([]string, 0, 6)
+	args := make([]interface{}, 0, 6)
 	argID := 1
 
 	trx, err := r.db.Begin()

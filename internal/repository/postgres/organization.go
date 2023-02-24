@@ -61,8 +61,8 @@ func (r *OrganizationPostgresql) Create(userID string, organization model.Organi
 
 // Update updates organization by id in database.
 func (r *OrganizationPostgresql) Update(userID string, input model.UpdateOrganizationInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 4)
+	args := make([]interface{}, 0, 4)
 	argID := 1
 
 	if input.Name != nil {

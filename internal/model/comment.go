@@ -6,10 +6,10 @@ type Comment struct {
 	UserID         string  `json:"user" db:"user_created" binding:"required"`
 	ItemID         string  `json:"item" db:"item_id" binding:"required"`
 	Content        string  `json:"content" db:"content" binding:"required"`
-	Status         int     `json:"status" db:"status_id" binding:"required"`
-	Rating         float32 `json:"rating" db:"rating" binding:"required"`
 	OrganizationID string  `json:"organization" db:"organization_id" binding:"required"`
 	CreatedAt      string  `json:"created,omitempty" db:"created_at"`
+	Status         int     `json:"status" db:"status_id" binding:"required"`
+	Rating         float32 `json:"rating" db:"rating" binding:"required"`
 }
 
 // UpdateCommentInput is an input data for updating comment.
@@ -18,9 +18,9 @@ type UpdateCommentInput struct {
 	UserID         *string  `json:"user"`
 	ItemID         *string  `json:"item"`
 	Content        *string  `json:"content"`
+	OrganizationID *string  `json:"organization"`
 	Status         *int     `json:"status"`
 	Rating         *float32 `json:"rating"`
-	OrganizationID *string  `json:"organization"`
 }
 
 // Validate checks if update input is nil.

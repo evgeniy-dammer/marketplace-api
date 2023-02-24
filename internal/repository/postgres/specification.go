@@ -81,8 +81,8 @@ func (r *SpecificationPostgresql) Create(userID string, specification model.Spec
 
 // Update updates specification by id in database.
 func (r *SpecificationPostgresql) Update(userID string, input model.UpdateSpecificationInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 12)
+	args := make([]interface{}, 0, 12)
 	argID := 1
 
 	if input.ItemID != nil {

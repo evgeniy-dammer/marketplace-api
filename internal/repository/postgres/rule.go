@@ -55,8 +55,8 @@ func (r *RulePostgresql) Create(userID string, rule model.Rule) (string, error) 
 
 // Update updates rule by id in database.
 func (r *RulePostgresql) Update(userID string, input model.UpdateRuleInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 8)
+	args := make([]interface{}, 0, 8)
 	argID := 1
 
 	if input.Ptype != nil {
@@ -101,7 +101,7 @@ func (r *RulePostgresql) Update(userID string, input model.UpdateRuleInput) erro
 	}
 
 	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND id = '%s'", ruleTable, setQuery, *input.ID)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = '%s'", ruleTable, setQuery, *input.ID)
 	_, err := r.db.Exec(query, args...)
 
 	return errors.Wrap(err, "rule update query error")

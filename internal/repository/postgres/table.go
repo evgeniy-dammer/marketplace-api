@@ -58,8 +58,8 @@ func (r *TablePostgresql) Create(userID string, table model.Table) (string, erro
 
 // Update updates table by id in database.
 func (r *TablePostgresql) Update(userID string, input model.UpdateTableInput) error {
-	setValues := make([]string, 0)
-	args := make([]interface{}, 0)
+	setValues := make([]string, 0, 3)
+	args := make([]interface{}, 0, 3)
 	argID := 1
 
 	if input.Name != nil {

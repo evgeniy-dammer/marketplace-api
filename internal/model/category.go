@@ -8,8 +8,8 @@ type Category struct {
 	NameTr         string `json:"nametr" db:"name_tr" binding:"required"`
 	NameEn         string `json:"nameen" db:"name_en" binding:"required"`
 	Parent         string `json:"parent" db:"parent_id"`
-	Level          int    `json:"level" db:"level"`
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
+	Level          int    `json:"level" db:"level"`
 }
 
 // UpdateCategoryInput is an input data for updating category.
@@ -20,8 +20,8 @@ type UpdateCategoryInput struct {
 	NameTr         *string `json:"nametr"`
 	NameEn         *string `json:"nameen"`
 	Parent         *string `json:"parent"`
-	Level          *int    `json:"level"`
 	OrganizationID *string `json:"organisation"`
+	Level          *int    `json:"level"`
 }
 
 // Validate checks if update input is nil.
