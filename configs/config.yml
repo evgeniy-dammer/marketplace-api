@@ -1,8 +1,8 @@
 server:
   port: "1111"
-  readtimeout: 20
-  writetimeout: 20
-  idletimeout: 20
+  readtimeout: 60
+  writetimeout: 60
+  idletimeout: 60
   maxheaderbytes: 1048576
 
 router:

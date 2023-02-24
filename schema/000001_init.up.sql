@@ -331,6 +331,7 @@ VALUES
    ('customer', 'rule', 'post', 'deny'),
    ('customer', 'rule', 'patch', 'deny'),
    ('customer', 'rule', 'delete', 'deny'),
+   ('customer', 'metrics', 'get', 'deny'),
 
    ('operator', 'users', 'get', 'deny'),
    ('operator', 'user', 'get', 'deny'),
@@ -385,6 +386,7 @@ VALUES
    ('operator', 'rule', 'post', 'deny'),
    ('operator', 'rule', 'patch', 'deny'),
    ('operator', 'rule', 'delete', 'deny'),
+   ('operator', 'metrics', 'get', 'deny'),
 
    ('vendor', 'users', 'get', 'deny'),
    ('vendor', 'user', 'get', 'deny'),
@@ -439,6 +441,7 @@ VALUES
    ('vendor', 'rule', 'post', 'deny'),
    ('vendor', 'rule', 'patch', 'deny'),
    ('vendor', 'rule', 'delete', 'deny'),
+   ('vendor', 'metrics', 'get', 'deny'),
 
    ('analyst', 'users', 'get', 'allow'),
    ('analyst', 'user', 'get', 'allow'),
@@ -493,6 +496,7 @@ VALUES
    ('analyst', 'rule', 'post', 'deny'),
    ('analyst', 'rule', 'patch', 'deny'),
    ('analyst', 'rule', 'delete', 'deny'),
+   ('analyst', 'metrics', 'get', 'deny'),
 
    ('admin', 'users', 'get', 'allow'),
    ('admin', 'user', 'get', 'allow'),
@@ -546,7 +550,8 @@ VALUES
    ('admin', 'rule', 'get', 'allow'),
    ('admin', 'rule', 'post', 'allow'),
    ('admin', 'rule', 'patch', 'allow'),
-   ('admin', 'rule', 'delete', 'allow');
+   ('admin', 'rule', 'delete', 'allow'),
+    ('admin', 'metrics', 'get', 'allow');
 
 -- FUNCTIONS --
 

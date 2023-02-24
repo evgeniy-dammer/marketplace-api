@@ -4,7 +4,9 @@ import (
 	"github.com/casbin/casbin-pg-adapter"
 	"github.com/evgeniy-dammer/emenu-api/internal/service"
 	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Handler handler.
@@ -23,6 +25,7 @@ func (h *Handler) InitRoutes(mode string) *gin.Engine {
 	gin.SetMode(mode)
 
 	router := gin.New()
+	pprof.Register(router, "dev/pprof")
 	router.Use(gin.Recovery())
 	router.Use(h.corsMiddleware())
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -133,6 +136,11 @@ func (h *Handler) InitRoutes(mode string) *gin.Engine {
 				rules.POST("/", h.Authorize("rule", "post", h.adapter), h.createRule)
 				rules.PATCH("/", h.Authorize("rule", "patch", h.adapter), h.updateRule)
 				rules.DELETE("/:id", h.Authorize("rule", "delete", h.adapter), h.deleteRule)
+			}
+
+			metrics := version1.Group("/metrics")
+			{
+				metrics.GET("/", h.Authorize("metrics", "get", h.adapter), gin.WrapH(promhttp.Handler()))
 			}
 		}
 	}
