@@ -1,5 +1,12 @@
-application:
+server:
   port: "1111"
+  readtimeout: 20
+  writetimeout: 20
+  idletimeout: 20
+  maxheaderbytes: 1048576
+
+router:
+  mode: "debug" # debug, release
 
 database:
   host: "localhost"

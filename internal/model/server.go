@@ -2,16 +2,9 @@ package model
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"net/http"
 	"time"
-
-	"github.com/pkg/errors"
-)
-
-const (
-	maxHeaderBytes = 1 << 20 // 1MB
-	readTimeout    = 10 * time.Second
-	writeTimeout   = 10 * time.Second
 )
 
 // Server is an http server.
@@ -20,13 +13,14 @@ type Server struct {
 }
 
 // Run starts the http server.
-func (s *Server) Run(port string, handler http.Handler) error {
+func (s *Server) Run(srvConfig ServerConfig) error {
 	s.httpServer = &http.Server{
-		Addr:           ":" + port,
-		Handler:        handler,
-		MaxHeaderBytes: maxHeaderBytes,
-		ReadTimeout:    readTimeout,
-		WriteTimeout:   writeTimeout,
+		Addr:           ":" + srvConfig.Port,
+		Handler:        srvConfig.Handler,
+		MaxHeaderBytes: srvConfig.MaxHeaderBytes,
+		ReadTimeout:    time.Duration(srvConfig.ReadTimeout) * time.Second,
+		WriteTimeout:   time.Duration(srvConfig.WriteTimeout) * time.Second,
+		IdleTimeout:    time.Duration(srvConfig.IdleTimeout) * time.Second,
 	}
 
 	return errors.Wrap(s.httpServer.ListenAndServe(), "unable to start listening")

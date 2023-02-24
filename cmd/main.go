@@ -53,9 +53,17 @@ func main() {
 	// create new server
 	srv := new(model.Server)
 
+	srvConfig := model.ServerConfig{
+		Port:           viper.GetString("server.port"),
+		Handler:        handlers.InitRoutes(viper.GetString("router.mode")),
+		ReadTimeout:    viper.GetInt("server.readtimeout"),
+		WriteTimeout:   viper.GetInt("server.writetimeout"),
+		IdleTimeout:    viper.GetInt("server.idletimeout"),
+		MaxHeaderBytes: viper.GetInt("server.maxheaderbytes"),
+	}
+
 	go func() {
-		// run server
-		if err = srv.Run(viper.GetString("application.port"), handlers.InitRoutes()); err != nil {
+		if err = srv.Run(srvConfig); err != nil {
 			logrus.Fatalf("error occurred while running http server: %s", err.Error())
 		}
 	}()

@@ -19,7 +19,9 @@ func NewHandler(services *service.Service, adapter *pgadapter.Adapter) *Handler 
 }
 
 // InitRoutes crete routes.
-func (h *Handler) InitRoutes() *gin.Engine {
+func (h *Handler) InitRoutes(mode string) *gin.Engine {
+	gin.SetMode(mode)
+
 	router := gin.New()
 	router.Use(h.corsMiddleware())
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
