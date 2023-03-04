@@ -1,8 +1,61 @@
 version: "3.9"
 
 services:
+  emenu-cache:
+    container_name: emenu-cache
+    image: redis:alpine
+    network_mode: host
+    hostname: cache
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      #- REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+    volumes:
+      #- /path/to/your_redis.conf:/opt/bitnami/cache/mounted-etc/cache.conf
+      - emenu-cache:/bitnami/cache/data
+
+  emenu-db:
+    container_name: emenu-db
+    image: postgres:alpine
+    network_mode: host
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=emenu
+      - POSTGRES_USER=emenu
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - emenu-db:/var/lib/postgresql/data
+
   emenu-api:
-    container_name: emenu_api
+    container_name: emenu-api
     build: .
+    network_mode: host
+    restart: always
+    env_file:
+      - .env
     depends_on:
-      - database
+      - emenu-db
+      - emenu-cache
+
+  emenu-migrate:
+    container_name: emenu-migrate
+    image: migrate/migrate:4
+    network_mode: host
+    env_file:
+      - .env
+    volumes:
+      - ./schema:/schema
+    command: [ "-path", "./schema", "-database",  'storage://emenu:${DB_PASSWORD}@0.0.0.0:5432/emenu?sslmode=disable', "up" ]
+    depends_on:
+      - emenu-db
+
+volumes:
+  emenu-db:
+    external: true
+  emenu-cache:
+    external: true

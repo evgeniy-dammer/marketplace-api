@@ -15,32 +15,38 @@ migrdown:
 
 build: clean
 	go mod download
-	go build -tags=jsoniter -o emenu-api cmd/main.go
+	go build -tags=jsoniter -o emenu-api cmd/app/main.go
 
 clean:
 	rm -f emenu-api
 
 run:
-	go run -tags=jsoniter cmd/main.go
+	go run -tags=jsoniter cmd/app/main.go
 
 lint:
-	gofumpt -w . && gci write --skip-generated -s standard,default . && fieldalignment -fix ./internal/model
+	gofumpt -w . && gci write --skip-generated -s standard,default . && golangci-lint run
+
+fields:
+	fieldalignment -fix .
 
 
-image: rmimage
+
+imagebuild: imageremove
 	docker build -t emenu-api .
 
-rmimage:
+imageremove:
 	docker image rm -f emenu-api
 
-cont:
-	docker run -dit --rm -p 1111:1111 --name emenu-api emenu-api
+imageprune:
+	docker image prune
 
-stopcont:
+contrun:
+	docker run -dit --rm --net=host --name emenu-api emenu-api
+
+contstop:
 	docker stop emenu-api
 
-prune:
-	docker image prune
+
 
 
 protos: # execute from root directory
