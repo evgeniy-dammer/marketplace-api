@@ -8,24 +8,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// createFavorite register an favorite in the system.
+// createFavorite register a favorite in the system.
 func (d *Delivery) createFavorite(ctx *gin.Context) {
-	var input favorite.Favorite
-
 	userID, _, err := d.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
+	var input favorite.Favorite
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	err = d.ucFavorite.FavoriteCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -41,16 +40,15 @@ func (d *Delivery) deleteFavorite(ctx *gin.Context) {
 	}
 
 	itemID := ctx.Param("item_id")
-
-	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+	if itemID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucFavorite.FavoriteDelete(userID, itemID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

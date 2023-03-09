@@ -17,7 +17,7 @@ func (d *Delivery) getRules(ctx *gin.Context) {
 
 	results, err := d.ucRule.RuleGetAll(userID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -33,10 +33,15 @@ func (d *Delivery) getRule(ctx *gin.Context) {
 	}
 
 	ruleID := ctx.Param("id")
+	if ruleID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+
+		return
+	}
 
 	list, err := d.ucRule.RuleGetOne(userID, ruleID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -44,24 +49,23 @@ func (d *Delivery) getRule(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, list)
 }
 
-// createRule register an rule in the system.
+// createRule register a rule in the system.
 func (d *Delivery) createRule(ctx *gin.Context) {
-	var input rule.Rule
-
 	userID, _, err := d.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
+	var input rule.Rule
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	ruleID, err := d.ucRule.RuleCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -78,13 +82,13 @@ func (d *Delivery) updateRule(ctx *gin.Context) {
 
 	var input rule.UpdateRuleInput
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	if err = d.ucRule.RuleUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -100,16 +104,15 @@ func (d *Delivery) deleteRule(ctx *gin.Context) {
 	}
 
 	ruleID := ctx.Param("id")
-
 	if ruleID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucRule.RuleDelete(userID, ruleID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

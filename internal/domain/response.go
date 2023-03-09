@@ -2,8 +2,8 @@ package domain
 
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
+	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 // MyError my custom error.
@@ -23,7 +23,8 @@ type StatusResponse struct {
 }
 
 // NewErrorResponse is a response with error.
-func NewErrorResponse(c *gin.Context, statusCode int, message string) {
-	logrus.Error(message)
-	c.AbortWithStatusJSON(statusCode, MyError{Message: message})
+func NewErrorResponse(c *gin.Context, statusCode int, err error) {
+	logger.Logger.Error(err.Error())
+
+	c.AbortWithStatusJSON(statusCode, MyError{Message: err.Error()})
 }

@@ -3,8 +3,10 @@ package http
 import (
 	"github.com/casbin/casbin-pg-adapter"
 	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
+	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/pprof"
+	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -68,6 +70,8 @@ func (d *Delivery) InitRoutes(mode string) *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(d.corsMiddleware())
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
+	router.Use(ginzap.RecoveryWithZap(logger.Logger, true))
+	router.RedirectTrailingSlash = false
 
 	auth := router.Group("/auth")
 	{

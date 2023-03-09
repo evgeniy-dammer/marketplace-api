@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/pkg/errors"
 )
@@ -13,7 +14,6 @@ func (r *Repository) UserGetOne(userID string) (user.User, error) {
 
 	keyCache := fmt.Sprintf("%s-%s: %s", "user", "id", userID)
 	err := r.cache.Get(context.Background(), keyCache, user)
-
 	if err != nil {
 		return user, errors.Wrap(err, "postCacheRepository.GetPostByID.redisClient.Get")
 	}
@@ -27,6 +27,5 @@ func (r *Repository) UserGetOne(userID string) (user.User, error) {
 
 // UserCreate insert user into database.
 func (r *Repository) UserCreate(userID string, user user.User) error {
-
 	return nil
 }

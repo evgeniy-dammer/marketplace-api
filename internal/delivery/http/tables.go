@@ -20,7 +20,7 @@ func (d *Delivery) getTables(ctx *gin.Context) {
 
 	results, err := d.ucTable.TableGetAll(userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -39,14 +39,14 @@ func (d *Delivery) getTable(ctx *gin.Context) {
 	tableID := ctx.Param("id")
 
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	list, err := d.ucTable.TableGetOne(userID, organizationID, tableID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -54,7 +54,7 @@ func (d *Delivery) getTable(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, list)
 }
 
-// createTable register an table in the system.
+// createTable register a table in the system.
 func (d *Delivery) createTable(ctx *gin.Context) {
 	var input table.Table
 
@@ -64,14 +64,14 @@ func (d *Delivery) createTable(ctx *gin.Context) {
 	}
 
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	tableID, err := d.ucTable.TableCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -88,13 +88,13 @@ func (d *Delivery) updateTable(ctx *gin.Context) {
 
 	var input table.UpdateTableInput
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	if err = d.ucTable.TableUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -113,14 +113,14 @@ func (d *Delivery) deleteTable(ctx *gin.Context) {
 	tableID := ctx.Param("id")
 
 	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucTable.TableDelete(userID, organizationID, tableID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

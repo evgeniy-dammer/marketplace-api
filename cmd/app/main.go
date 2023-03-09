@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	rediscache "github.com/evgeniy-dammer/emenu-api/pkg/store/redis"
-	"github.com/go-redis/cache/v8"
-	"github.com/go-redis/redis/v8"
 	"net"
 	"os"
 	"os/signal"
@@ -27,25 +24,30 @@ import (
 	useCaseSpecification "github.com/evgeniy-dammer/emenu-api/internal/usecase/specification"
 	useCaseTable "github.com/evgeniy-dammer/emenu-api/internal/usecase/table"
 	useCaseUser "github.com/evgeniy-dammer/emenu-api/internal/usecase/user"
+	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/evgeniy-dammer/emenu-api/pkg/store/postgres"
+	redisStorage "github.com/evgeniy-dammer/emenu-api/pkg/store/redis"
+	"github.com/go-redis/cache/v8"
+	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func main() {
-	// set log format as JSON
-	logrus.SetFormatter(new(logrus.JSONFormatter))
-
 	// initializing config
 	if err := config.InitConfig(); err != nil {
-		logrus.Fatalf("error initializing config: %s", err.Error())
+		logger.Logger.Fatal("config initialization failed", zap.String("error", err.Error()))
 	}
 
 	// loading env variables
 	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("error loading env variables: %s", err.Error())
+		logger.Logger.Fatal("env variables loading failed", zap.String("error", err.Error()))
+	}
+
+	if err := logger.InitLogger(); err != nil {
+		logger.Logger.Fatal("logger initialization failed", zap.String("error", err.Error()))
 	}
 
 	// establishing database connection
@@ -58,35 +60,35 @@ func main() {
 		SSLMode:  viper.GetString("database.sslmode"),
 	})
 	if err != nil {
-		logrus.Fatalf("failed to initialize database: %s", err)
+		logger.Logger.Fatal("database initialization failed", zap.String("error", err.Error()))
 	}
 
 	defer func(database *sqlx.DB) {
 		err = database.Close()
 		if err != nil {
-			logrus.Fatalf("failed to close database connection: %s", err)
+			logger.Logger.Fatal("failed to close database connection", zap.String("error", err.Error()))
 		}
 	}(database)
 
-	var cache *cache.Cache
+	var rcache *cache.Cache
 
 	if viper.GetBool("cache.mode") {
 		// establishing cache connection
-		cache, err = rediscache.NewRedisCache(redis.Options{
+		rcache, err = redisStorage.NewRedisCache(redis.Options{
 			Addr:     net.JoinHostPort(viper.GetString("cache.host"), viper.GetString("cache.port")),
 			Password: "", // os.Getenv("REDIS_PASSWORD"),
 			DB:       viper.GetInt("cache.database"),
 		})
 		if err != nil {
-			logrus.Fatalf("failed to initialize cache: %s", err)
+			logger.Logger.Fatal("cache initialization failed", zap.String("error", err.Error()))
 		}
 	} else {
-		logrus.Info("cache is turned off")
+		logger.Logger.Info("cache is turned off")
 	}
 
 	// repositories
 	repoStorage := postgresStorage.New(database)
-	repoCache := redisCache.New(cache)
+	repoCache := redisCache.New(rcache)
 
 	// use cases
 	ucAuthentication := useCaseAuthentication.New(repoStorage, repoCache)
@@ -133,19 +135,19 @@ func main() {
 
 	go func() {
 		if err = srv.Run(srvConfig); err != nil {
-			logrus.Fatalf("error occurred while running http server: %s", err.Error())
+			logger.Logger.Fatal("server starting failed", zap.String("error", err.Error()))
 		}
 	}()
 
-	logrus.Println("Application started...")
+	logger.Logger.Info("application started", zap.String("port", viper.GetString("server.port")))
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Println("Application shutdown...")
+	logger.Logger.Info("application shutdown")
 
 	if err = srv.Shutdown(context.Background()); err != nil {
-		logrus.Errorf("error ocured on server shutdown: %s", err.Error())
+		logger.Logger.Fatal("error occurred on server shutdown", zap.String("error", err.Error()))
 	}
 }

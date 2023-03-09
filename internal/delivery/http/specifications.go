@@ -11,16 +11,20 @@ import (
 // getSpecifications is a get all specifications delivery.
 func (d *Delivery) getSpecifications(ctx *gin.Context) {
 	userID, _, err := d.getUserIDAndRole(ctx)
+	if err != nil {
+		return
+	}
 
 	organizationID := ctx.Param("org_id")
+	if organizationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
-	if err != nil {
 		return
 	}
 
 	results, err := d.ucSpecification.SpecificationGetAll(userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -36,17 +40,22 @@ func (d *Delivery) getSpecification(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("org_id")
-	specificationID := ctx.Param("id")
-
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+
+		return
+	}
+
+	specificationID := ctx.Param("id")
+	if specificationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	list, err := d.ucSpecification.SpecificationGetOne(userID, organizationID, specificationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -54,24 +63,23 @@ func (d *Delivery) getSpecification(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, list)
 }
 
-// createSpecification register an specification in the system.
+// createSpecification register a specification in the system.
 func (d *Delivery) createSpecification(ctx *gin.Context) {
-	var input specification.Specification
-
 	userID, _, err := d.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
+	var input specification.Specification
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	specificationID, err := d.ucSpecification.SpecificationCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -88,13 +96,13 @@ func (d *Delivery) updateSpecification(ctx *gin.Context) {
 
 	var input specification.UpdateSpecificationInput
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	if err = d.ucSpecification.SpecificationUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -110,17 +118,22 @@ func (d *Delivery) deleteSpecification(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("org_id")
-	specificationID := ctx.Param("id")
+	if organizationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
-	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+		return
+	}
+
+	specificationID := ctx.Param("id")
+	if specificationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucSpecification.SpecificationDelete(userID, organizationID, specificationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

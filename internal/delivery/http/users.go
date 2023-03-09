@@ -16,7 +16,7 @@ func (d *Delivery) getAllUsers(ctx *gin.Context) {
 
 	results, err := d.ucUser.UserGetAll(search, status, roleID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -27,16 +27,15 @@ func (d *Delivery) getAllUsers(ctx *gin.Context) {
 // getUser is a get user by id delivery.
 func (d *Delivery) getUser(ctx *gin.Context) {
 	userID := ctx.Param("id")
-
 	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	list, err := d.ucUser.UserGetOne(userID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -48,7 +47,7 @@ func (d *Delivery) getUser(ctx *gin.Context) {
 func (d *Delivery) getAllRoles(ctx *gin.Context) {
 	results, err := d.ucUser.UserGetAllRoles()
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -64,17 +63,15 @@ func (d *Delivery) createUser(ctx *gin.Context) {
 	}
 
 	var input user.User
-
-	// parsing JSON body
-	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	insertID, err := d.ucUser.UserCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -91,14 +88,14 @@ func (d *Delivery) updateUser(ctx *gin.Context) {
 	}
 
 	var input user.UpdateUserInput
-	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	if err = ctx.BindJSON(&input); err != nil {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err := d.ucUser.UserUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+	if err = d.ucUser.UserUpdate(userID, input); err != nil {
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -114,16 +111,15 @@ func (d *Delivery) deleteUser(ctx *gin.Context) {
 	}
 
 	dUserID := ctx.Param("id")
-
-	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+	if dUserID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucUser.UserDelete(userID, dUserID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

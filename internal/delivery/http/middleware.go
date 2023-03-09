@@ -25,25 +25,22 @@ var errUserIsNotFound = errors.New("user is not found")
 // userIdentity validate access token.
 func (d *Delivery) userIdentity(ctx *gin.Context) {
 	header := ctx.GetHeader(authorizationHeader)
-
 	if header == "" {
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, "empty auth header")
+		domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrEmptyAuthHeader)
 
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
-
 	if len(headerParts) != 2 { //nolint:gomnd
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, "invalid auth header")
+		domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrInvalidAuthHeader)
 
 		return
 	}
 
-	// parse token and return user id
 	userID, err := d.ucAuthentication.AuthenticationParseToken(headerParts[1])
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusUnauthorized, err)
 
 		return
 	}
@@ -54,24 +51,22 @@ func (d *Delivery) userIdentity(ctx *gin.Context) {
 // getUserId returns user id from authorization context.
 func (d *Delivery) getUserIDAndRole(ctx *gin.Context) (string, string, error) {
 	userID, exists := ctx.Get(userCtx)
-
 	if !exists {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, "user is not found")
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, ErrUserIsNotFound)
 
 		return "", "", errUserIsNotFound
 	}
 
 	idString, exists := userID.(string)
-
 	if !exists {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, "user id is of invalid type")
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, ErrInvalidUserID)
 
 		return "", "", errUserIsNotFound
 	}
 
 	role, err := d.ucAuthentication.AuthenticationGetUserRole(idString)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, "role is not found")
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, ErrRoleIsNotFound)
 
 		return "", "", errUserIsNotFound
 	}
@@ -102,13 +97,13 @@ func (d *Delivery) Authorize(obj string, act string, adapter persist.Adapter) gi
 
 		enforced, err := enforce(userRole, obj, act, adapter)
 		if err != nil {
-			domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+			domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 			return
 		}
 
 		if !enforced {
-			domain.NewErrorResponse(ctx, http.StatusForbidden, "forbidden")
+			domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrAccessDenied)
 
 			return
 		}

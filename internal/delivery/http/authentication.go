@@ -15,43 +15,40 @@ func (d *Delivery) signIn(ctx *gin.Context) {
 
 	var tokens domain.Tokens
 
-	var user user.User
+	var usr user.User
 
 	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	user, tokens, err := d.ucAuthentication.AuthenticationGenerateToken("", input.Phone, input.Password)
+	usr, tokens, err := d.ucAuthentication.AuthenticationGenerateToken("", input.Phone, input.Password)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	// if all is ok
-	ctx.JSON(http.StatusOK, domain.ResponseData{User: user, Tokens: tokens})
+	ctx.JSON(http.StatusOK, domain.ResponseData{User: usr, Tokens: tokens})
 }
 
 // signUp register a user in the system.
 func (d *Delivery) signUp(ctx *gin.Context) {
 	var input user.User
-
 	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	userID, err := d.ucAuthentication.AuthenticationCreateUser(input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	// if all is ok
 	ctx.JSON(http.StatusOK, map[string]interface{}{"id": userID})
 }
 
@@ -61,39 +58,34 @@ func (d *Delivery) refresh(ctx *gin.Context) {
 
 	var tokens domain.Tokens
 
-	var user user.User
+	var usr user.User
 
-	// parsing JSON body
 	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	headerParts := strings.Split(input.Authorization, " ")
-
 	if len(headerParts) != 2 { //nolint:gomnd
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, "invalid auth header")
+		domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrInvalidAuthHeader)
 
 		return
 	}
 
 	userID, err := d.ucAuthentication.AuthenticationParseToken(headerParts[1])
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusUnauthorized, err)
 
 		return
 	}
 
-	// check if user exists and create the token
-	user, tokens, err = d.ucAuthentication.AuthenticationGenerateToken(userID, "", "")
-
+	usr, tokens, err = d.ucAuthentication.AuthenticationGenerateToken(userID, "", "")
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	// if all is ok
-	ctx.JSON(http.StatusOK, domain.ResponseData{User: user, Tokens: tokens})
+	ctx.JSON(http.StatusOK, domain.ResponseData{User: usr, Tokens: tokens})
 }

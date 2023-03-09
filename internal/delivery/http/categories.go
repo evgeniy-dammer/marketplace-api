@@ -17,9 +17,15 @@ func (d *Delivery) getCategories(ctx *gin.Context) {
 
 	organizationID := ctx.Param("org_id")
 
+	if organizationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+
+		return
+	}
+
 	results, err := d.ucCategory.CategoryGetAll(userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -35,17 +41,24 @@ func (d *Delivery) getCategory(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("org_id")
+
+	if organizationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+
+		return
+	}
+
 	categoryID := ctx.Param("id")
 
 	if categoryID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	list, err := d.ucCategory.CategoryGetOne(userID, organizationID, categoryID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -63,14 +76,14 @@ func (d *Delivery) createCategory(ctx *gin.Context) {
 	}
 
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	categoryID, err := d.ucCategory.CategoryCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -87,13 +100,13 @@ func (d *Delivery) updateCategory(ctx *gin.Context) {
 
 	var input category.UpdateCategoryInput
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	if err = d.ucCategory.CategoryUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -109,17 +122,24 @@ func (d *Delivery) deleteCategory(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("org_id")
+
+	if organizationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+
+		return
+	}
+
 	categoryID := ctx.Param("id")
 
-	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+	if categoryID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucCategory.CategoryDelete(userID, organizationID, categoryID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

@@ -17,7 +17,7 @@ func (d *Delivery) getOrganizations(ctx *gin.Context) {
 
 	results, err := d.ucOrganization.OrganizationGetAll(userID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -33,16 +33,15 @@ func (d *Delivery) getOrganization(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("id")
-
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	list, err := d.ucOrganization.OrganizationGetOne(userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -52,22 +51,21 @@ func (d *Delivery) getOrganization(ctx *gin.Context) {
 
 // createOrganization register an organization in the system.
 func (d *Delivery) createOrganization(ctx *gin.Context) {
-	var input organization.Organization
-
 	userID, _, err := d.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
+	var input organization.Organization
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	organizationID, err := d.ucOrganization.OrganizationCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -84,19 +82,19 @@ func (d *Delivery) updateOrganization(ctx *gin.Context) {
 
 	var input organization.UpdateOrganizationInput
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	if *input.ID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	if err = d.ucOrganization.OrganizationUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -112,16 +110,15 @@ func (d *Delivery) deleteOrganization(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("id")
-
-	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+	if organizationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucOrganization.OrganizationDelete(userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

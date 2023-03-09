@@ -11,16 +11,20 @@ import (
 // getOrders is a get all orders delivery.
 func (d *Delivery) getOrders(ctx *gin.Context) {
 	userID, _, err := d.getUserIDAndRole(ctx)
+	if err != nil {
+		return
+	}
 
 	organizationID := ctx.Param("org_id")
+	if organizationID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
-	if err != nil {
 		return
 	}
 
 	results, err := d.ucOrder.OrderGetAll(userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -36,17 +40,22 @@ func (d *Delivery) getOrder(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("org_id")
-	orderID := ctx.Param("id")
-
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "invalid id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+
+		return
+	}
+
+	orderID := ctx.Param("id")
+	if orderID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	list, err := d.ucOrder.OrderGetOne(userID, organizationID, orderID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -56,22 +65,21 @@ func (d *Delivery) getOrder(ctx *gin.Context) {
 
 // createOrder register an order in the system.
 func (d *Delivery) createOrder(ctx *gin.Context) {
-	var input order.Order
-
 	userID, _, err := d.getUserIDAndRole(ctx)
 	if err != nil {
 		return
 	}
 
+	var input order.Order
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	orderID, err := d.ucOrder.OrderCreate(userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -88,13 +96,13 @@ func (d *Delivery) updateOrder(ctx *gin.Context) {
 
 	var input order.UpdateOrderInput
 	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	if err = d.ucOrder.OrderUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -110,17 +118,22 @@ func (d *Delivery) deleteOrder(ctx *gin.Context) {
 	}
 
 	organizationID := ctx.Param("org_id")
-	orderID := ctx.Param("id")
-
 	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, "empty id param")
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+
+		return
+	}
+
+	orderID := ctx.Param("id")
+	if orderID == "" {
+		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
 	err = d.ucOrder.OrderDelete(userID, organizationID, orderID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 		return
 	}

@@ -4,8 +4,9 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/role"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
+	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 // UserGetAll returns all users from the system.
@@ -31,7 +32,6 @@ func (s *UseCase) UserGetOne(userID string) (user.User, error) {
 	}
 
 	usr, err := s.adapterStorage.UserGetOne(userID)
-
 	if err != nil {
 		return usr, errors.Wrap(err, "user select failed")
 	}
@@ -41,9 +41,8 @@ func (s *UseCase) UserGetOne(userID string) (user.User, error) {
 
 func getOneWithCache(s *UseCase, userID string) (user.User, error) {
 	usr, err := s.adapterCache.UserGetOne(userID)
-
 	if err != nil {
-		logrus.Errorf("unable to add user into cache: %s", err.Error())
+		logger.Logger.Error("unable to get user from cache", zap.String("error", err.Error()))
 	}
 
 	if usr != (user.User{}) {
@@ -57,7 +56,7 @@ func getOneWithCache(s *UseCase, userID string) (user.User, error) {
 	}
 
 	if err = s.adapterCache.UserCreate(userID, usr); err != nil {
-		logrus.Errorf("unable to add user into cache: %s", err.Error())
+		logger.Logger.Error("unable to add user into cache", zap.String("error", err.Error()))
 	}
 
 	return usr, nil
