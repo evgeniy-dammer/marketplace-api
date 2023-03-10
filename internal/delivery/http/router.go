@@ -12,7 +12,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// InitRoutes crete routes.
+// InitRoutes initialize routes.
 func (d *Delivery) InitRoutes(mode string) *gin.Engine {
 	gin.SetMode(mode)
 
