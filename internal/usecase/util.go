@@ -8,23 +8,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
+	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
 	"github.com/golang-jwt/jwt"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/argon2"
 )
 
 const (
-	SigningKey      = "jndc83uhf3fdoenfoe0iededf9uecijnuche9cc"
+	SigningKey      = "n?2BXpZV?K6/L*:2n$yZPHpt(m+6j6DQL[ud2:K+_*phduQ7*/?{a3fqdHcyuctTu{zrLf"
 	TokenTTL        = 30 * time.Hour // replace with time.Minute
 	RefreshTokenTTL = 12 * time.Hour
 	ValuesNum       = 6
 )
 
-var Params = &domain.HashParams{Memory: 4096, Iterations: 3, Parallelism: 1, SaltLength: 16, KeyLength: 32}
+// HashParams is a password hash params.
+type HashParams struct {
+	Memory      uint32
+	Iterations  uint32
+	SaltLength  uint32
+	KeyLength   uint32
+	Parallelism uint8
+}
+
+var Params = &HashParams{Memory: 4096, Iterations: 3, Parallelism: 1, SaltLength: 16, KeyLength: 32}
 
 // GeneratePasswordHash hashes the password.
-func GeneratePasswordHash(password string, Params *domain.HashParams) (string, error) {
+func GeneratePasswordHash(password string, Params *HashParams) (string, error) {
 	salt, err := GenerateRandomBytes(Params.SaltLength)
 	if err != nil {
 		return "", err
@@ -79,7 +88,7 @@ func ComparePasswordAndHash(password, encodedHash string) (bool, error) {
 	return false, nil
 }
 
-func DecodeHash(encodedHash string) (*domain.HashParams, []byte, []byte, error) {
+func DecodeHash(encodedHash string) (*HashParams, []byte, []byte, error) {
 	values := strings.Split(encodedHash, "$")
 
 	if len(values) != ValuesNum {
@@ -97,7 +106,7 @@ func DecodeHash(encodedHash string) (*domain.HashParams, []byte, []byte, error) 
 		return nil, nil, nil, ErrIncompatibleVersion
 	}
 
-	Params = &domain.HashParams{}
+	Params = &HashParams{}
 
 	_, err = fmt.Sscanf(values[3], "m=%d,t=%d,p=%d", &Params.Memory, &Params.Iterations, &Params.Parallelism)
 
@@ -124,7 +133,7 @@ func DecodeHash(encodedHash string) (*domain.HashParams, []byte, []byte, error) 
 
 // CreateNewToken creates new token with claims.
 func CreateNewToken(userID string, expiresAt int64, issuedAt int64) *jwt.Token {
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, &domain.TokenClaims{
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, &token.Claims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiresAt,
 			IssuedAt:  issuedAt,

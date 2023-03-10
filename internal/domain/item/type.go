@@ -33,6 +33,23 @@ type Item struct {
 	Price          float32                       `json:"price" db:"price"`
 }
 
+// CreateItemInput entity.
+type CreateItemInput struct {
+	DescriptionEn  string  `json:"descriptionen" db:"description_en"`
+	DescriptionRu  string  `json:"descriptionru" db:"description_ru"`
+	NameRu         string  `json:"nameru" db:"name_ru" binding:"required"`
+	NameTr         string  `json:"nametr" db:"name_tr" binding:"required"`
+	DescriptionTm  string  `json:"descriptiontm" db:"description_tm"`
+	NameTm         string  `json:"nametm" db:"name_tm" binding:"required"`
+	DescriptionTr  string  `json:"descriptiontr" db:"description_tr"`
+	NameEn         string  `json:"nameen" db:"name_en" binding:"required"`
+	InternalID     string  `json:"internal" db:"internal_id"`
+	OrganizationID string  `json:"organization" db:"organization_id" binding:"required"`
+	CategoryID     string  `json:"category" db:"category_id" binding:"required"`
+	BrandID        int     `json:"brand" db:"brand_id" binding:"required"`
+	Price          float32 `json:"price" db:"price"`
+}
+
 // UpdateItemInput is an input data for updating item entity.
 type UpdateItemInput struct {
 	ID             *string  `json:"id"`

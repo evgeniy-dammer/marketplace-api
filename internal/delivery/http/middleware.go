@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,66 +8,62 @@ import (
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/persist"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/gin-gonic/gin"
 	cors "github.com/itsjamie/gin-cors"
 )
 
-const (
-	authorizationHeader = "Authorization"
-	userCtx             = "userId"
-	maxAge              = 300
-)
-
-var errUserIsNotFound = errors.New("user is not found")
-
 // userIdentity validate access token.
-func (d *Delivery) userIdentity(ctx *gin.Context) {
-	header := ctx.GetHeader(authorizationHeader)
+func (d *Delivery) userIdentity(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	header := ginCtx.GetHeader(authorizationHeader)
 	if header == "" {
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrEmptyAuthHeader)
+		NewErrorResponse(ginCtx, http.StatusUnauthorized, ErrEmptyAuthHeader)
 
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 { //nolint:gomnd
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrInvalidAuthHeader)
+		NewErrorResponse(ginCtx, http.StatusUnauthorized, ErrInvalidAuthHeader)
 
 		return
 	}
 
-	userID, err := d.ucAuthentication.AuthenticationParseToken(headerParts[1])
+	userID, err := d.ucAuthentication.AuthenticationParseToken(ctx, headerParts[1])
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, err)
+		NewErrorResponse(ginCtx, http.StatusUnauthorized, err)
 
 		return
 	}
 
-	ctx.Set(userCtx, userID)
+	ginCtx.Set(userCtx, userID)
 }
 
 // getUserId returns user id from authorization context.
-func (d *Delivery) getUserIDAndRole(ctx *gin.Context) (string, string, error) {
-	userID, exists := ctx.Get(userCtx)
-	if !exists {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, ErrUserIsNotFound)
+func (d *Delivery) getUserIDAndRole(ginCtx *gin.Context) (string, string, error) {
+	ctx := context.New(ginCtx)
 
-		return "", "", errUserIsNotFound
+	userID, exists := ginCtx.Get(userCtx)
+	if !exists {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrUserIsNotFound)
+
+		return "", "", ErrUserIsNotFound
 	}
 
 	idString, exists := userID.(string)
 	if !exists {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, ErrInvalidUserID)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrInvalidUserID)
 
-		return "", "", errUserIsNotFound
+		return "", "", ErrUserIsNotFound
 	}
 
-	role, err := d.ucAuthentication.AuthenticationGetUserRole(idString)
+	role, err := d.ucAuthentication.AuthenticationGetUserRole(ctx, idString)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, ErrRoleIsNotFound)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrRoleIsNotFound)
 
-		return "", "", errUserIsNotFound
+		return "", "", ErrUserIsNotFound
 	}
 
 	return idString, role, nil
@@ -97,13 +92,13 @@ func (d *Delivery) Authorize(obj string, act string, adapter persist.Adapter) gi
 
 		enforced, err := enforce(userRole, obj, act, adapter)
 		if err != nil {
-			domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+			NewErrorResponse(ctx, http.StatusInternalServerError, err)
 
 			return
 		}
 
 		if !enforced {
-			domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrAccessDenied)
+			NewErrorResponse(ctx, http.StatusUnauthorized, ErrAccessDenied)
 
 			return
 		}

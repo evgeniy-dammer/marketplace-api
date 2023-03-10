@@ -1,6 +1,9 @@
 package cache
 
-import "github.com/evgeniy-dammer/emenu-api/internal/domain/user"
+import (
+	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+)
 
 // Cache interface.
 type Cache struct {
@@ -23,8 +26,8 @@ type Authentication interface{}
 
 // User interface.
 type User interface {
-	UserGetOne(userID string) (user.User, error)
-	UserCreate(userID string, user user.User) error
+	UserGetOne(ctx context.Context, userID string) (user.User, error)
+	UserCreate(ctx context.Context, userID string, input user.CreateUserInput) error
 }
 
 // Organization interface.

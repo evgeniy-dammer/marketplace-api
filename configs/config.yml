@@ -18,6 +18,7 @@ database:
   username: "emenu"
   dbname: "emenu"
   sslmode: "disable"
+  timeout: 30
 
 cache:
   mode: true # true, false

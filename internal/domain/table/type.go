@@ -13,6 +13,12 @@ type Table struct {
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
 }
 
+// CreateTableInput entity.
+type CreateTableInput struct {
+	Name           string `json:"name" db:"name" binding:"required"`
+	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
+}
+
 // UpdateTableInput is an input data for updating table entity.
 type UpdateTableInput struct {
 	ID             *string `json:"id"`

@@ -5,11 +5,15 @@ import (
 	"strings"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/pkg/errors"
 )
 
 // SpecificationGetAll selects all specifications from database.
-func (r *Repository) SpecificationGetAll(userID string, organizationID string) ([]specification.Specification, error) {
+func (r *Repository) SpecificationGetAll(ctx context.Context, userID string, organizationID string) ([]specification.Specification, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var specifications []specification.Specification
 
 	query := fmt.Sprintf(
@@ -18,14 +22,17 @@ func (r *Repository) SpecificationGetAll(userID string, organizationID string) (
 		specificationTable,
 	)
 
-	err := r.db.Select(&specifications, query, organizationID)
+	err := r.database.Select(&specifications, query, organizationID)
 
 	return specifications, errors.Wrap(err, "specifications select query error")
 }
 
 // SpecificationGetOne select specification by id from database.
-func (r *Repository) SpecificationGetOne(userID string, organizationID string, specificationID string) (specification.Specification, error) {
-	var specification specification.Specification
+func (r *Repository) SpecificationGetOne(ctx context.Context, userID string, organizationID string, specificationID string) (specification.Specification, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	var spec specification.Specification
 
 	query := fmt.Sprintf(
 		"SELECT id, item_id, organization_id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, "+
@@ -33,13 +40,16 @@ func (r *Repository) SpecificationGetOne(userID string, organizationID string, s
 		specificationTable,
 	)
 
-	err := r.db.Get(&specification, query, organizationID, specificationID)
+	err := r.database.Get(&spec, query, organizationID, specificationID)
 
-	return specification, errors.Wrap(err, "specification select query error")
+	return spec, errors.Wrap(err, "specification select query error")
 }
 
 // SpecificationCreate insert specification into database.
-func (r *Repository) SpecificationCreate(userID string, specification specification.Specification) (string, error) {
+func (r *Repository) SpecificationCreate(ctx context.Context, userID string, input specification.CreateSpecificationInput) (string, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var specificationID string
 
 	query := fmt.Sprintf(
@@ -48,19 +58,19 @@ func (r *Repository) SpecificationCreate(userID string, specification specificat
 		specificationTable,
 	)
 
-	row := r.db.QueryRow(
+	row := r.database.QueryRow(
 		query,
-		specification.ItemID,
-		specification.OrganizationID,
-		specification.NameTm,
-		specification.NameRu,
-		specification.NameTr,
-		specification.NameEn,
-		specification.DescriptionTm,
-		specification.DescriptionRu,
-		specification.DescriptionTr,
-		specification.DescriptionEn,
-		specification.Value,
+		input.ItemID,
+		input.OrganizationID,
+		input.NameTm,
+		input.NameRu,
+		input.NameTr,
+		input.NameEn,
+		input.DescriptionTm,
+		input.DescriptionRu,
+		input.DescriptionTr,
+		input.DescriptionEn,
+		input.Value,
 	)
 
 	err := row.Scan(&specificationID)
@@ -69,7 +79,10 @@ func (r *Repository) SpecificationCreate(userID string, specification specificat
 }
 
 // SpecificationUpdate updates specification by id in database.
-func (r *Repository) SpecificationUpdate(userID string, input specification.UpdateSpecificationInput) error {
+func (r *Repository) SpecificationUpdate(ctx context.Context, userID string, input specification.UpdateSpecificationInput) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	setValues := make([]string, 0, 12)
 	args := make([]interface{}, 0, 12)
 	argID := 1
@@ -143,16 +156,19 @@ func (r *Repository) SpecificationUpdate(userID string, input specification.Upda
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE organization_id = '%s' AND id = '%s'",
 		specificationTable, setQuery, *input.OrganizationID, *input.ID)
 
-	_, err := r.db.Exec(query, args...)
+	_, err := r.database.Exec(query, args...)
 
 	return errors.Wrap(err, "specification update query error")
 }
 
 // SpecificationDelete deletes specification by id from database.
-func (r *Repository) SpecificationDelete(userID string, organizationID string, specificationID string) error {
+func (r *Repository) SpecificationDelete(ctx context.Context, userID string, organizationID string, specificationID string) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND organization_id = $2", specificationTable)
 
-	_, err := r.db.Exec(query, specificationID, organizationID)
+	_, err := r.database.Exec(query, specificationID, organizationID)
 
 	return errors.Wrap(err, "specification delete query error")
 }

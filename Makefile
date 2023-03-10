@@ -27,9 +27,10 @@ lint:
 	gofumpt -w . && gci write --skip-generated -s standard,default . && golangci-lint run
 
 fields:
-	fieldalignment -fix .
+	fieldalignment -fix ./internal/delivery/http
 
-
+swagger:
+	swag init --parseDependency --generalInfo ./internal/delivery/http/delivery.go --output ./docs/
 
 imagebuild: imageremove
 	docker build -t emenu-api .

@@ -15,6 +15,14 @@ type Organization struct {
 	Phone   string `json:"phone" db:"phone" binding:"required"`
 }
 
+// CreateOrganizationInput entity.
+type CreateOrganizationInput struct {
+	Name    string `json:"name" db:"name" binding:"required"`
+	UserID  string `json:"userid" db:"user_id" binding:"required"`
+	Address string `json:"address" db:"address" binding:"required"`
+	Phone   string `json:"phone" db:"phone" binding:"required"`
+}
+
 // UpdateOrganizationInput is an input data for updating organization entity.
 type UpdateOrganizationInput struct {
 	ID      *string `json:"id"`

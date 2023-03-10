@@ -1,0 +1,325 @@
+basePath: /
+definitions:
+  category.Category:
+    properties:
+      id:
+        description: Category ID
+        type: string
+      level:
+        description: Depth level
+        type: integer
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      parent:
+        description: Parent category ID
+        type: string
+    required:
+    - nameen
+    - nameru
+    - nametm
+    - nametr
+    - organization
+    type: object
+  category.CreateCategoryInput:
+    properties:
+      level:
+        description: Depth level
+        type: integer
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      parent:
+        description: Parent category ID
+        type: string
+    required:
+    - nameen
+    - nameru
+    - nametm
+    - nametr
+    - organization
+    type: object
+  category.UpdateCategoryInput:
+    properties:
+      id:
+        description: Category ID
+        type: string
+      level:
+        description: Depth level
+        type: integer
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organisation:
+        description: Organization ID
+        type: string
+      parent:
+        description: Parent category ID
+        type: string
+    type: object
+  http.ErrorResponse:
+    properties:
+      message:
+        description: Error message
+        type: string
+    type: object
+  http.StatusResponse:
+    properties:
+      status:
+        description: Status message
+        type: string
+    type: object
+info:
+  contact:
+    email: evgeniydammer@gmail.com
+    name: Evgeniy Dammer
+  description: Emenu API service
+  title: Emenu API
+  version: "1.0"
+paths:
+  /api/v1/categories/:
+    patch:
+      consumes:
+      - application/json
+      description: Update category method.
+      parameters:
+      - description: Category data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/category.UpdateCategoryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update category method.
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Create category method.
+      parameters:
+      - description: Category data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/category.CreateCategoryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Category ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create category method.
+      tags:
+      - categories
+  /api/v1/categories/{org_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all categories method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Category List
+          schema:
+            items:
+              $ref: '#/definitions/category.Category'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all categories method.
+      tags:
+      - categories
+  /api/v1/categories/{org_id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete category method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete category method.
+      tags:
+      - categories
+    get:
+      consumes:
+      - application/json
+      description: Get category by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Category data
+          schema:
+            $ref: '#/definitions/category.Category'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get category by id method.
+      tags:
+      - categories
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

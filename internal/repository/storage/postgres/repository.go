@@ -1,11 +1,32 @@
 package postgres
 
-import "github.com/jmoiron/sqlx"
+import (
+	"time"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type Repository struct {
-	db *sqlx.DB
+	options  Options
+	database *sqlx.DB
 }
 
-func New(db *sqlx.DB) *Repository {
-	return &Repository{db: db}
+type Options struct {
+	Timeout time.Duration
+}
+
+func New(database *sqlx.DB, options Options) *Repository {
+	repository := &Repository{
+		database: database,
+	}
+
+	repository.SetOptions(options)
+
+	return repository
+}
+
+func (r *Repository) SetOptions(options Options) {
+	if r.options != options {
+		r.options = options
+	}
 }

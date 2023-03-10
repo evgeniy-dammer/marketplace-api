@@ -3,140 +3,150 @@ package http
 import (
 	"net/http"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/gin-gonic/gin"
 )
 
 // getSpecifications is a get all specifications delivery.
-func (d *Delivery) getSpecifications(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	results, err := d.ucSpecification.SpecificationGetAll(userID, organizationID)
+	results, err := d.ucSpecification.SpecificationGetAll(ctx, userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, results)
+	ginCtx.JSON(http.StatusOK, results)
 }
 
 // getSpecification is a get specification by id delivery.
-func (d *Delivery) getSpecification(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getSpecification(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	specificationID := ctx.Param("id")
+	specificationID := ginCtx.Param("id")
 	if specificationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	list, err := d.ucSpecification.SpecificationGetOne(userID, organizationID, specificationID)
+	list, err := d.ucSpecification.SpecificationGetOne(ctx, userID, organizationID, specificationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, list)
+	ginCtx.JSON(http.StatusCreated, list)
 }
 
 // createSpecification register a specification in the system.
-func (d *Delivery) createSpecification(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) createSpecification(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	var input specification.Specification
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	var input specification.CreateSpecificationInput
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	specificationID, err := d.ucSpecification.SpecificationCreate(userID, input)
+	specificationID, err := d.ucSpecification.SpecificationCreate(ctx, userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": specificationID})
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": specificationID})
 }
 
 // updateSpecification is an update specification by id delivery.
-func (d *Delivery) updateSpecification(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
 	var input specification.UpdateSpecificationInput
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err = d.ucSpecification.SpecificationUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+	if err = d.ucSpecification.SpecificationUpdate(ctx, userID, input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
 // deleteSpecification is delete specification by id delivery.
-func (d *Delivery) deleteSpecification(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) deleteSpecification(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	specificationID := ctx.Param("id")
+	specificationID := ginCtx.Param("id")
 	if specificationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	err = d.ucSpecification.SpecificationDelete(userID, organizationID, specificationID)
+	err = d.ucSpecification.SpecificationDelete(ctx, userID, organizationID, specificationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }

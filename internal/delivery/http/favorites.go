@@ -3,55 +3,59 @@ package http
 import (
 	"net/http"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/favorite"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/gin-gonic/gin"
 )
 
 // createFavorite register a favorite in the system.
-func (d *Delivery) createFavorite(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) createFavorite(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
 	var input favorite.Favorite
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	err = d.ucFavorite.FavoriteCreate(userID, input)
+	err = d.ucFavorite.FavoriteCreate(ctx, userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
 // deleteFavorite is delete favorite by id delivery.
-func (d *Delivery) deleteFavorite(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) deleteFavorite(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	itemID := ctx.Param("item_id")
+	itemID := ginCtx.Param("item_id")
 	if itemID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	err = d.ucFavorite.FavoriteDelete(userID, itemID)
+	err = d.ucFavorite.FavoriteDelete(ctx, userID, itemID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }

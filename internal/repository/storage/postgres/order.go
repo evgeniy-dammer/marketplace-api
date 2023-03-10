@@ -6,11 +6,15 @@ import (
 	"time"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/order"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/pkg/errors"
 )
 
 // OrderGetAll selects all orders from database.
-func (r *Repository) OrderGetAll(userID string, organizationID string) ([]order.Order, error) {
+func (r *Repository) OrderGetAll(ctx context.Context, userID string, organizationID string) ([]order.Order, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var orders []order.Order
 
 	query := fmt.Sprintf(
@@ -19,30 +23,36 @@ func (r *Repository) OrderGetAll(userID string, organizationID string) ([]order.
 		orderTable,
 	)
 
-	err := r.db.Select(&orders, query, organizationID)
+	err := r.database.Select(&orders, query, organizationID)
 
 	return orders, errors.Wrap(err, "orders select query error")
 }
 
 // OrderGetOne select order by id from database.
-func (r *Repository) OrderGetOne(userID string, organizationID string, orderID string) (order.Order, error) {
-	var order order.Order
+func (r *Repository) OrderGetOne(ctx context.Context, userID string, organizationID string, orderID string) (order.Order, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	var ordr order.Order
 
 	query := fmt.Sprintf(
 		"SELECT id, user_id, organization_id, table_id, status_id, totalsum, created_at FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		orderTable,
 	)
-	err := r.db.Get(&order, query, organizationID, orderID)
+	err := r.database.Get(&ordr, query, organizationID, orderID)
 
-	return order, errors.Wrap(err, "order select query error")
+	return ordr, errors.Wrap(err, "order select query error")
 }
 
 // OrderCreate insert order into database.
-func (r *Repository) OrderCreate(userID string, order order.Order) (string, error) {
+func (r *Repository) OrderCreate(ctx context.Context, userID string, input order.CreateOrderInput) (string, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var orderID string
 
-	trx, err := r.db.Begin()
+	trx, err := r.database.Begin()
 	if err != nil {
 		return "", errors.Wrap(err, "transaction begin error")
 	}
@@ -51,7 +61,7 @@ func (r *Repository) OrderCreate(userID string, order order.Order) (string, erro
 		"INSERT INTO %s (user_id, organization_id, table_id, status_id, totalsum, user_created) "+
 			"VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
 		orderTable)
-	row := trx.QueryRow(query, order.UserID, order.OrganizationID, order.TableID, order.StatusID, order.TotalSum, userID)
+	row := trx.QueryRow(query, input.UserID, input.OrganizationID, input.TableID, input.StatusID, input.TotalSum, userID)
 
 	if err = row.Scan(&orderID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -61,7 +71,7 @@ func (r *Repository) OrderCreate(userID string, order order.Order) (string, erro
 		return "", errors.Wrap(err, "order id scan error")
 	}
 
-	for _, item := range order.Items {
+	for _, item := range input.Items {
 		createOrderItemQuery := fmt.Sprintf(
 			"INSERT INTO %s (order_id, item_id, quantity, unitprise, totalprice) VALUES ($1, $2, $3, $4, $5)",
 			orderItemTable,
@@ -82,12 +92,15 @@ func (r *Repository) OrderCreate(userID string, order order.Order) (string, erro
 }
 
 // OrderUpdate updates order by id in database.
-func (r *Repository) OrderUpdate(userID string, input order.UpdateOrderInput) error {
+func (r *Repository) OrderUpdate(ctx context.Context, userID string, input order.UpdateOrderInput) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	setValues := make([]string, 0, 6)
 	args := make([]interface{}, 0, 6)
 	argID := 1
 
-	trx, err := r.db.Begin()
+	trx, err := r.database.Begin()
 	if err != nil {
 		return errors.Wrap(err, "transaction begin error")
 	}
@@ -166,14 +179,17 @@ func (r *Repository) OrderUpdate(userID string, input order.UpdateOrderInput) er
 }
 
 // OrderDelete deletes order by id from database.
-func (r *Repository) OrderDelete(userID string, organizationID string, orderID string) error {
+func (r *Repository) OrderDelete(ctx context.Context, userID string, organizationID string, orderID string) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
 			"WHERE is_deleted = false AND id = $3 AND organization_id = $4",
 		orderTable,
 	)
 
-	_, err := r.db.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, orderID, organizationID)
+	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, orderID, organizationID)
 
 	return errors.Wrap(err, "order delete query error")
 }

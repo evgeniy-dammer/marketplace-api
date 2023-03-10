@@ -8,26 +8,60 @@ var ErrStructHasNoValues = errors.New("update structure has no values")
 
 // Category entity.
 type Category struct {
-	ID             string `json:"id" db:"id"`
-	NameTm         string `json:"nametm" db:"name_tm" binding:"required"`
-	NameRu         string `json:"nameru" db:"name_ru" binding:"required"`
-	NameTr         string `json:"nametr" db:"name_tr" binding:"required"`
-	NameEn         string `json:"nameen" db:"name_en" binding:"required"`
-	Parent         string `json:"parent" db:"parent_id"`
+	// Category ID
+	ID string `json:"id" db:"id"`
+	// Name Turkmen
+	NameTm string `json:"nametm" db:"name_tm" binding:"required"`
+	// Name Russian
+	NameRu string `json:"nameru" db:"name_ru" binding:"required"`
+	// Name Turkish
+	NameTr string `json:"nametr" db:"name_tr" binding:"required"`
+	// Name English
+	NameEn string `json:"nameen" db:"name_en" binding:"required"`
+	// Parent category ID
+	Parent string `json:"parent" db:"parent_id"`
+	// Organization ID
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
-	Level          int    `json:"level" db:"level"`
+	// Depth level
+	Level int `json:"level" db:"level"`
+}
+
+// CreateCategoryInput entity.
+type CreateCategoryInput struct {
+	// Name Turkmen
+	NameTm string `json:"nametm" db:"name_tm" binding:"required"`
+	// Name Russian
+	NameRu string `json:"nameru" db:"name_ru" binding:"required"`
+	// Name Turkish
+	NameTr string `json:"nametr" db:"name_tr" binding:"required"`
+	// Name English
+	NameEn string `json:"nameen" db:"name_en" binding:"required"`
+	// Parent category ID
+	Parent string `json:"parent" db:"parent_id"`
+	// Organization ID
+	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
+	// Depth level
+	Level int `json:"level" db:"level"`
 }
 
 // UpdateCategoryInput is an input data for updating category entity.
 type UpdateCategoryInput struct {
-	ID             *string `json:"id"`
-	NameTm         *string `json:"nametm"`
-	NameRu         *string `json:"nameru"`
-	NameTr         *string `json:"nametr"`
-	NameEn         *string `json:"nameen"`
-	Parent         *string `json:"parent"`
+	// Category ID
+	ID *string `json:"id"`
+	// Name Turkmen
+	NameTm *string `json:"nametm"`
+	// Name Russian
+	NameRu *string `json:"nameru"`
+	// Name Turkish
+	NameTr *string `json:"nametr"`
+	// Name English
+	NameEn *string `json:"nameen"`
+	// Parent category ID
+	Parent *string `json:"parent"`
+	// Organization ID
 	OrganizationID *string `json:"organisation"`
-	Level          *int    `json:"level"`
+	// Depth level
+	Level *int `json:"level"`
 }
 
 // Validate checks if update input is nil.

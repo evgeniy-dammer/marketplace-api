@@ -13,6 +13,7 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/table"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 )
 
 // Storage interface.
@@ -33,105 +34,105 @@ type Storage struct {
 
 // Authentication interface.
 type Authentication interface {
-	AuthenticationGetUser(id string, username string) (user.User, error)
-	AuthenticationCreateUser(user user.User) (string, error)
-	AuthenticationGetUserRole(id string) (string, error)
+	AuthenticationGetUser(ctx context.Context, id string, username string) (user.User, error)
+	AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error)
+	AuthenticationGetUserRole(ctx context.Context, id string) (string, error)
 }
 
 // User interface.
 type User interface {
-	UserGetAll(search string, status string, roleID string) ([]user.User, error)
-	UserGetOne(userID string) (user.User, error)
-	UserCreate(userID string, user user.User) (string, error)
-	UserUpdate(userID string, input user.UpdateUserInput) error
-	UserDelete(userID string, dUserID string) error
+	UserGetAll(ctx context.Context, search string, status string, roleID string) ([]user.User, error)
+	UserGetOne(ctx context.Context, userID string) (user.User, error)
+	UserCreate(ctx context.Context, userID string, input user.CreateUserInput) (string, error)
+	UserUpdate(ctx context.Context, userID string, input user.UpdateUserInput) error
+	UserDelete(ctx context.Context, userID string, dUserID string) error
 
-	UserGetAllRoles() ([]role.Role, error)
+	UserGetAllRoles(ctx context.Context) ([]role.Role, error)
 }
 
 // Organization interface.
 type Organization interface {
-	OrganizationGetAll(userID string) ([]organization.Organization, error)
-	OrganizationGetOne(userID string, organizationID string) (organization.Organization, error)
-	OrganizationCreate(userID string, organization organization.Organization) (string, error)
-	OrganizationUpdate(userID string, input organization.UpdateOrganizationInput) error
-	OrganizationDelete(userID string, organizationID string) error
+	OrganizationGetAll(ctx context.Context, userID string) ([]organization.Organization, error)
+	OrganizationGetOne(ctx context.Context, userID string, organizationID string) (organization.Organization, error)
+	OrganizationCreate(ctx context.Context, userID string, input organization.CreateOrganizationInput) (string, error)
+	OrganizationUpdate(ctx context.Context, userID string, input organization.UpdateOrganizationInput) error
+	OrganizationDelete(ctx context.Context, userID string, organizationID string) error
 }
 
 // Category interface.
 type Category interface {
-	CategoryGetAll(userID string, organizationID string) ([]category.Category, error)
-	CategoryGetOne(userID string, organizationID string, categoryID string) (category.Category, error)
-	CategoryCreate(userID string, category category.Category) (string, error)
-	CategoryUpdate(userID string, input category.UpdateCategoryInput) error
-	CategoryDelete(userID string, organizationID string, categoryID string) error
+	CategoryGetAll(ctx context.Context, userID string, organizationID string) ([]category.Category, error)
+	CategoryGetOne(ctx context.Context, userID string, organizationID string, categoryID string) (category.Category, error)
+	CategoryCreate(ctx context.Context, userID string, input category.CreateCategoryInput) (string, error)
+	CategoryUpdate(ctx context.Context, userID string, input category.UpdateCategoryInput) error
+	CategoryDelete(ctx context.Context, userID string, organizationID string, categoryID string) error
 }
 
 // Item interface.
 type Item interface {
-	ItemGetAll(userID string, organizationID string) ([]item.Item, error)
-	ItemGetOne(userID string, organizationID string, itemID string) (item.Item, error)
-	ItemCreate(userID string, item item.Item) (string, error)
-	ItemUpdate(userID string, input item.UpdateItemInput) error
-	ItemDelete(userID string, organizationID string, itemID string) error
+	ItemGetAll(ctx context.Context, userID string, organizationID string) ([]item.Item, error)
+	ItemGetOne(ctx context.Context, userID string, organizationID string, itemID string) (item.Item, error)
+	ItemCreate(ctx context.Context, userID string, input item.CreateItemInput) (string, error)
+	ItemUpdate(ctx context.Context, userID string, input item.UpdateItemInput) error
+	ItemDelete(ctx context.Context, userID string, organizationID string, itemID string) error
 }
 
 // Table interface.
 type Table interface {
-	TableGetAll(userID string, organizationID string) ([]table.Table, error)
-	TableGetOne(userID string, organizationID string, tableID string) (table.Table, error)
-	TableCreate(userID string, table table.Table) (string, error)
-	TableUpdate(userID string, input table.UpdateTableInput) error
-	TableDelete(userID string, organizationID string, tableID string) error
+	TableGetAll(ctx context.Context, userID string, organizationID string) ([]table.Table, error)
+	TableGetOne(ctx context.Context, userID string, organizationID string, tableID string) (table.Table, error)
+	TableCreate(ctx context.Context, userID string, input table.CreateTableInput) (string, error)
+	TableUpdate(ctx context.Context, userID string, input table.UpdateTableInput) error
+	TableDelete(ctx context.Context, userID string, organizationID string, tableID string) error
 }
 
 // Order interface.
 type Order interface {
-	OrderGetAll(userID string, organizationID string) ([]order.Order, error)
-	OrderGetOne(userID string, organizationID string, orderID string) (order.Order, error)
-	OrderCreate(userID string, order order.Order) (string, error)
-	OrderUpdate(userID string, input order.UpdateOrderInput) error
-	OrderDelete(userID string, organizationID string, orderID string) error
+	OrderGetAll(ctx context.Context, userID string, organizationID string) ([]order.Order, error)
+	OrderGetOne(ctx context.Context, userID string, organizationID string, orderID string) (order.Order, error)
+	OrderCreate(ctx context.Context, userID string, input order.CreateOrderInput) (string, error)
+	OrderUpdate(ctx context.Context, userID string, input order.UpdateOrderInput) error
+	OrderDelete(ctx context.Context, userID string, organizationID string, orderID string) error
 }
 
 // Image interface.
 type Image interface {
-	ImageGetAll(userID string, organizationID string) ([]image.Image, error)
-	ImageGetOne(userID string, organizationID string, imageID string) (image.Image, error)
-	ImageCreate(userID string, image image.Image) (string, error)
-	ImageUpdate(userID string, input image.UpdateImageInput) error
-	ImageDelete(userID string, organizationID string, imageID string) error
+	ImageGetAll(ctx context.Context, userID string, organizationID string) ([]image.Image, error)
+	ImageGetOne(ctx context.Context, userID string, organizationID string, imageID string) (image.Image, error)
+	ImageCreate(ctx context.Context, userID string, input image.CreateImageInput) (string, error)
+	ImageUpdate(ctx context.Context, userID string, input image.UpdateImageInput) error
+	ImageDelete(ctx context.Context, userID string, organizationID string, imageID string) error
 }
 
 // Comment interface.
 type Comment interface {
-	CommentGetAll(userID string, organizationID string) ([]comment.Comment, error)
-	CommentGetOne(userID string, organizationID string, commentID string) (comment.Comment, error)
-	CommentCreate(userID string, comment comment.Comment) (string, error)
-	CommentUpdate(userID string, input comment.UpdateCommentInput) error
-	CommentDelete(userID string, organizationID string, commentID string) error
+	CommentGetAll(ctx context.Context, userID string, organizationID string) ([]comment.Comment, error)
+	CommentGetOne(ctx context.Context, userID string, organizationID string, commentID string) (comment.Comment, error)
+	CommentCreate(ctx context.Context, userID string, input comment.CreateCommentInput) (string, error)
+	CommentUpdate(ctx context.Context, userID string, input comment.UpdateCommentInput) error
+	CommentDelete(ctx context.Context, userID string, organizationID string, commentID string) error
 }
 
 // Specification interface.
 type Specification interface {
-	SpecificationGetAll(userID string, organizationID string) ([]specification.Specification, error)
-	SpecificationGetOne(userID string, organizationID string, specificationID string) (specification.Specification, error)
-	SpecificationCreate(userID string, specification specification.Specification) (string, error)
-	SpecificationUpdate(userID string, input specification.UpdateSpecificationInput) error
-	SpecificationDelete(userID string, organizationID string, specificationID string) error
+	SpecificationGetAll(ctx context.Context, userID string, organizationID string) ([]specification.Specification, error)
+	SpecificationGetOne(ctx context.Context, userID string, organizationID string, specificationID string) (specification.Specification, error)
+	SpecificationCreate(ctx context.Context, userID string, input specification.CreateSpecificationInput) (string, error)
+	SpecificationUpdate(ctx context.Context, userID string, input specification.UpdateSpecificationInput) error
+	SpecificationDelete(ctx context.Context, userID string, organizationID string, specificationID string) error
 }
 
 // Favorite interface.
 type Favorite interface {
-	FavoriteCreate(userID string, favorite favorite.Favorite) error
-	FavoriteDelete(userID string, itemID string) error
+	FavoriteCreate(ctx context.Context, userID string, favorite favorite.Favorite) error
+	FavoriteDelete(ctx context.Context, userID string, itemID string) error
 }
 
 // Rule interface.
 type Rule interface {
-	RuleGetAll(userID string) ([]rule.Rule, error)
-	RuleGetOne(userID string, ruleID string) (rule.Rule, error)
-	RuleCreate(userID string, rule rule.Rule) (string, error)
-	RuleUpdate(userID string, input rule.UpdateRuleInput) error
-	RuleDelete(userID string, ruleID string) error
+	RuleGetAll(ctx context.Context, userID string) ([]rule.Rule, error)
+	RuleGetOne(ctx context.Context, userID string, ruleID string) (rule.Rule, error)
+	RuleCreate(ctx context.Context, userID string, input rule.CreateRuleInput) (string, error)
+	RuleUpdate(ctx context.Context, userID string, input rule.UpdateRuleInput) error
+	RuleDelete(ctx context.Context, userID string, ruleID string) error
 }

@@ -6,10 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/config"
 	deliveryHttp "github.com/evgeniy-dammer/emenu-api/internal/delivery/http"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
 	postgresStorage "github.com/evgeniy-dammer/emenu-api/internal/repository/storage/postgres"
 	redisCache "github.com/evgeniy-dammer/emenu-api/internal/repository/storage/redis"
 	useCaseAuthentication "github.com/evgeniy-dammer/emenu-api/internal/usecase/authentication"
@@ -25,6 +25,7 @@ import (
 	useCaseTable "github.com/evgeniy-dammer/emenu-api/internal/usecase/table"
 	useCaseUser "github.com/evgeniy-dammer/emenu-api/internal/usecase/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
+	"github.com/evgeniy-dammer/emenu-api/pkg/server"
 	"github.com/evgeniy-dammer/emenu-api/pkg/store/postgres"
 	redisStorage "github.com/evgeniy-dammer/emenu-api/pkg/store/redis"
 	"github.com/go-redis/cache/v8"
@@ -46,7 +47,8 @@ func main() {
 		logger.Logger.Fatal("env variables loading failed", zap.String("error", err.Error()))
 	}
 
-	if err := logger.InitLogger(); err != nil {
+	err := logger.InitLogger()
+	if err != nil {
 		logger.Logger.Fatal("logger initialization failed", zap.String("error", err.Error()))
 	}
 
@@ -87,7 +89,11 @@ func main() {
 	}
 
 	// repositories
-	repoStorage := postgresStorage.New(database)
+	repoStorage := postgresStorage.New(
+		database,
+		postgresStorage.Options{Timeout: time.Duration(viper.GetInt("database.timeout")) * time.Second},
+	)
+
 	repoCache := redisCache.New(rcache)
 
 	// use cases
@@ -122,9 +128,9 @@ func main() {
 	)
 
 	// create new server
-	srv := new(domain.Server)
+	srv := new(server.Server)
 
-	srvConfig := domain.ServerConfig{
+	srvConfig := server.Config{
 		Port:           viper.GetString("server.port"),
 		Handler:        deliveryHTTP.InitRoutes(viper.GetString("router.mode")),
 		ReadTimeout:    viper.GetInt("server.read_timeout"),

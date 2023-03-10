@@ -3,140 +3,150 @@ package http
 import (
 	"net/http"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/order"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/gin-gonic/gin"
 )
 
 // getOrders is a get all orders delivery.
-func (d *Delivery) getOrders(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getOrders(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	results, err := d.ucOrder.OrderGetAll(userID, organizationID)
+	results, err := d.ucOrder.OrderGetAll(ctx, userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, results)
+	ginCtx.JSON(http.StatusOK, results)
 }
 
 // getOrder is a get order by id delivery.
-func (d *Delivery) getOrder(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getOrder(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	orderID := ctx.Param("id")
+	orderID := ginCtx.Param("id")
 	if orderID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	list, err := d.ucOrder.OrderGetOne(userID, organizationID, orderID)
+	list, err := d.ucOrder.OrderGetOne(ctx, userID, organizationID, orderID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, list)
+	ginCtx.JSON(http.StatusCreated, list)
 }
 
 // createOrder register an order in the system.
-func (d *Delivery) createOrder(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) createOrder(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	var input order.Order
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	var input order.CreateOrderInput
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	orderID, err := d.ucOrder.OrderCreate(userID, input)
+	orderID, err := d.ucOrder.OrderCreate(ctx, userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": orderID})
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": orderID})
 }
 
 // updateOrder is an update order by id delivery.
-func (d *Delivery) updateOrder(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) updateOrder(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
 	var input order.UpdateOrderInput
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err = d.ucOrder.OrderUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+	if err = d.ucOrder.OrderUpdate(ctx, userID, input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
 // deleteOrder is delete order by id delivery.
-func (d *Delivery) deleteOrder(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) deleteOrder(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	orderID := ctx.Param("id")
+	orderID := ginCtx.Param("id")
 	if orderID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	err = d.ucOrder.OrderDelete(userID, organizationID, orderID)
+	err = d.ucOrder.OrderDelete(ctx, userID, organizationID, orderID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }

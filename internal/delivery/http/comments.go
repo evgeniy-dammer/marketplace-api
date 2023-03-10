@@ -3,145 +3,155 @@ package http
 import (
 	"net/http"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/comment"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/gin-gonic/gin"
 )
 
 // getComments is a get all comments delivery.
-func (d *Delivery) getComments(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getComments(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	results, err := d.ucComment.CommentGetAll(userID, organizationID)
+	results, err := d.ucComment.CommentGetAll(ctx, userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, results)
+	ginCtx.JSON(http.StatusOK, results)
 }
 
 // getComment is a get comment by id delivery.
-func (d *Delivery) getComment(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getComment(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	commentID := ctx.Param("id")
+	commentID := ginCtx.Param("id")
 
 	if commentID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	list, err := d.ucComment.CommentGetOne(userID, organizationID, commentID)
+	list, err := d.ucComment.CommentGetOne(ctx, userID, organizationID, commentID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, list)
+	ginCtx.JSON(http.StatusCreated, list)
 }
 
 // createComment register a comment in the system.
-func (d *Delivery) createComment(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) createComment(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	var input comment.Comment
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	var input comment.CreateCommentInput
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	commentID, err := d.ucComment.CommentCreate(userID, input)
+	commentID, err := d.ucComment.CommentCreate(ctx, userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": commentID})
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": commentID})
 }
 
 // updateComment is an update comment by id delivery.
-func (d *Delivery) updateComment(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) updateComment(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
 	var input comment.UpdateCommentInput
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err = d.ucComment.CommentUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+	if err = d.ucComment.CommentUpdate(ctx, userID, input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
 // deleteComment is delete comment by id delivery.
-func (d *Delivery) deleteComment(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) deleteComment(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	commentID := ctx.Param("id")
+	commentID := ginCtx.Param("id")
 
 	if commentID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	err = d.ucComment.CommentDelete(userID, organizationID, commentID)
+	err = d.ucComment.CommentDelete(ctx, userID, organizationID, commentID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }

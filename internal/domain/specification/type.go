@@ -22,6 +22,21 @@ type Specification struct {
 	Value          string `json:"value" db:"value" binding:"required"`
 }
 
+// CreateSpecificationInput entity.
+type CreateSpecificationInput struct {
+	ItemID         string `json:"item" db:"item_id" binding:"required"`
+	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
+	NameTm         string `json:"nametm" db:"name_tm" binding:"required"`
+	NameRu         string `json:"nameru" db:"name_ru" binding:"required"`
+	NameTr         string `json:"nametr" db:"name_tr" binding:"required"`
+	NameEn         string `json:"nameen" db:"name_en" binding:"required"`
+	DescriptionTm  string `json:"descriptiontm" db:"description_tm"`
+	DescriptionRu  string `json:"descriptionru" db:"description_ru"`
+	DescriptionTr  string `json:"descriptiontr" db:"description_tr"`
+	DescriptionEn  string `json:"descriptionen" db:"description_en"`
+	Value          string `json:"value" db:"value" binding:"required"`
+}
+
 // UpdateSpecificationInput is an input data for updating specification entity.
 type UpdateSpecificationInput struct {
 	ID             *string `json:"id"`

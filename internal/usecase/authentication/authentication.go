@@ -3,22 +3,23 @@ package authentication
 import (
 	"time"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
+	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/golang-jwt/jwt"
 	"github.com/pkg/errors"
 )
 
 // AuthenticationGenerateToken generates authorization token.
-func (s *UseCase) AuthenticationGenerateToken(userID string, username string, password string) (user.User, domain.Tokens, error) {
+func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string, username string, password string) (user.User, token.Tokens, error) {
 	var usr user.User
 
-	var tokens domain.Tokens
+	var tokens token.Tokens
 
 	var err error
 
-	usr, err = s.adapterStorage.AuthenticationGetUser(userID, username)
+	usr, err = s.adapterStorage.AuthenticationGetUser(ctx, userID, username)
 
 	if err != nil {
 		return usr, tokens, errors.Wrap(err, "can not get user")
@@ -66,8 +67,8 @@ func (s *UseCase) AuthenticationGenerateToken(userID string, username string, pa
 }
 
 // AuthenticationParseToken checks access token and returns user id.
-func (s *UseCase) AuthenticationParseToken(accessToken string) (string, error) {
-	token, err := jwt.ParseWithClaims(accessToken, &domain.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken string) (string, error) {
+	tkn, err := jwt.ParseWithClaims(accessToken, &token.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, usecase.ErrInvalidSigningMethod
 		}
@@ -78,7 +79,7 @@ func (s *UseCase) AuthenticationParseToken(accessToken string) (string, error) {
 		return "", errors.Wrap(err, "can not parse token")
 	}
 
-	claims, ok := token.Claims.(*domain.TokenClaims)
+	claims, ok := tkn.Claims.(*token.Claims)
 
 	if !ok {
 		return "", usecase.ErrInvalidTokenClaims
@@ -88,22 +89,22 @@ func (s *UseCase) AuthenticationParseToken(accessToken string) (string, error) {
 }
 
 // AuthenticationCreateUser hashes the password and insert User into system.
-func (s *UseCase) AuthenticationCreateUser(user user.User) (string, error) {
-	pass, err := usecase.GeneratePasswordHash(user.Password, usecase.Params)
+func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error) {
+	pass, err := usecase.GeneratePasswordHash(input.Password, usecase.Params)
 	if err != nil {
 		return "", err
 	}
 
-	user.Password = pass
+	input.Password = pass
 
-	userID, err := s.adapterStorage.AuthenticationCreateUser(user)
+	userID, err := s.adapterStorage.AuthenticationCreateUser(ctx, input)
 
 	return userID, errors.Wrap(err, "can not create user")
 }
 
 // AuthenticationGetUserRole returns users role name.
-func (s *UseCase) AuthenticationGetUserRole(id string) (string, error) {
-	role, err := s.adapterStorage.AuthenticationGetUserRole(id)
+func (s *UseCase) AuthenticationGetUserRole(ctx context.Context, id string) (string, error) {
+	role, err := s.adapterStorage.AuthenticationGetUserRole(ctx, id)
 
 	return role, errors.Wrap(err, "can not get role")
 }

@@ -6,11 +6,15 @@ import (
 	"time"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/category"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/pkg/errors"
 )
 
 // CategoryGetAll selects all categories from database.
-func (r *Repository) CategoryGetAll(userID string, organizationID string) ([]category.Category, error) {
+func (r *Repository) CategoryGetAll(ctx context.Context, userID string, organizationID string) ([]category.Category, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var categories []category.Category
 
 	query := fmt.Sprintf(
@@ -18,13 +22,16 @@ func (r *Repository) CategoryGetAll(userID string, organizationID string) ([]cat
 			"WHERE is_deleted = false AND organization_id = $1",
 		categoryTable)
 
-	err := r.db.Select(&categories, query, organizationID)
+	err := r.database.Select(&categories, query, organizationID)
 
 	return categories, errors.Wrap(err, "categories select query error")
 }
 
 // CategoryGetOne select category by id from database.
-func (r *Repository) CategoryGetOne(userID string, organizationID string, categoryID string) (category.Category, error) {
+func (r *Repository) CategoryGetOne(ctx context.Context, userID string, organizationID string, categoryID string) (category.Category, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var user category.Category
 
 	query := fmt.Sprintf(
@@ -33,13 +40,16 @@ func (r *Repository) CategoryGetOne(userID string, organizationID string, catego
 		categoryTable,
 	)
 
-	err := r.db.Get(&user, query, categoryID, organizationID)
+	err := r.database.Get(&user, query, categoryID, organizationID)
 
 	return user, errors.Wrap(err, "category select query error")
 }
 
 // CategoryCreate insert category into database.
-func (r *Repository) CategoryCreate(userID string, category category.Category) (string, error) {
+func (r *Repository) CategoryCreate(ctx context.Context, userID string, input category.CreateCategoryInput) (string, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var categoryID string
 
 	query := fmt.Sprintf(
@@ -48,15 +58,15 @@ func (r *Repository) CategoryCreate(userID string, category category.Category) (
 		categoryTable,
 	)
 
-	row := r.db.QueryRow(
+	row := r.database.QueryRow(
 		query,
-		category.NameTm,
-		category.NameRu,
-		category.NameTr,
-		category.NameEn,
-		category.Parent,
-		category.Level,
-		category.OrganizationID,
+		input.NameTm,
+		input.NameRu,
+		input.NameTr,
+		input.NameEn,
+		input.Parent,
+		input.Level,
+		input.OrganizationID,
 		userID,
 	)
 
@@ -66,7 +76,10 @@ func (r *Repository) CategoryCreate(userID string, category category.Category) (
 }
 
 // CategoryUpdate updates category by id in database.
-func (r *Repository) CategoryUpdate(userID string, input category.UpdateCategoryInput) error {
+func (r *Repository) CategoryUpdate(ctx context.Context, userID string, input category.UpdateCategoryInput) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	setValues := make([]string, 0, 8)
 	args := make([]interface{}, 0, 8)
 	argID := 1
@@ -117,19 +130,22 @@ func (r *Repository) CategoryUpdate(userID string, input category.UpdateCategory
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND id = '%s' AND organization_id = '%s'",
 		categoryTable, setQuery, *input.ID, *input.OrganizationID)
-	_, err := r.db.Exec(query, args...)
+	_, err := r.database.Exec(query, args...)
 
 	return errors.Wrap(err, "category update query error")
 }
 
 // CategoryDelete deletes category by id from database.
-func (r *Repository) CategoryDelete(userID string, organizationID string, categoryID string) error {
+func (r *Repository) CategoryDelete(ctx context.Context, userID string, organizationID string, categoryID string) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 WHERE is_deleted = false AND id = $3 AND organization_id = $4",
 		categoryTable,
 	)
 
-	_, err := r.db.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, categoryID, organizationID)
+	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, categoryID, organizationID)
 
 	return errors.Wrap(err, "category delete query error")
 }

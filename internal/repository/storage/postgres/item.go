@@ -6,12 +6,16 @@ import (
 	"time"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/item"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
 // ItemGetAll selects all items from database.
-func (r *Repository) ItemGetAll(userID string, organizationID string) ([]item.Item, error) {
+func (r *Repository) ItemGetAll(ctx context.Context, userID string, organizationID string) ([]item.Item, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var items []item.Item
 
 	egroup := &errgroup.Group{}
@@ -24,7 +28,7 @@ func (r *Repository) ItemGetAll(userID string, organizationID string) ([]item.It
 		itemTable,
 	)
 
-	err := r.db.Select(&items, query, organizationID)
+	err := r.database.Select(&items, query, organizationID)
 
 	for i := 0; i < len(items); i++ {
 		index := i
@@ -36,7 +40,7 @@ func (r *Repository) ItemGetAll(userID string, organizationID string) ([]item.It
 				imageTable,
 			)
 
-			err = r.db.Select(&items[index].Images, queryImages, items[index].ID)
+			err = r.database.Select(&items[index].Images, queryImages, items[index].ID)
 
 			return errors.Wrap(err, "images select query error")
 		})
@@ -49,8 +53,11 @@ func (r *Repository) ItemGetAll(userID string, organizationID string) ([]item.It
 }
 
 // ItemGetOne select item by id from database.
-func (r *Repository) ItemGetOne(userID string, organizationID string, itemID string) (item.Item, error) {
-	var item item.Item
+func (r *Repository) ItemGetOne(ctx context.Context, userID string, organizationID string, itemID string) (item.Item, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	var itm item.Item
 
 	egroup := &errgroup.Group{}
 
@@ -62,9 +69,9 @@ func (r *Repository) ItemGetOne(userID string, organizationID string, itemID str
 		itemTable,
 	)
 
-	err := r.db.Get(&item, query, organizationID, itemID)
+	err := r.database.Get(&itm, query, organizationID, itemID)
 	if err != nil {
-		return item, errors.Wrap(err, "item select query error")
+		return itm, errors.Wrap(err, "item select query error")
 	}
 
 	egroup.Go(func() error {
@@ -73,7 +80,7 @@ func (r *Repository) ItemGetOne(userID string, organizationID string, itemID str
 			imageTable,
 		)
 
-		err = r.db.Select(&item.Images, queryImages, item.ID)
+		err = r.database.Select(&itm.Images, queryImages, itm.ID)
 
 		return errors.Wrap(err, "images select query error")
 	})
@@ -85,7 +92,7 @@ func (r *Repository) ItemGetOne(userID string, organizationID string, itemID str
 			specificationTable,
 		)
 
-		err = r.db.Select(&item.Specification, querySpecifications, item.ID)
+		err = r.database.Select(&itm.Specification, querySpecifications, itm.ID)
 
 		return errors.Wrap(err, "specification select query error")
 	})
@@ -97,18 +104,21 @@ func (r *Repository) ItemGetOne(userID string, organizationID string, itemID str
 			commentTable,
 		)
 
-		err = r.db.Select(&item.Comments, queryComments, item.ID)
+		err = r.database.Select(&itm.Comments, queryComments, itm.ID)
 
 		return errors.Wrap(err, "comments select query error")
 	})
 
 	err = egroup.Wait()
 
-	return item, errors.Wrap(err, "images select query error")
+	return itm, errors.Wrap(err, "images select query error")
 }
 
 // ItemCreate insert item into database.
-func (r *Repository) ItemCreate(userID string, item item.Item) (string, error) {
+func (r *Repository) ItemCreate(ctx context.Context, userID string, input item.CreateItemInput) (string, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var itemID string
 
 	query := fmt.Sprintf(
@@ -119,21 +129,21 @@ func (r *Repository) ItemCreate(userID string, item item.Item) (string, error) {
 		itemTable,
 	)
 
-	row := r.db.QueryRow(
+	row := r.database.QueryRow(
 		query,
-		item.NameTm,
-		item.NameRu,
-		item.NameTr,
-		item.NameEn,
-		item.DescriptionTm,
-		item.DescriptionRu,
-		item.DescriptionTr,
-		item.DescriptionEn,
-		item.InternalID,
-		item.Price,
-		item.CategoryID,
-		item.OrganizationID,
-		item.BrandID,
+		input.NameTm,
+		input.NameRu,
+		input.NameTr,
+		input.NameEn,
+		input.DescriptionTm,
+		input.DescriptionRu,
+		input.DescriptionTr,
+		input.DescriptionEn,
+		input.InternalID,
+		input.Price,
+		input.CategoryID,
+		input.OrganizationID,
+		input.BrandID,
 		userID,
 	)
 
@@ -143,7 +153,10 @@ func (r *Repository) ItemCreate(userID string, item item.Item) (string, error) {
 }
 
 // ItemUpdate updates item by id in database.
-func (r *Repository) ItemUpdate(userID string, input item.UpdateItemInput) error {
+func (r *Repository) ItemUpdate(ctx context.Context, userID string, input item.UpdateItemInput) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	setValues := make([]string, 0, 14)
 	args := make([]interface{}, 0, 14)
 	argID := 1
@@ -237,20 +250,23 @@ func (r *Repository) ItemUpdate(userID string, input item.UpdateItemInput) error
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
 		itemTable, setQuery, *input.OrganizationID, *input.ID)
 
-	_, err := r.db.Exec(query, args...)
+	_, err := r.database.Exec(query, args...)
 
 	return errors.Wrap(err, "item update query error")
 }
 
 // ItemDelete deletes item by id from database.
-func (r *Repository) ItemDelete(userID string, organizationID string, itemID string) error {
+func (r *Repository) ItemDelete(ctx context.Context, userID string, organizationID string, itemID string) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
 			"WHERE is_deleted = false AND id = $3 AND organization_id = $4",
 		itemTable,
 	)
 
-	_, err := r.db.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, itemID, organizationID)
+	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, itemID, organizationID)
 
 	return errors.Wrap(err, "item delete query error")
 }

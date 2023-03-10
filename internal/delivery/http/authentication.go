@@ -4,88 +4,95 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
+	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/gin-gonic/gin"
 )
 
 // signIn login a user in the system.
-func (d *Delivery) signIn(ctx *gin.Context) {
+func (d *Delivery) signIn(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
 	var input user.SignInInput
 
-	var tokens domain.Tokens
+	var tokens token.Tokens
 
 	var usr user.User
 
-	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err := ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	usr, tokens, err := d.ucAuthentication.AuthenticationGenerateToken("", input.Phone, input.Password)
+	usr, tokens, err := d.ucAuthentication.AuthenticationGenerateToken(ctx, "", input.Phone, input.Password)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.ResponseData{User: usr, Tokens: tokens})
+	ginCtx.JSON(http.StatusOK, AuthResponse{User: usr, Tokens: tokens})
 }
 
 // signUp register a user in the system.
-func (d *Delivery) signUp(ctx *gin.Context) {
-	var input user.User
-	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+func (d *Delivery) signUp(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	var input user.CreateUserInput
+	if err := ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	userID, err := d.ucAuthentication.AuthenticationCreateUser(input)
+	userID, err := d.ucAuthentication.AuthenticationCreateUser(ctx, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": userID})
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": userID})
 }
 
 // refresh refreshes token.
-func (d *Delivery) refresh(ctx *gin.Context) {
-	var input domain.RefreshToken
+func (d *Delivery) refresh(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
 
-	var tokens domain.Tokens
+	var input token.RefreshToken
+
+	var tokens token.Tokens
 
 	var usr user.User
 
-	if err := ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err := ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
 	headerParts := strings.Split(input.Authorization, " ")
 	if len(headerParts) != 2 { //nolint:gomnd
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, ErrInvalidAuthHeader)
+		NewErrorResponse(ginCtx, http.StatusUnauthorized, ErrInvalidAuthHeader)
 
 		return
 	}
 
-	userID, err := d.ucAuthentication.AuthenticationParseToken(headerParts[1])
+	userID, err := d.ucAuthentication.AuthenticationParseToken(ctx, headerParts[1])
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusUnauthorized, err)
+		NewErrorResponse(ginCtx, http.StatusUnauthorized, err)
 
 		return
 	}
 
-	usr, tokens, err = d.ucAuthentication.AuthenticationGenerateToken(userID, "", "")
+	usr, tokens, err = d.ucAuthentication.AuthenticationGenerateToken(ctx, userID, "", "")
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.ResponseData{User: usr, Tokens: tokens})
+	ginCtx.JSON(http.StatusOK, AuthResponse{User: usr, Tokens: tokens})
 }

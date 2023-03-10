@@ -1,6 +1,5 @@
 package postgres
 
-// database table names.
 const (
 	userTable          = "users"
 	roleTable          = "roles"

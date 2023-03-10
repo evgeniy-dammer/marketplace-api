@@ -1,4 +1,4 @@
-package domain
+package token
 
 import "github.com/golang-jwt/jwt"
 
@@ -15,17 +15,8 @@ type RefreshToken struct {
 	Authorization string `json:"token"`
 }
 
-// TokenClaims is a token claims.
-type TokenClaims struct {
+// Claims is a token claims.
+type Claims struct {
 	jwt.StandardClaims
 	UserID string `json:"userId"`
-}
-
-// HashParams is a password hash params.
-type HashParams struct {
-	Memory      uint32
-	Iterations  uint32
-	SaltLength  uint32
-	KeyLength   uint32
-	Parallelism uint8
 }

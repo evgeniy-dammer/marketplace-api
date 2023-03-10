@@ -18,6 +18,17 @@ type Comment struct {
 	Rating         float32 `json:"rating" db:"rating" binding:"required"`
 }
 
+// CreateCommentInput entity.
+type CreateCommentInput struct {
+	UserID         string  `json:"user" db:"user_created" binding:"required"`
+	ItemID         string  `json:"item" db:"item_id" binding:"required"`
+	Content        string  `json:"content" db:"content" binding:"required"`
+	OrganizationID string  `json:"organization" db:"organization_id" binding:"required"`
+	CreatedAt      string  `json:"created,omitempty" db:"created_at"`
+	Status         int     `json:"status" db:"status_id" binding:"required"`
+	Rating         float32 `json:"rating" db:"rating" binding:"required"`
+}
+
 // UpdateCommentInput is an input data for updating comment entity.
 type UpdateCommentInput struct {
 	ID             *string  `json:"id"`

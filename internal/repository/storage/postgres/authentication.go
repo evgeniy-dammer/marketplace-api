@@ -4,12 +4,16 @@ import (
 	"fmt"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/pkg/errors"
 )
 
 // AuthenticationGetUser returns users id by username and password hash.
-func (r *Repository) AuthenticationGetUser(userID string, username string) (user.User, error) {
-	var user user.User
+func (r *Repository) AuthenticationGetUser(ctx context.Context, userID string, username string) (user.User, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	var usr user.User
 
 	var where string
 
@@ -28,16 +32,19 @@ func (r *Repository) AuthenticationGetUser(userID string, username string) (user
 		userTable, userRoleTable, roleTable, statusTable, where,
 	)
 
-	err := r.db.Get(&user, query)
+	err := r.database.Get(&usr, query)
 
-	return user, errors.Wrap(err, "user select error")
+	return usr, errors.Wrap(err, "user select error")
 }
 
 // AuthenticationCreateUser insert user into database.
-func (r *Repository) AuthenticationCreateUser(user user.User) (string, error) {
+func (r *Repository) AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var userID string
 
-	trx, err := r.db.Begin()
+	trx, err := r.database.Begin()
 	if err != nil {
 		return "", errors.Wrap(err, "transaction begin error")
 	}
@@ -47,7 +54,7 @@ func (r *Repository) AuthenticationCreateUser(user user.User) (string, error) {
 		userTable,
 	)
 
-	row := trx.QueryRow(createUserQuery, user.Phone, user.Password, user.FirstName, user.LastName)
+	row := trx.QueryRow(createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName)
 
 	if err = row.Scan(&userID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -59,7 +66,7 @@ func (r *Repository) AuthenticationCreateUser(user user.User) (string, error) {
 
 	createUsersRoleQuery := fmt.Sprintf("INSERT INTO %s (user_id, role_id) VALUES ($1, $2)", userRoleTable)
 
-	if _, err = trx.Exec(createUsersRoleQuery, userID, user.RoleID); err != nil {
+	if _, err = trx.Exec(createUsersRoleQuery, userID, input.RoleID); err != nil {
 		if err = trx.Rollback(); err != nil {
 			return "", errors.Wrap(err, "role table rollback error")
 		}
@@ -71,7 +78,10 @@ func (r *Repository) AuthenticationCreateUser(user user.User) (string, error) {
 }
 
 // AuthenticationGetUserRole returns users role name
-func (r *Repository) AuthenticationGetUserRole(userID string) (string, error) {
+func (r *Repository) AuthenticationGetUserRole(ctx context.Context, userID string) (string, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	var name string
 
 	query := fmt.Sprintf("SELECT ro.name AS role FROM %s ro "+
@@ -81,7 +91,7 @@ func (r *Repository) AuthenticationGetUserRole(userID string) (string, error) {
 		roleTable, userRoleTable, userTable, userID,
 	)
 
-	err := r.db.Get(&name, query)
+	err := r.database.Get(&name, query)
 
 	return name, errors.Wrap(err, "role name select error")
 }

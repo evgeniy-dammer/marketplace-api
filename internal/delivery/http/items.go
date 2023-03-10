@@ -3,141 +3,151 @@ package http
 import (
 	"net/http"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/item"
+	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/gin-gonic/gin"
 )
 
 // getItems is a get all items delivery.
-func (d *Delivery) getItems(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getItems(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	results, err := d.ucItem.ItemGetAll(userID, organizationID)
+	results, err := d.ucItem.ItemGetAll(ctx, userID, organizationID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, results)
+	ginCtx.JSON(http.StatusOK, results)
 }
 
 // getItem is a get item by id delivery.
-func (d *Delivery) getItem(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) getItem(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if organizationID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	itemID := ctx.Param("id")
+	itemID := ginCtx.Param("id")
 	if itemID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	list, err := d.ucItem.ItemGetOne(userID, organizationID, itemID)
+	list, err := d.ucItem.ItemGetOne(ctx, userID, organizationID, itemID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, list)
+	ginCtx.JSON(http.StatusCreated, list)
 }
 
 // createItem register an item in the system.
-func (d *Delivery) createItem(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) createItem(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	var input item.Item
+	var input item.CreateItemInput
 
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	itemID, err := d.ucItem.ItemCreate(userID, input)
+	itemID, err := d.ucItem.ItemCreate(ctx, userID, input)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, map[string]interface{}{"id": itemID})
+	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": itemID})
 }
 
 // updateItem is an update item by id delivery.
-func (d *Delivery) updateItem(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) updateItem(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
 	var input item.UpdateItemInput
-	if err = ctx.BindJSON(&input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, err)
+	if err = ginCtx.BindJSON(&input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err = d.ucItem.ItemUpdate(userID, input); err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+	if err = d.ucItem.ItemUpdate(ctx, userID, input); err != nil {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
 // deleteItem is delete item by id delivery.
-func (d *Delivery) deleteItem(ctx *gin.Context) {
-	userID, _, err := d.getUserIDAndRole(ctx)
+func (d *Delivery) deleteItem(ginCtx *gin.Context) {
+	ctx := context.New(ginCtx)
+
+	userID, _, err := d.getUserIDAndRole(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ctx.Param("org_id")
+	organizationID := ginCtx.Param("org_id")
 	if userID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	itemID := ctx.Param("id")
+	itemID := ginCtx.Param("id")
 	if itemID == "" {
-		domain.NewErrorResponse(ctx, http.StatusBadRequest, ErrEmptyIDParam)
+		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	err = d.ucItem.ItemDelete(userID, organizationID, itemID)
+	err = d.ucItem.ItemDelete(ctx, userID, organizationID, itemID)
 	if err != nil {
-		domain.NewErrorResponse(ctx, http.StatusInternalServerError, err)
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.StatusResponse{Status: "ok"})
+	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }

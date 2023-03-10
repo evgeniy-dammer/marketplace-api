@@ -18,6 +18,15 @@ type User struct {
 	RoleID    int    `json:"roleid,omitempty"`
 }
 
+// CreateUserInput entity.
+type CreateUserInput struct {
+	Phone     string `json:"phone" db:"phone" binding:"required"`
+	Password  string `json:"password,omitempty" db:"password" binding:"required"`
+	FirstName string `json:"firstname" db:"first_name" binding:"required"`
+	LastName  string `json:"lastname" db:"last_name" binding:"required"`
+	RoleID    int    `json:"roleid,omitempty"`
+}
+
 // SignInInput is an input data for signing in.
 type SignInInput struct {
 	Phone    string `json:"phone" binding:"required"`
