@@ -8,36 +8,56 @@ var ErrStructHasNoValues = errors.New("update structure has no values")
 
 // Comment entity.
 type Comment struct {
-	ID             string  `json:"id" db:"id"`
-	UserID         string  `json:"user" db:"user_created" binding:"required"`
-	ItemID         string  `json:"item" db:"item_id" binding:"required"`
-	Content        string  `json:"content" db:"content" binding:"required"`
-	OrganizationID string  `json:"organization" db:"organization_id" binding:"required"`
-	CreatedAt      string  `json:"created,omitempty" db:"created_at"`
-	Status         int     `json:"status" db:"status_id" binding:"required"`
-	Rating         float32 `json:"rating" db:"rating" binding:"required"`
+	// Comment ID
+	ID string `json:"id" db:"id"`
+	// User ID
+	UserID string `json:"user" db:"user_created" binding:"required"`
+	// Item ID
+	ItemID string `json:"item" db:"item_id" binding:"required"`
+	// Comments content message
+	Content string `json:"content" db:"content" binding:"required"`
+	// Organization ID
+	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
+	// Created datetime
+	CreatedAt string `json:"created,omitempty" db:"created_at"`
+	// Comments status ID
+	Status int `json:"status" db:"status_id" binding:"required"`
+	// Comments rating value
+	Rating float32 `json:"rating" db:"rating" binding:"required"`
 }
 
 // CreateCommentInput entity.
 type CreateCommentInput struct {
-	UserID         string  `json:"user" db:"user_created" binding:"required"`
-	ItemID         string  `json:"item" db:"item_id" binding:"required"`
-	Content        string  `json:"content" db:"content" binding:"required"`
-	OrganizationID string  `json:"organization" db:"organization_id" binding:"required"`
-	CreatedAt      string  `json:"created,omitempty" db:"created_at"`
-	Status         int     `json:"status" db:"status_id" binding:"required"`
-	Rating         float32 `json:"rating" db:"rating" binding:"required"`
+	// User ID
+	UserID string `json:"user" db:"user_created" binding:"required"`
+	// Item ID
+	ItemID string `json:"item" db:"item_id" binding:"required"`
+	// Comments content message
+	Content string `json:"content" db:"content" binding:"required"`
+	// Organization ID
+	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
+	// Comments status ID
+	Status int `json:"status" db:"status_id" binding:"required"`
+	// Comments rating value
+	Rating float32 `json:"rating" db:"rating" binding:"required"`
 }
 
 // UpdateCommentInput is an input data for updating comment entity.
 type UpdateCommentInput struct {
-	ID             *string  `json:"id"`
-	UserID         *string  `json:"user"`
-	ItemID         *string  `json:"item"`
-	Content        *string  `json:"content"`
-	OrganizationID *string  `json:"organization"`
-	Status         *int     `json:"status"`
-	Rating         *float32 `json:"rating"`
+	// Comment ID
+	ID *string `json:"id"`
+	// User ID
+	UserID *string `json:"user"`
+	// Item ID
+	ItemID *string `json:"item"`
+	// Comments content message
+	Content *string `json:"content"`
+	// Organization ID
+	OrganizationID *string `json:"organization"`
+	// Comments status ID
+	Status *int `json:"status"`
+	// Comments rating value
+	Rating *float32 `json:"rating"`
 }
 
 // Validate checks if update input is nil.

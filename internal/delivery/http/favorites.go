@@ -8,7 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// createFavorite register a favorite in the system.
+// createFavorite
+// @Summary Create favorite item method.
+// @Description Create favorite item method.
+// @Tags favorites
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		favorite.Favorite 	true  "Favorite data"
+// @Success 200		{object}  	StatusResponse		true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/favorites/ [post].
 func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -34,7 +47,20 @@ func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
-// deleteFavorite is delete favorite by id delivery.
+// deleteFavorite
+// @Summary Delete favorite item method.
+// @Description Delete favorite item method.
+// @Tags favorites
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   item_id path 		string 		   	true  "Item ID"
+// @Success 200		{object}  	StatusResponse	true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/favorites/{item_id} [delete].
 func (d *Delivery) deleteFavorite(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 

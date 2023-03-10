@@ -8,21 +8,29 @@ var ErrStructHasNoValues = errors.New("update structure has no values")
 
 // Table entity.
 type Table struct {
-	ID             string `json:"id" db:"id"`
-	Name           string `json:"name" db:"name" binding:"required"`
+	// Table ID
+	ID string `json:"id" db:"id"`
+	// Table name
+	Name string `json:"name" db:"name" binding:"required"`
+	// Organization ID
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
 }
 
 // CreateTableInput entity.
 type CreateTableInput struct {
-	Name           string `json:"name" db:"name" binding:"required"`
+	// Table name
+	Name string `json:"name" db:"name" binding:"required"`
+	// Organization ID
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
 }
 
 // UpdateTableInput is an input data for updating table entity.
 type UpdateTableInput struct {
-	ID             *string `json:"id"`
-	Name           *string `json:"name"`
+	// Table ID
+	ID *string `json:"id"`
+	// Table name
+	Name *string `json:"name"`
+	// Organization ID
 	OrganizationID *string `json:"organisation"`
 }
 

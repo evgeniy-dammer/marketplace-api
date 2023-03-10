@@ -8,37 +8,60 @@ var ErrStructHasNoValues = errors.New("update structure has no values")
 
 // Rule entity
 type Rule struct {
-	ID    string `json:"id" db:"id"`
+	// Rule ID
+	ID string `json:"id" db:"id"`
+	// Type
 	Ptype string `json:"ptype" db:"ptype" binding:"required"`
-	V0    string `json:"v0" db:"v0" binding:"required"`
-	V1    string `json:"v1" db:"v1" binding:"required"`
-	V2    string `json:"v2" db:"v2" binding:"required"`
-	V3    string `json:"v3" db:"v3" binding:"required"`
-	V4    string `json:"v4" db:"v4"`
-	V5    string `json:"v5" db:"v5"`
+	// Role name
+	V0 string `json:"v0" db:"v0" binding:"required"`
+	// Recourse name
+	V1 string `json:"v1" db:"v1" binding:"required"`
+	// REST verb
+	V2 string `json:"v2" db:"v2" binding:"required"`
+	// Permission status
+	V3 string `json:"v3" db:"v3" binding:"required"`
+	// Empty
+	V4 string `json:"v4" db:"v4"`
+	// Empty
+	V5 string `json:"v5" db:"v5"`
 }
 
 // CreateRuleInput entity
 type CreateRuleInput struct {
+	// Type
 	Ptype string `json:"ptype" db:"ptype" binding:"required"`
-	V0    string `json:"v0" db:"v0" binding:"required"`
-	V1    string `json:"v1" db:"v1" binding:"required"`
-	V2    string `json:"v2" db:"v2" binding:"required"`
-	V3    string `json:"v3" db:"v3" binding:"required"`
-	V4    string `json:"v4" db:"v4"`
-	V5    string `json:"v5" db:"v5"`
+	// Role name
+	V0 string `json:"v0" db:"v0" binding:"required"`
+	// Recourse name
+	V1 string `json:"v1" db:"v1" binding:"required"`
+	// REST verb
+	V2 string `json:"v2" db:"v2" binding:"required"`
+	// Permission status
+	V3 string `json:"v3" db:"v3" binding:"required"`
+	// Empty
+	V4 string `json:"v4" db:"v4"`
+	// Empty
+	V5 string `json:"v5" db:"v5"`
 }
 
 // UpdateRuleInput is an input data for updating rule entity.
 type UpdateRuleInput struct {
-	ID    *string `json:"id"`
+	// Rule ID
+	ID *string `json:"id"`
+	// Type
 	Ptype *string `json:"ptype"`
-	V0    *string `json:"v0"`
-	V1    *string `json:"v1"`
-	V2    *string `json:"v2"`
-	V3    *string `json:"v3"`
-	V4    *string `json:"v4"`
-	V5    *string `json:"v5"`
+	// Role name
+	V0 *string `json:"v0"`
+	// Recourse name
+	V1 *string `json:"v1"`
+	// REST verb
+	V2 *string `json:"v2"`
+	// Permission status
+	V3 *string `json:"v3"`
+	// Empty
+	V4 *string `json:"v4"`
+	// Empty
+	V5 *string `json:"v5"`
 }
 
 // Validate checks if update input is nil.

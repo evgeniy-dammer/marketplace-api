@@ -332,6 +332,3164 @@
                     }
                 }
             }
+        },
+        "/api/v1/comments/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create comment method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Create comment method.",
+                "parameters": [
+                    {
+                        "description": "Comment data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateCommentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comment ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update comment method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Update comment method.",
+                "parameters": [
+                    {
+                        "description": "Comment data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.UpdateCommentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/comments/{org_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all comments method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get all comments method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comments List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/comment.Comment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/comments/{org_id}/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get comment by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get comment by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Comment data",
+                        "schema": {
+                            "$ref": "#/definitions/comment.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete comment method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Delete comment method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Comment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/favorites/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create favorite item method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Create favorite item method.",
+                "parameters": [
+                    {
+                        "description": "Favorite data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/favorite.Favorite"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/favorites/{item_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete favorite item method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "favorites"
+                ],
+                "summary": "Delete favorite item method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "item_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/images/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create image method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "Create image method.",
+                "parameters": [
+                    {
+                        "description": "Image data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/image.CreateImageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update image method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "Update image method.",
+                "parameters": [
+                    {
+                        "description": "Image data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/image.UpdateImageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/images/{org_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all images method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "Get all images method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/image.Image"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/images/{org_id}/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get image by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "Get image by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Image ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image data",
+                        "schema": {
+                            "$ref": "#/definitions/image.Image"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete image method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "images"
+                ],
+                "summary": "Delete image method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Image ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/items/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create item method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "items"
+                ],
+                "summary": "Create item method.",
+                "parameters": [
+                    {
+                        "description": "Item data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/item.CreateItemInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update item method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "items"
+                ],
+                "summary": "Update item method.",
+                "parameters": [
+                    {
+                        "description": "Item data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/item.UpdateItemInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/items/{org_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all items method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "items"
+                ],
+                "summary": "Get all items method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/item.Item"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/items/{org_id}/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get item by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "items"
+                ],
+                "summary": "Get item by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "item data",
+                        "schema": {
+                            "$ref": "#/definitions/item.Item"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete item method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "items"
+                ],
+                "summary": "Delete item method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create order method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Create order method.",
+                "parameters": [
+                    {
+                        "description": "Order data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.CreateOrderInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update order method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Update order method.",
+                "parameters": [
+                    {
+                        "description": "Order data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.UpdateOrderInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{org_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all orders method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get all orders method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/order.Order"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{org_id}/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get order by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get order by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order data",
+                        "schema": {
+                            "$ref": "#/definitions/order.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete order method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Delete order method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/organizations/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all organizations method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "organizations"
+                ],
+                "summary": "Get all organizations method.",
+                "responses": {
+                    "200": {
+                        "description": "Organization List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/organization.Organization"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create organization method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "organizations"
+                ],
+                "summary": "Create organization method.",
+                "parameters": [
+                    {
+                        "description": "Organization data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/organization.CreateOrganizationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update organization method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "organizations"
+                ],
+                "summary": "Update organization method.",
+                "parameters": [
+                    {
+                        "description": "Organization data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/organization.UpdateOrganizationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/organizations/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get organization by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "organizations"
+                ],
+                "summary": "Get organization by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Organization data",
+                        "schema": {
+                            "$ref": "#/definitions/organization.Organization"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete organization method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "organizations"
+                ],
+                "summary": "Delete organization method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all rules method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Get all rules method.",
+                "responses": {
+                    "200": {
+                        "description": "Rule List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/rule.Rule"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create rule method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Create rule method.",
+                "parameters": [
+                    {
+                        "description": "Rule data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rule.CreateRuleInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rule ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update rule method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Update rule method.",
+                "parameters": [
+                    {
+                        "description": "Rule data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rule.UpdateRuleInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get rule by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Get rule by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Rule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rule data",
+                        "schema": {
+                            "$ref": "#/definitions/rule.Rule"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete rule method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rules"
+                ],
+                "summary": "Delete rule method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Rule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/specifications/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create specification method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "specifications"
+                ],
+                "summary": "Create specification method.",
+                "parameters": [
+                    {
+                        "description": "Specification data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/specification.CreateSpecificationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Specification ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update specification method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "specifications"
+                ],
+                "summary": "Update specification method.",
+                "parameters": [
+                    {
+                        "description": "Specification data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/specification.UpdateSpecificationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/specifications/{org_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all specifications method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "specifications"
+                ],
+                "summary": "Get all specifications method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Specification ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Specification List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/specification.Specification"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/specifications/{org_id}/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get specification by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "specifications"
+                ],
+                "summary": "Get specification by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Specification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Specification data",
+                        "schema": {
+                            "$ref": "#/definitions/specification.Specification"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete specification method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "specifications"
+                ],
+                "summary": "Delete specification method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Specification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tables/": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create table method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tables"
+                ],
+                "summary": "Create table method.",
+                "parameters": [
+                    {
+                        "description": "Table data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/table.CreateTableInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Table ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update table method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tables"
+                ],
+                "summary": "Update table method.",
+                "parameters": [
+                    {
+                        "description": "Table data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/table.UpdateTableInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tables/{org_id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all tables method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tables"
+                ],
+                "summary": "Get all tables method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Table List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/table.Table"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tables/{org_id}/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get table by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tables"
+                ],
+                "summary": "Get table by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Table ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Table data",
+                        "schema": {
+                            "$ref": "#/definitions/table.Table"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete table method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tables"
+                ],
+                "summary": "Delete table method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Table ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all users method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get all users method.",
+                "responses": {
+                    "200": {
+                        "description": "User List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/user.User"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create user method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create user method.",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.CreateUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update user method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user method.",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/roles/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all roles method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "roles"
+                ],
+                "summary": "Get all roles method.",
+                "responses": {
+                    "200": {
+                        "description": "Role List",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/role.Role"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get user by id method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user by id method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data",
+                        "schema": {
+                            "$ref": "#/definitions/user.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete user method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete user method.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.StatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/refresh/": {
+            "post": {
+                "description": "Refresh token method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Refresh token method.",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/token.RefreshToken"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data and Tokens",
+                        "schema": {
+                            "$ref": "#/definitions/http.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/signin/": {
+            "post": {
+                "description": "SignIn user method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "SignIn user method.",
+                "parameters": [
+                    {
+                        "description": "Username and Password",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.SignInInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User data and Tokens",
+                        "schema": {
+                            "$ref": "#/definitions/http.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup/": {
+            "post": {
+                "description": "SignUp user method.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "SignUp user method.",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.CreateUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -456,6 +3614,146 @@
                 }
             }
         },
+        "comment.Comment": {
+            "type": "object",
+            "required": [
+                "content",
+                "item",
+                "organization",
+                "rating",
+                "status",
+                "user"
+            ],
+            "properties": {
+                "content": {
+                    "description": "Comments content message",
+                    "type": "string"
+                },
+                "created": {
+                    "description": "Created datetime",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Comment ID",
+                    "type": "string"
+                },
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "rating": {
+                    "description": "Comments rating value",
+                    "type": "number"
+                },
+                "status": {
+                    "description": "Comments status ID",
+                    "type": "integer"
+                },
+                "user": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
+        "comment.CreateCommentInput": {
+            "type": "object",
+            "required": [
+                "content",
+                "item",
+                "organization",
+                "rating",
+                "status",
+                "user"
+            ],
+            "properties": {
+                "content": {
+                    "description": "Comments content message",
+                    "type": "string"
+                },
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "rating": {
+                    "description": "Comments rating value",
+                    "type": "number"
+                },
+                "status": {
+                    "description": "Comments status ID",
+                    "type": "integer"
+                },
+                "user": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
+        "comment.UpdateCommentInput": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Comments content message",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Comment ID",
+                    "type": "string"
+                },
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "rating": {
+                    "description": "Comments rating value",
+                    "type": "number"
+                },
+                "status": {
+                    "description": "Comments status ID",
+                    "type": "integer"
+                },
+                "user": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
+        "favorite.Favorite": {
+            "type": "object",
+            "required": [
+                "item"
+            ],
+            "properties": {
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                }
+            }
+        },
+        "http.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "tokens": {
+                    "description": "Tokens",
+                    "$ref": "#/definitions/token.Tokens"
+                },
+                "user": {
+                    "description": "User",
+                    "$ref": "#/definitions/user.User"
+                }
+            }
+        },
         "http.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -470,6 +3768,1122 @@
             "properties": {
                 "status": {
                     "description": "Status message",
+                    "type": "string"
+                }
+            }
+        },
+        "image.CreateImageInput": {
+            "type": "object",
+            "required": [
+                "main",
+                "middle",
+                "object",
+                "organization",
+                "origin",
+                "small",
+                "type"
+            ],
+            "properties": {
+                "main": {
+                    "description": "Is main image",
+                    "type": "boolean"
+                },
+                "middle": {
+                    "description": "Middle-sized file name",
+                    "type": "string"
+                },
+                "object": {
+                    "description": "Object ID",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "origin": {
+                    "description": "Origin file name",
+                    "type": "string"
+                },
+                "small": {
+                    "description": "Small-sized file name",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Object type",
+                    "type": "integer"
+                }
+            }
+        },
+        "image.Image": {
+            "type": "object",
+            "required": [
+                "main",
+                "middle",
+                "object",
+                "organization",
+                "origin",
+                "small",
+                "type"
+            ],
+            "properties": {
+                "id": {
+                    "description": "Image ID",
+                    "type": "string"
+                },
+                "main": {
+                    "description": "Is main image",
+                    "type": "boolean"
+                },
+                "middle": {
+                    "description": "Middle-sized file name",
+                    "type": "string"
+                },
+                "object": {
+                    "description": "Object ID",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "origin": {
+                    "description": "Origin file name",
+                    "type": "string"
+                },
+                "small": {
+                    "description": "Small-sized file name",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Object type",
+                    "type": "integer"
+                }
+            }
+        },
+        "image.UpdateImageInput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Image ID",
+                    "type": "string"
+                },
+                "main": {
+                    "description": "Is main image",
+                    "type": "boolean"
+                },
+                "middle": {
+                    "description": "Middle-sized file name",
+                    "type": "string"
+                },
+                "object": {
+                    "description": "Object ID",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "origin": {
+                    "description": "Origin file name",
+                    "type": "string"
+                },
+                "small": {
+                    "description": "Small-sized file name",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Object type",
+                    "type": "integer"
+                }
+            }
+        },
+        "item.CreateItemInput": {
+            "type": "object",
+            "required": [
+                "brand",
+                "category",
+                "nameen",
+                "nameru",
+                "nametm",
+                "nametr",
+                "organization"
+            ],
+            "properties": {
+                "brand": {
+                    "description": "Brand ID",
+                    "type": "integer"
+                },
+                "category": {
+                    "description": "Category ID",
+                    "type": "string"
+                },
+                "descriptionen": {
+                    "description": "Description English",
+                    "type": "string"
+                },
+                "descriptionru": {
+                    "description": "Description Russian",
+                    "type": "string"
+                },
+                "descriptiontm": {
+                    "description": "Description Turkmen",
+                    "type": "string"
+                },
+                "descriptiontr": {
+                    "description": "Description Turkish",
+                    "type": "string"
+                },
+                "internal": {
+                    "description": "Internal ID",
+                    "type": "string"
+                },
+                "nameen": {
+                    "description": "Name English",
+                    "type": "string"
+                },
+                "nameru": {
+                    "description": "Name Russian",
+                    "type": "string"
+                },
+                "nametm": {
+                    "description": "Name Turkmen",
+                    "type": "string"
+                },
+                "nametr": {
+                    "description": "Name Turkish",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "price": {
+                    "description": "Item price",
+                    "type": "number"
+                }
+            }
+        },
+        "item.Item": {
+            "type": "object",
+            "required": [
+                "brand",
+                "category",
+                "nameen",
+                "nameru",
+                "nametm",
+                "nametr",
+                "organization"
+            ],
+            "properties": {
+                "brand": {
+                    "description": "Brand ID",
+                    "type": "integer"
+                },
+                "category": {
+                    "description": "Category ID",
+                    "type": "string"
+                },
+                "comments": {
+                    "description": "Comments",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/comment.Comment"
+                    }
+                },
+                "commentsqty": {
+                    "description": "Comments quantity",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created datetime",
+                    "type": "string"
+                },
+                "descriptionen": {
+                    "description": "Description English",
+                    "type": "string"
+                },
+                "descriptionru": {
+                    "description": "Description Russian",
+                    "type": "string"
+                },
+                "descriptiontm": {
+                    "description": "Description Turkmen",
+                    "type": "string"
+                },
+                "descriptiontr": {
+                    "description": "Description Turkish",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "images": {
+                    "description": "Images",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/image.Image"
+                    }
+                },
+                "internal": {
+                    "description": "Internal ID",
+                    "type": "string"
+                },
+                "nameen": {
+                    "description": "Name English",
+                    "type": "string"
+                },
+                "nameru": {
+                    "description": "Name Russian",
+                    "type": "string"
+                },
+                "nametm": {
+                    "description": "Name Turkmen",
+                    "type": "string"
+                },
+                "nametr": {
+                    "description": "Name Turkish",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "price": {
+                    "description": "Item price",
+                    "type": "number"
+                },
+                "rating": {
+                    "description": "Rating value",
+                    "type": "number"
+                },
+                "specification": {
+                    "description": "Specifications",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/specification.Specification"
+                    }
+                }
+            }
+        },
+        "item.UpdateItemInput": {
+            "type": "object",
+            "properties": {
+                "brand": {
+                    "description": "Brand ID",
+                    "type": "integer"
+                },
+                "category": {
+                    "description": "Category ID",
+                    "type": "string"
+                },
+                "descriptionen": {
+                    "description": "Description English",
+                    "type": "string"
+                },
+                "descriptionru": {
+                    "description": "Description Russian",
+                    "type": "string"
+                },
+                "descriptiontm": {
+                    "description": "Description Turkmen",
+                    "type": "string"
+                },
+                "descriptiontr": {
+                    "description": "Description Turkish",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "internal": {
+                    "description": "Internal ID",
+                    "type": "string"
+                },
+                "nameen": {
+                    "description": "Name English",
+                    "type": "string"
+                },
+                "nameru": {
+                    "description": "Name Russian",
+                    "type": "string"
+                },
+                "nametm": {
+                    "description": "Name Turkmen",
+                    "type": "string"
+                },
+                "nametr": {
+                    "description": "Name Turkish",
+                    "type": "string"
+                },
+                "organisation": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "price": {
+                    "description": "Item price",
+                    "type": "number"
+                }
+            }
+        },
+        "order.CreateOrderInput": {
+            "type": "object",
+            "required": [
+                "organization",
+                "totalsum"
+            ],
+            "properties": {
+                "orderitems": {
+                    "description": "Order items",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/order.CreateOrderItemInput"
+                    }
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Order status ID",
+                    "type": "integer"
+                },
+                "table": {
+                    "description": "Table ID",
+                    "type": "string"
+                },
+                "totalsum": {
+                    "description": "Order total sum",
+                    "type": "number"
+                },
+                "user": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
+        "order.CreateOrderItemInput": {
+            "type": "object",
+            "required": [
+                "item",
+                "quantity",
+                "totalprice",
+                "unitprise"
+            ],
+            "properties": {
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "quantity": {
+                    "description": "Item quantity",
+                    "type": "number"
+                },
+                "totalprice": {
+                    "description": "Item total price",
+                    "type": "number"
+                },
+                "unitprise": {
+                    "description": "Item unit price",
+                    "type": "number"
+                }
+            }
+        },
+        "order.Order": {
+            "type": "object",
+            "required": [
+                "organization",
+                "totalsum"
+            ],
+            "properties": {
+                "created": {
+                    "description": "Created datetime",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Order ID",
+                    "type": "string"
+                },
+                "orderitems": {
+                    "description": "Order items",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/order.OrderItem"
+                    }
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Order status ID",
+                    "type": "integer"
+                },
+                "table": {
+                    "description": "Table ID",
+                    "type": "string"
+                },
+                "totalsum": {
+                    "description": "Order total sum",
+                    "type": "number"
+                },
+                "updated": {
+                    "description": "Updated datetime",
+                    "type": "string"
+                },
+                "user": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
+        "order.OrderItem": {
+            "type": "object",
+            "required": [
+                "item",
+                "quantity",
+                "totalprice",
+                "unitprise"
+            ],
+            "properties": {
+                "id": {
+                    "description": "OrderItem ID",
+                    "type": "string"
+                },
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "order": {
+                    "description": "Order ID",
+                    "type": "string"
+                },
+                "quantity": {
+                    "description": "Item quantity",
+                    "type": "number"
+                },
+                "totalprice": {
+                    "description": "Item total price",
+                    "type": "number"
+                },
+                "unitprise": {
+                    "description": "Item unit price",
+                    "type": "number"
+                }
+            }
+        },
+        "order.UpdateOrderInput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Order ID",
+                    "type": "string"
+                },
+                "orderitems": {
+                    "description": "Order items",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/order.OrderItem"
+                    }
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Order status ID",
+                    "type": "integer"
+                },
+                "table": {
+                    "description": "Table ID",
+                    "type": "string"
+                },
+                "totalsum": {
+                    "description": "Order total sum",
+                    "type": "number"
+                }
+            }
+        },
+        "organization.CreateOrganizationInput": {
+            "type": "object",
+            "required": [
+                "address",
+                "name",
+                "phone",
+                "userid"
+            ],
+            "properties": {
+                "address": {
+                    "description": "Organization address",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Organization name",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "Organization phone number",
+                    "type": "string"
+                },
+                "userid": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
+        "organization.Organization": {
+            "type": "object",
+            "required": [
+                "address",
+                "name",
+                "phone",
+                "userid"
+            ],
+            "properties": {
+                "address": {
+                    "description": "Organization address",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Organization name",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "Organization phone number",
+                    "type": "string"
+                },
+                "userid": {
+                    "description": "User ID",
+                    "type": "string"
+                }
+            }
+        },
+        "organization.UpdateOrganizationInput": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Organization address",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Organization name",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "Organization phone number",
+                    "type": "string"
+                }
+            }
+        },
+        "role.Role": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Role ID",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Role name",
+                    "type": "string"
+                }
+            }
+        },
+        "rule.CreateRuleInput": {
+            "type": "object",
+            "required": [
+                "ptype",
+                "v0",
+                "v1",
+                "v2",
+                "v3"
+            ],
+            "properties": {
+                "ptype": {
+                    "description": "Type",
+                    "type": "string"
+                },
+                "v0": {
+                    "description": "Role name",
+                    "type": "string"
+                },
+                "v1": {
+                    "description": "Recourse name",
+                    "type": "string"
+                },
+                "v2": {
+                    "description": "REST verb",
+                    "type": "string"
+                },
+                "v3": {
+                    "description": "Permission status",
+                    "type": "string"
+                },
+                "v4": {
+                    "description": "Empty",
+                    "type": "string"
+                },
+                "v5": {
+                    "description": "Empty",
+                    "type": "string"
+                }
+            }
+        },
+        "rule.Rule": {
+            "type": "object",
+            "required": [
+                "ptype",
+                "v0",
+                "v1",
+                "v2",
+                "v3"
+            ],
+            "properties": {
+                "id": {
+                    "description": "Rule ID",
+                    "type": "string"
+                },
+                "ptype": {
+                    "description": "Type",
+                    "type": "string"
+                },
+                "v0": {
+                    "description": "Role name",
+                    "type": "string"
+                },
+                "v1": {
+                    "description": "Recourse name",
+                    "type": "string"
+                },
+                "v2": {
+                    "description": "REST verb",
+                    "type": "string"
+                },
+                "v3": {
+                    "description": "Permission status",
+                    "type": "string"
+                },
+                "v4": {
+                    "description": "Empty",
+                    "type": "string"
+                },
+                "v5": {
+                    "description": "Empty",
+                    "type": "string"
+                }
+            }
+        },
+        "rule.UpdateRuleInput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Rule ID",
+                    "type": "string"
+                },
+                "ptype": {
+                    "description": "Type",
+                    "type": "string"
+                },
+                "v0": {
+                    "description": "Role name",
+                    "type": "string"
+                },
+                "v1": {
+                    "description": "Recourse name",
+                    "type": "string"
+                },
+                "v2": {
+                    "description": "REST verb",
+                    "type": "string"
+                },
+                "v3": {
+                    "description": "Permission status",
+                    "type": "string"
+                },
+                "v4": {
+                    "description": "Empty",
+                    "type": "string"
+                },
+                "v5": {
+                    "description": "Empty",
+                    "type": "string"
+                }
+            }
+        },
+        "specification.CreateSpecificationInput": {
+            "type": "object",
+            "required": [
+                "item",
+                "nameen",
+                "nameru",
+                "nametm",
+                "nametr",
+                "organization",
+                "value"
+            ],
+            "properties": {
+                "descriptionen": {
+                    "description": "Description English",
+                    "type": "string"
+                },
+                "descriptionru": {
+                    "description": "Description Russian",
+                    "type": "string"
+                },
+                "descriptiontm": {
+                    "description": "Description Turkmen",
+                    "type": "string"
+                },
+                "descriptiontr": {
+                    "description": "Description Turkish",
+                    "type": "string"
+                },
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "nameen": {
+                    "description": "Name English",
+                    "type": "string"
+                },
+                "nameru": {
+                    "description": "Name Russian",
+                    "type": "string"
+                },
+                "nametm": {
+                    "description": "Name Turkmen",
+                    "type": "string"
+                },
+                "nametr": {
+                    "description": "Name Turkish",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value",
+                    "type": "string"
+                }
+            }
+        },
+        "specification.Specification": {
+            "type": "object",
+            "required": [
+                "item",
+                "nameen",
+                "nameru",
+                "nametm",
+                "nametr",
+                "organization",
+                "value"
+            ],
+            "properties": {
+                "descriptionen": {
+                    "description": "Description English",
+                    "type": "string"
+                },
+                "descriptionru": {
+                    "description": "Description Russian",
+                    "type": "string"
+                },
+                "descriptiontm": {
+                    "description": "Description Turkmen",
+                    "type": "string"
+                },
+                "descriptiontr": {
+                    "description": "Description Turkish",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Specification ID",
+                    "type": "string"
+                },
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "nameen": {
+                    "description": "Name English",
+                    "type": "string"
+                },
+                "nameru": {
+                    "description": "Name Russian",
+                    "type": "string"
+                },
+                "nametm": {
+                    "description": "Name Turkmen",
+                    "type": "string"
+                },
+                "nametr": {
+                    "description": "Name Turkish",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value",
+                    "type": "string"
+                }
+            }
+        },
+        "specification.UpdateSpecificationInput": {
+            "type": "object",
+            "properties": {
+                "descriptionen": {
+                    "description": "Description English",
+                    "type": "string"
+                },
+                "descriptionru": {
+                    "description": "Description Russian",
+                    "type": "string"
+                },
+                "descriptiontm": {
+                    "description": "Description Turkmen",
+                    "type": "string"
+                },
+                "descriptiontr": {
+                    "description": "Description Turkish",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Specification ID",
+                    "type": "string"
+                },
+                "item": {
+                    "description": "Item ID",
+                    "type": "string"
+                },
+                "nameen": {
+                    "description": "Name English",
+                    "type": "string"
+                },
+                "nameru": {
+                    "description": "Name Russian",
+                    "type": "string"
+                },
+                "nametm": {
+                    "description": "Name Turkmen",
+                    "type": "string"
+                },
+                "nametr": {
+                    "description": "Name Turkish",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value",
+                    "type": "string"
+                }
+            }
+        },
+        "table.CreateTableInput": {
+            "type": "object",
+            "required": [
+                "name",
+                "organization"
+            ],
+            "properties": {
+                "name": {
+                    "description": "Table name",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                }
+            }
+        },
+        "table.Table": {
+            "type": "object",
+            "required": [
+                "name",
+                "organization"
+            ],
+            "properties": {
+                "id": {
+                    "description": "Table ID",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Table name",
+                    "type": "string"
+                },
+                "organization": {
+                    "description": "Organization ID",
+                    "type": "string"
+                }
+            }
+        },
+        "table.UpdateTableInput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Table ID",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Table name",
+                    "type": "string"
+                },
+                "organisation": {
+                    "description": "Organization ID",
+                    "type": "string"
+                }
+            }
+        },
+        "token.RefreshToken": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "description": "Refresh Token",
+                    "type": "string"
+                }
+            }
+        },
+        "token.Tokens": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "description": "Access Token",
+                    "type": "string"
+                },
+                "accessTokenExpires": {
+                    "description": "Access Token Expires datetime",
+                    "type": "integer"
+                },
+                "refreshToken": {
+                    "description": "Refresh Token",
+                    "type": "string"
+                },
+                "tokenType": {
+                    "description": "Token Type",
+                    "type": "string"
+                }
+            }
+        },
+        "user.CreateUserInput": {
+            "type": "object",
+            "required": [
+                "firstname",
+                "lastname",
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "firstname": {
+                    "description": "First name",
+                    "type": "string"
+                },
+                "lastname": {
+                    "description": "Last Name",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Password",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "Phone number",
+                    "type": "string"
+                },
+                "roleid": {
+                    "description": "Role ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "user.SignInInput": {
+            "type": "object",
+            "required": [
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "password": {
+                    "description": "Users password",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "Users phone number",
+                    "type": "string"
+                }
+            }
+        },
+        "user.UpdateUserInput": {
+            "type": "object",
+            "properties": {
+                "firstname": {
+                    "description": "First name",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "User ID",
+                    "type": "string"
+                },
+                "lastname": {
+                    "description": "Last Name",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Password",
+                    "type": "string"
+                }
+            }
+        },
+        "user.User": {
+            "type": "object",
+            "required": [
+                "firstname",
+                "lastname",
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "firstname": {
+                    "description": "First name",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "User ID",
+                    "type": "string"
+                },
+                "lastname": {
+                    "description": "Last Name",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Password",
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "Phone number",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "Role name",
+                    "type": "string"
+                },
+                "roleid": {
+                    "description": "Role ID",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "Users status",
                     "type": "string"
                 }
             }

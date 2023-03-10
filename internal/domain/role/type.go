@@ -2,6 +2,8 @@ package role
 
 // Role entity.
 type Role struct {
-	ID   string `json:"id"`
+	// Role ID
+	ID string `json:"id"`
+	// Role name
 	Name string `json:"name"`
 }

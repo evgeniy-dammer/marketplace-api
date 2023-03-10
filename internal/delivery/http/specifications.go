@@ -8,7 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getSpecifications is a get all specifications delivery.
+// getSpecifications
+// @Summary Get all specifications method.
+// @Description Get all specifications method.
+// @Tags specifications
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   					true  "Specification ID"
+// @Success 200		{array}  	specification.Specification		true  "Specification List"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/specifications/{org_id} [get].
 func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -34,7 +47,21 @@ func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, results)
 }
 
-// getSpecification is a get specification by id delivery.
+// getSpecification
+// @Summary Get specification by id method.
+// @Description Get specification by id method.
+// @Tags specifications
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   					true  "Organization ID"
+// @Param   id	 	path 		string 		   					true  "Specification ID"
+// @Success 200		{object}  	specification.Specification		true  "Specification data"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/specifications/{org_id}/{id} [get].
 func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -67,7 +94,20 @@ func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusCreated, list)
 }
 
-// createSpecification register a specification in the system.
+// createSpecification
+// @Summary Create specification method.
+// @Description Create specification method.
+// @Tags specifications
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		specification.CreateSpecificationInput 	true  "Specification data"
+// @Success 200		{string}  	string									true  "Specification ID"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/specifications/ [post].
 func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -93,7 +133,20 @@ func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": specificationID})
 }
 
-// updateSpecification is an update specification by id delivery.
+// updateSpecification
+// @Summary Update specification method.
+// @Description Update specification method.
+// @Tags specifications
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		specification.UpdateSpecificationInput 	true  "Specification data"
+// @Success 200		{object}  	StatusResponse							true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/specifications/ [patch].
 func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -118,7 +171,21 @@ func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
-// deleteSpecification is delete specification by id delivery.
+// deleteSpecification
+// @Summary Delete specification method.
+// @Description Delete specification method.
+// @Tags specifications
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Param   id	 	path 		string 		   	true  "Specification ID"
+// @Success 200		{object}  	StatusResponse	true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/specifications/{org_id}/{id} [delete].
 func (d *Delivery) deleteSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 

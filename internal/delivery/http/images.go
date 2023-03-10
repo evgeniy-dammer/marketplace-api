@@ -8,7 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getImages is a get all images delivery.
+// getImages
+// @Summary Get all images method.
+// @Description Get all images method.
+// @Tags images
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Success 200		{array}  	image.Image		true  "Image List"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/images/{org_id} [get].
 func (d *Delivery) getImages(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -34,7 +47,21 @@ func (d *Delivery) getImages(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, results)
 }
 
-// getImage is a get image by id delivery.
+// getImage
+// @Summary Get image by id method.
+// @Description Get image by id method.
+// @Tags images
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Param   id	 	path 		string 		   	true  "Image ID"
+// @Success 200		{object}  	image.Image		true  "Image data"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/images/{org_id}/{id} [get].
 func (d *Delivery) getImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -67,7 +94,20 @@ func (d *Delivery) getImage(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusCreated, list)
 }
 
-// createImage register an image in the system.
+// createImage
+// @Summary Create image method.
+// @Description Create image method.
+// @Tags images
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		image.CreateImageInput 	true  "Image data"
+// @Success 200		{string}  	string					true  "Image ID"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/images/ [post].
 func (d *Delivery) createImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -93,7 +133,20 @@ func (d *Delivery) createImage(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": imageID})
 }
 
-// updateImage is an update image by id delivery.
+// updateImage
+// @Summary Update image method.
+// @Description Update image method.
+// @Tags images
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		image.UpdateImageInput 	true  "Image data"
+// @Success 200		{object}  	StatusResponse			true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/images/ [patch].
 func (d *Delivery) updateImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -118,7 +171,21 @@ func (d *Delivery) updateImage(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
-// deleteImage is delete image by id delivery.
+// deleteImage
+// @Summary Delete image method.
+// @Description Delete image method.
+// @Tags images
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Param   id	 	path 		string 		   	true  "Image ID"
+// @Success 200		{object}  	StatusResponse	true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/images/{org_id}/{id} [delete].
 func (d *Delivery) deleteImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 

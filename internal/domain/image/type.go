@@ -8,37 +8,60 @@ var ErrStructHasNoValues = errors.New("update structure has no values")
 
 // Image entity.
 type Image struct {
-	ID             string `json:"id"`
-	ObjectID       string `json:"object" db:"object_id" binding:"required"`
-	Origin         string `json:"origin" db:"origin" binding:"required"`
-	Middle         string `json:"middle" db:"middle" binding:"required"`
-	Small          string `json:"small" db:"small" binding:"required"`
+	// Image ID
+	ID string `json:"id"`
+	// Object ID
+	ObjectID string `json:"object" db:"object_id" binding:"required"`
+	// Origin file name
+	Origin string `json:"origin" db:"origin" binding:"required"`
+	// Middle-sized file name
+	Middle string `json:"middle" db:"middle" binding:"required"`
+	// Small-sized file name
+	Small string `json:"small" db:"small" binding:"required"`
+	// Organization ID
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
-	ObjectType     int    `json:"type" db:"type" binding:"required"`
-	IsMain         bool   `json:"main" db:"is_main" binding:"required"`
+	// Object type
+	ObjectType int `json:"type" db:"type" binding:"required"`
+	// Is main image
+	IsMain bool `json:"main" db:"is_main" binding:"required"`
 }
 
 // CreateImageInput entity.
 type CreateImageInput struct {
-	ObjectID       string `json:"object" db:"object_id" binding:"required"`
-	Origin         string `json:"origin" db:"origin" binding:"required"`
-	Middle         string `json:"middle" db:"middle" binding:"required"`
-	Small          string `json:"small" db:"small" binding:"required"`
+	// Object ID
+	ObjectID string `json:"object" db:"object_id" binding:"required"`
+	// Origin file name
+	Origin string `json:"origin" db:"origin" binding:"required"`
+	// Middle-sized file name
+	Middle string `json:"middle" db:"middle" binding:"required"`
+	// Small-sized file name
+	Small string `json:"small" db:"small" binding:"required"`
+	// Organization ID
 	OrganizationID string `json:"organization" db:"organization_id" binding:"required"`
-	ObjectType     int    `json:"type" db:"type" binding:"required"`
-	IsMain         bool   `json:"main" db:"is_main" binding:"required"`
+	// Object type
+	ObjectType int `json:"type" db:"type" binding:"required"`
+	// Is main image
+	IsMain bool `json:"main" db:"is_main" binding:"required"`
 }
 
 // UpdateImageInput is an input data for updating image entity.
 type UpdateImageInput struct {
-	ID             *string `json:"id"`
-	ObjectID       *string `json:"object"`
-	Origin         *string `json:"origin"`
-	Middle         *string `json:"middle"`
-	Small          *string `json:"small"`
+	// Image ID
+	ID *string `json:"id"`
+	// Object ID
+	ObjectID *string `json:"object"`
+	// Origin file name
+	Origin *string `json:"origin"`
+	// Middle-sized file name
+	Middle *string `json:"middle"`
+	// Small-sized file name
+	Small *string `json:"small"`
+	// Organization ID
 	OrganizationID *string `json:"organization"`
-	ObjectType     *int    `json:"type"`
-	IsMain         *bool   `json:"main"`
+	// Object type
+	ObjectType *int `json:"type"`
+	// Is main image
+	IsMain *bool `json:"main"`
 }
 
 // Validate checks if update input is nil.

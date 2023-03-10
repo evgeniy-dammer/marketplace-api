@@ -8,7 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getTables is a get all tables delivery.
+// getTables
+// @Summary Get all tables method.
+// @Description Get all tables method.
+// @Tags tables
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Success 200		{array}  	table.Table		true  "Table List"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/tables/{org_id} [get].
 func (d *Delivery) getTables(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -34,7 +47,21 @@ func (d *Delivery) getTables(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, results)
 }
 
-// getTable is a get table by id delivery.
+// getTable
+// @Summary Get table by id method.
+// @Description Get table by id method.
+// @Tags tables
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Param   id	 	path 		string 		   	true  "Table ID"
+// @Success 200		{object}  	table.Table		true  "Table data"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/tables/{org_id}/{id} [get].
 func (d *Delivery) getTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -67,7 +94,20 @@ func (d *Delivery) getTable(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusCreated, list)
 }
 
-// createTable register a table in the system.
+// createTable
+// @Summary Create table method.
+// @Description Create table method.
+// @Tags tables
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		table.CreateTableInput 	true  "Table data"
+// @Success 200		{string}  	string					true  "Table ID"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/tables/ [post].
 func (d *Delivery) createTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -93,7 +133,20 @@ func (d *Delivery) createTable(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": tableID})
 }
 
-// updateTable is an update table by id delivery.
+// updateTable
+// @Summary Update table method.
+// @Description Update table method.
+// @Tags tables
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		table.UpdateTableInput 	true  "Table data"
+// @Success 200		{object}  	StatusResponse			true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/tables/ [patch].
 func (d *Delivery) updateTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -118,7 +171,21 @@ func (d *Delivery) updateTable(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
-// deleteTable is delete table by id delivery.
+// deleteTable
+// @Summary Delete table method.
+// @Description Delete table method.
+// @Tags tables
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Param   id	 	path 		string 		   	true  "Table ID"
+// @Success 200		{object}  	StatusResponse	true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/tables/{org_id}/{id} [delete].
 func (d *Delivery) deleteTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 

@@ -10,7 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// signIn login a user in the system.
+// signIn
+// @Summary SignIn user method.
+// @Description SignIn user method.
+// @Tags authentication
+// @Accept  json
+// @Produce json
+// @Param   input 	body 		user.SignInInput 	true  "Username and Password"
+// @Success 200		{object}  	AuthResponse		true  "User data and Tokens"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /signin/ [post].
 func (d *Delivery) signIn(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -36,7 +47,18 @@ func (d *Delivery) signIn(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, AuthResponse{User: usr, Tokens: tokens})
 }
 
-// signUp register a user in the system.
+// signUp
+// @Summary SignUp user method.
+// @Description SignUp user method.
+// @Tags authentication
+// @Accept  json
+// @Produce json
+// @Param   input 	body 		user.CreateUserInput 	true  "User data"
+// @Success 200		{string}  	string					true  "User ID"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /signup/ [post].
 func (d *Delivery) signUp(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -57,7 +79,18 @@ func (d *Delivery) signUp(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": userID})
 }
 
-// refresh refreshes token.
+// refresh
+// @Summary Refresh token method.
+// @Description Refresh token method.
+// @Tags authentication
+// @Accept  json
+// @Produce json
+// @Param   input 	body 		token.RefreshToken		true  "Refresh token"
+// @Success 200		{object}  	AuthResponse			true  "User data and Tokens"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /refresh/ [post].
 func (d *Delivery) refresh(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 

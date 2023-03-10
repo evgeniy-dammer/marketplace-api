@@ -8,7 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getOrders is a get all orders delivery.
+// getOrders
+// @Summary Get all orders method.
+// @Description Get all orders method.
+// @Tags orders
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Success 200		{array}  	order.Order		true  "Order List"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/orders/{org_id} [get].
 func (d *Delivery) getOrders(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -34,7 +47,21 @@ func (d *Delivery) getOrders(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, results)
 }
 
-// getOrder is a get order by id delivery.
+// getOrder
+// @Summary Get order by id method.
+// @Description Get order by id method.
+// @Tags orders
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Param   id	 	path 		string 		   	true  "Order ID"
+// @Success 200		{object}  	order.Order		true  "Order data"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/orders/{org_id}/{id} [get].
 func (d *Delivery) getOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -67,7 +94,20 @@ func (d *Delivery) getOrder(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusCreated, list)
 }
 
-// createOrder register an order in the system.
+// createOrder
+// @Summary Create order method.
+// @Description Create order method.
+// @Tags orders
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		order.CreateOrderInput 	true  "Order data"
+// @Success 200		{string}  	string					true  "Order ID"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/orders/ [post].
 func (d *Delivery) createOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -93,7 +133,20 @@ func (d *Delivery) createOrder(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": orderID})
 }
 
-// updateOrder is an update order by id delivery.
+// updateOrder
+// @Summary Update order method.
+// @Description Update order method.
+// @Tags orders
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		order.UpdateOrderInput 	true  "Order data"
+// @Success 200		{object}  	StatusResponse			true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/orders/ [patch].
 func (d *Delivery) updateOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -118,7 +171,21 @@ func (d *Delivery) updateOrder(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
-// deleteOrder is delete order by id delivery.
+// deleteOrder
+// @Summary Delete order method.
+// @Description Delete order method.
+// @Tags orders
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   org_id 	path 		string 		   	true  "Organization ID"
+// @Param   id	 	path 		string 		   	true  "Order ID"
+// @Success 200		{object}  	StatusResponse	true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/orders/{org_id}/{id} [delete].
 func (d *Delivery) deleteOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 

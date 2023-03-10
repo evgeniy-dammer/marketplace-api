@@ -8,7 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// getOrganizations is a get all organizations' delivery.
+// getOrganizations
+// @Summary Get all organizations method.
+// @Description Get all organizations method.
+// @Tags organizations
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Success 200		{array}  	organization.Organization	true  "Organization List"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/organizations/ [get].
 func (d *Delivery) getOrganizations(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -27,7 +39,20 @@ func (d *Delivery) getOrganizations(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, results)
 }
 
-// getOrganization is a get organization by id delivery.
+// getOrganization
+// @Summary Get organization by id method.
+// @Description Get organization by id method.
+// @Tags organizations
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   id	 	path 		string 		   				true  "Organization ID"
+// @Success 200		{object}  	organization.Organization	true  "Organization data"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/organizations/{id} [get].
 func (d *Delivery) getOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -53,7 +78,20 @@ func (d *Delivery) getOrganization(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusCreated, list)
 }
 
-// createOrganization register an organization in the system.
+// createOrganization
+// @Summary Create organization method.
+// @Description Create organization method.
+// @Tags organizations
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		organization.CreateOrganizationInput 	true  "Organization data"
+// @Success 200		{string}  	string									true  "Organization ID"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/organizations/ [post].
 func (d *Delivery) createOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -79,7 +117,20 @@ func (d *Delivery) createOrganization(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, map[string]interface{}{"id": organizationID})
 }
 
-// updateOrganization is an update organization by id delivery.
+// updateOrganization
+// @Summary Update organization method.
+// @Description Update organization method.
+// @Tags organizations
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   input 	body 		organization.UpdateOrganizationInput 	true  "Organization data"
+// @Success 200		{object}  	StatusResponse							true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/organizations/ [patch].
 func (d *Delivery) updateOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
@@ -110,7 +161,20 @@ func (d *Delivery) updateOrganization(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, StatusResponse{Status: "ok"})
 }
 
-// deleteOrganization is delete organization by id delivery.
+// deleteOrganization
+// @Summary Delete organization method.
+// @Description Delete organization method.
+// @Tags organizations
+// @Accept  json
+// @Produce json
+// @Security Bearer
+// @Param   id	 	path 		string 		   	true  "Organization ID"
+// @Success 200		{object}  	StatusResponse	true  "OK"
+// @Failure 400 	{object}    ErrorResponse
+// @Failure 401	 	{object}	ErrorResponse
+// @Failure 404 	{object} 	ErrorResponse
+// @Failure 500 	{object} 	ErrorResponse
+// @Router /api/v1/organizations/{id} [delete].
 func (d *Delivery) deleteOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 

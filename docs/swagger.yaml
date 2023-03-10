@@ -90,6 +90,109 @@ definitions:
         description: Parent category ID
         type: string
     type: object
+  comment.Comment:
+    properties:
+      content:
+        description: Comments content message
+        type: string
+      created:
+        description: Created datetime
+        type: string
+      id:
+        description: Comment ID
+        type: string
+      item:
+        description: Item ID
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      rating:
+        description: Comments rating value
+        type: number
+      status:
+        description: Comments status ID
+        type: integer
+      user:
+        description: User ID
+        type: string
+    required:
+    - content
+    - item
+    - organization
+    - rating
+    - status
+    - user
+    type: object
+  comment.CreateCommentInput:
+    properties:
+      content:
+        description: Comments content message
+        type: string
+      item:
+        description: Item ID
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      rating:
+        description: Comments rating value
+        type: number
+      status:
+        description: Comments status ID
+        type: integer
+      user:
+        description: User ID
+        type: string
+    required:
+    - content
+    - item
+    - organization
+    - rating
+    - status
+    - user
+    type: object
+  comment.UpdateCommentInput:
+    properties:
+      content:
+        description: Comments content message
+        type: string
+      id:
+        description: Comment ID
+        type: string
+      item:
+        description: Item ID
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      rating:
+        description: Comments rating value
+        type: number
+      status:
+        description: Comments status ID
+        type: integer
+      user:
+        description: User ID
+        type: string
+    type: object
+  favorite.Favorite:
+    properties:
+      item:
+        description: Item ID
+        type: string
+    required:
+    - item
+    type: object
+  http.AuthResponse:
+    properties:
+      tokens:
+        $ref: '#/definitions/token.Tokens'
+        description: Tokens
+      user:
+        $ref: '#/definitions/user.User'
+        description: User
+    type: object
   http.ErrorResponse:
     properties:
       message:
@@ -101,6 +204,831 @@ definitions:
       status:
         description: Status message
         type: string
+    type: object
+  image.CreateImageInput:
+    properties:
+      main:
+        description: Is main image
+        type: boolean
+      middle:
+        description: Middle-sized file name
+        type: string
+      object:
+        description: Object ID
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      origin:
+        description: Origin file name
+        type: string
+      small:
+        description: Small-sized file name
+        type: string
+      type:
+        description: Object type
+        type: integer
+    required:
+    - main
+    - middle
+    - object
+    - organization
+    - origin
+    - small
+    - type
+    type: object
+  image.Image:
+    properties:
+      id:
+        description: Image ID
+        type: string
+      main:
+        description: Is main image
+        type: boolean
+      middle:
+        description: Middle-sized file name
+        type: string
+      object:
+        description: Object ID
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      origin:
+        description: Origin file name
+        type: string
+      small:
+        description: Small-sized file name
+        type: string
+      type:
+        description: Object type
+        type: integer
+    required:
+    - main
+    - middle
+    - object
+    - organization
+    - origin
+    - small
+    - type
+    type: object
+  image.UpdateImageInput:
+    properties:
+      id:
+        description: Image ID
+        type: string
+      main:
+        description: Is main image
+        type: boolean
+      middle:
+        description: Middle-sized file name
+        type: string
+      object:
+        description: Object ID
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      origin:
+        description: Origin file name
+        type: string
+      small:
+        description: Small-sized file name
+        type: string
+      type:
+        description: Object type
+        type: integer
+    type: object
+  item.CreateItemInput:
+    properties:
+      brand:
+        description: Brand ID
+        type: integer
+      category:
+        description: Category ID
+        type: string
+      descriptionen:
+        description: Description English
+        type: string
+      descriptionru:
+        description: Description Russian
+        type: string
+      descriptiontm:
+        description: Description Turkmen
+        type: string
+      descriptiontr:
+        description: Description Turkish
+        type: string
+      internal:
+        description: Internal ID
+        type: string
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      price:
+        description: Item price
+        type: number
+    required:
+    - brand
+    - category
+    - nameen
+    - nameru
+    - nametm
+    - nametr
+    - organization
+    type: object
+  item.Item:
+    properties:
+      brand:
+        description: Brand ID
+        type: integer
+      category:
+        description: Category ID
+        type: string
+      comments:
+        description: Comments
+        items:
+          $ref: '#/definitions/comment.Comment'
+        type: array
+      commentsqty:
+        description: Comments quantity
+        type: integer
+      created:
+        description: Created datetime
+        type: string
+      descriptionen:
+        description: Description English
+        type: string
+      descriptionru:
+        description: Description Russian
+        type: string
+      descriptiontm:
+        description: Description Turkmen
+        type: string
+      descriptiontr:
+        description: Description Turkish
+        type: string
+      id:
+        description: Item ID
+        type: string
+      images:
+        description: Images
+        items:
+          $ref: '#/definitions/image.Image'
+        type: array
+      internal:
+        description: Internal ID
+        type: string
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      price:
+        description: Item price
+        type: number
+      rating:
+        description: Rating value
+        type: number
+      specification:
+        description: Specifications
+        items:
+          $ref: '#/definitions/specification.Specification'
+        type: array
+    required:
+    - brand
+    - category
+    - nameen
+    - nameru
+    - nametm
+    - nametr
+    - organization
+    type: object
+  item.UpdateItemInput:
+    properties:
+      brand:
+        description: Brand ID
+        type: integer
+      category:
+        description: Category ID
+        type: string
+      descriptionen:
+        description: Description English
+        type: string
+      descriptionru:
+        description: Description Russian
+        type: string
+      descriptiontm:
+        description: Description Turkmen
+        type: string
+      descriptiontr:
+        description: Description Turkish
+        type: string
+      id:
+        description: Item ID
+        type: string
+      internal:
+        description: Internal ID
+        type: string
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organisation:
+        description: Organization ID
+        type: string
+      price:
+        description: Item price
+        type: number
+    type: object
+  order.CreateOrderInput:
+    properties:
+      orderitems:
+        description: Order items
+        items:
+          $ref: '#/definitions/order.CreateOrderItemInput'
+        type: array
+      organization:
+        description: Organization ID
+        type: string
+      status:
+        description: Order status ID
+        type: integer
+      table:
+        description: Table ID
+        type: string
+      totalsum:
+        description: Order total sum
+        type: number
+      user:
+        description: User ID
+        type: string
+    required:
+    - organization
+    - totalsum
+    type: object
+  order.CreateOrderItemInput:
+    properties:
+      item:
+        description: Item ID
+        type: string
+      quantity:
+        description: Item quantity
+        type: number
+      totalprice:
+        description: Item total price
+        type: number
+      unitprise:
+        description: Item unit price
+        type: number
+    required:
+    - item
+    - quantity
+    - totalprice
+    - unitprise
+    type: object
+  order.Order:
+    properties:
+      created:
+        description: Created datetime
+        type: string
+      id:
+        description: Order ID
+        type: string
+      orderitems:
+        description: Order items
+        items:
+          $ref: '#/definitions/order.OrderItem'
+        type: array
+      organization:
+        description: Organization ID
+        type: string
+      status:
+        description: Order status ID
+        type: integer
+      table:
+        description: Table ID
+        type: string
+      totalsum:
+        description: Order total sum
+        type: number
+      updated:
+        description: Updated datetime
+        type: string
+      user:
+        description: User ID
+        type: string
+    required:
+    - organization
+    - totalsum
+    type: object
+  order.OrderItem:
+    properties:
+      id:
+        description: OrderItem ID
+        type: string
+      item:
+        description: Item ID
+        type: string
+      order:
+        description: Order ID
+        type: string
+      quantity:
+        description: Item quantity
+        type: number
+      totalprice:
+        description: Item total price
+        type: number
+      unitprise:
+        description: Item unit price
+        type: number
+    required:
+    - item
+    - quantity
+    - totalprice
+    - unitprise
+    type: object
+  order.UpdateOrderInput:
+    properties:
+      id:
+        description: Order ID
+        type: string
+      orderitems:
+        description: Order items
+        items:
+          $ref: '#/definitions/order.OrderItem'
+        type: array
+      organization:
+        description: Organization ID
+        type: string
+      status:
+        description: Order status ID
+        type: integer
+      table:
+        description: Table ID
+        type: string
+      totalsum:
+        description: Order total sum
+        type: number
+    type: object
+  organization.CreateOrganizationInput:
+    properties:
+      address:
+        description: Organization address
+        type: string
+      name:
+        description: Organization name
+        type: string
+      phone:
+        description: Organization phone number
+        type: string
+      userid:
+        description: User ID
+        type: string
+    required:
+    - address
+    - name
+    - phone
+    - userid
+    type: object
+  organization.Organization:
+    properties:
+      address:
+        description: Organization address
+        type: string
+      id:
+        description: Organization ID
+        type: string
+      name:
+        description: Organization name
+        type: string
+      phone:
+        description: Organization phone number
+        type: string
+      userid:
+        description: User ID
+        type: string
+    required:
+    - address
+    - name
+    - phone
+    - userid
+    type: object
+  organization.UpdateOrganizationInput:
+    properties:
+      address:
+        description: Organization address
+        type: string
+      id:
+        description: Organization ID
+        type: string
+      name:
+        description: Organization name
+        type: string
+      phone:
+        description: Organization phone number
+        type: string
+    type: object
+  role.Role:
+    properties:
+      id:
+        description: Role ID
+        type: string
+      name:
+        description: Role name
+        type: string
+    type: object
+  rule.CreateRuleInput:
+    properties:
+      ptype:
+        description: Type
+        type: string
+      v0:
+        description: Role name
+        type: string
+      v1:
+        description: Recourse name
+        type: string
+      v2:
+        description: REST verb
+        type: string
+      v3:
+        description: Permission status
+        type: string
+      v4:
+        description: Empty
+        type: string
+      v5:
+        description: Empty
+        type: string
+    required:
+    - ptype
+    - v0
+    - v1
+    - v2
+    - v3
+    type: object
+  rule.Rule:
+    properties:
+      id:
+        description: Rule ID
+        type: string
+      ptype:
+        description: Type
+        type: string
+      v0:
+        description: Role name
+        type: string
+      v1:
+        description: Recourse name
+        type: string
+      v2:
+        description: REST verb
+        type: string
+      v3:
+        description: Permission status
+        type: string
+      v4:
+        description: Empty
+        type: string
+      v5:
+        description: Empty
+        type: string
+    required:
+    - ptype
+    - v0
+    - v1
+    - v2
+    - v3
+    type: object
+  rule.UpdateRuleInput:
+    properties:
+      id:
+        description: Rule ID
+        type: string
+      ptype:
+        description: Type
+        type: string
+      v0:
+        description: Role name
+        type: string
+      v1:
+        description: Recourse name
+        type: string
+      v2:
+        description: REST verb
+        type: string
+      v3:
+        description: Permission status
+        type: string
+      v4:
+        description: Empty
+        type: string
+      v5:
+        description: Empty
+        type: string
+    type: object
+  specification.CreateSpecificationInput:
+    properties:
+      descriptionen:
+        description: Description English
+        type: string
+      descriptionru:
+        description: Description Russian
+        type: string
+      descriptiontm:
+        description: Description Turkmen
+        type: string
+      descriptiontr:
+        description: Description Turkish
+        type: string
+      item:
+        description: Item ID
+        type: string
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      value:
+        description: Value
+        type: string
+    required:
+    - item
+    - nameen
+    - nameru
+    - nametm
+    - nametr
+    - organization
+    - value
+    type: object
+  specification.Specification:
+    properties:
+      descriptionen:
+        description: Description English
+        type: string
+      descriptionru:
+        description: Description Russian
+        type: string
+      descriptiontm:
+        description: Description Turkmen
+        type: string
+      descriptiontr:
+        description: Description Turkish
+        type: string
+      id:
+        description: Specification ID
+        type: string
+      item:
+        description: Item ID
+        type: string
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      value:
+        description: Value
+        type: string
+    required:
+    - item
+    - nameen
+    - nameru
+    - nametm
+    - nametr
+    - organization
+    - value
+    type: object
+  specification.UpdateSpecificationInput:
+    properties:
+      descriptionen:
+        description: Description English
+        type: string
+      descriptionru:
+        description: Description Russian
+        type: string
+      descriptiontm:
+        description: Description Turkmen
+        type: string
+      descriptiontr:
+        description: Description Turkish
+        type: string
+      id:
+        description: Specification ID
+        type: string
+      item:
+        description: Item ID
+        type: string
+      nameen:
+        description: Name English
+        type: string
+      nameru:
+        description: Name Russian
+        type: string
+      nametm:
+        description: Name Turkmen
+        type: string
+      nametr:
+        description: Name Turkish
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+      value:
+        description: Value
+        type: string
+    type: object
+  table.CreateTableInput:
+    properties:
+      name:
+        description: Table name
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+    required:
+    - name
+    - organization
+    type: object
+  table.Table:
+    properties:
+      id:
+        description: Table ID
+        type: string
+      name:
+        description: Table name
+        type: string
+      organization:
+        description: Organization ID
+        type: string
+    required:
+    - name
+    - organization
+    type: object
+  table.UpdateTableInput:
+    properties:
+      id:
+        description: Table ID
+        type: string
+      name:
+        description: Table name
+        type: string
+      organisation:
+        description: Organization ID
+        type: string
+    type: object
+  token.RefreshToken:
+    properties:
+      token:
+        description: Refresh Token
+        type: string
+    type: object
+  token.Tokens:
+    properties:
+      accessToken:
+        description: Access Token
+        type: string
+      accessTokenExpires:
+        description: Access Token Expires datetime
+        type: integer
+      refreshToken:
+        description: Refresh Token
+        type: string
+      tokenType:
+        description: Token Type
+        type: string
+    type: object
+  user.CreateUserInput:
+    properties:
+      firstname:
+        description: First name
+        type: string
+      lastname:
+        description: Last Name
+        type: string
+      password:
+        description: Password
+        type: string
+      phone:
+        description: Phone number
+        type: string
+      roleid:
+        description: Role ID
+        type: integer
+    required:
+    - firstname
+    - lastname
+    - password
+    - phone
+    type: object
+  user.SignInInput:
+    properties:
+      password:
+        description: Users password
+        type: string
+      phone:
+        description: Users phone number
+        type: string
+    required:
+    - password
+    - phone
+    type: object
+  user.UpdateUserInput:
+    properties:
+      firstname:
+        description: First name
+        type: string
+      id:
+        description: User ID
+        type: string
+      lastname:
+        description: Last Name
+        type: string
+      password:
+        description: Password
+        type: string
+    type: object
+  user.User:
+    properties:
+      firstname:
+        description: First name
+        type: string
+      id:
+        description: User ID
+        type: string
+      lastname:
+        description: Last Name
+        type: string
+      password:
+        description: Password
+        type: string
+      phone:
+        description: Phone number
+        type: string
+      role:
+        description: Role name
+        type: string
+      roleid:
+        description: Role ID
+        type: integer
+      status:
+        description: Users status
+        type: string
+    required:
+    - firstname
+    - lastname
+    - password
+    - phone
     type: object
 info:
   contact:
@@ -317,6 +1245,2034 @@ paths:
       summary: Get category by id method.
       tags:
       - categories
+  /api/v1/comments/:
+    patch:
+      consumes:
+      - application/json
+      description: Update comment method.
+      parameters:
+      - description: Comment data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/comment.UpdateCommentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update comment method.
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: Create comment method.
+      parameters:
+      - description: Comment data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/comment.CreateCommentInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Comment ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create comment method.
+      tags:
+      - comments
+  /api/v1/comments/{org_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all comments method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Comments List
+          schema:
+            items:
+              $ref: '#/definitions/comment.Comment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all comments method.
+      tags:
+      - comments
+  /api/v1/comments/{org_id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete comment method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete comment method.
+      tags:
+      - comments
+    get:
+      consumes:
+      - application/json
+      description: Get comment by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Comment data
+          schema:
+            $ref: '#/definitions/comment.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get comment by id method.
+      tags:
+      - comments
+  /api/v1/favorites/:
+    post:
+      consumes:
+      - application/json
+      description: Create favorite item method.
+      parameters:
+      - description: Favorite data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/favorite.Favorite'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create favorite item method.
+      tags:
+      - favorites
+  /api/v1/favorites/{item_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete favorite item method.
+      parameters:
+      - description: Item ID
+        in: path
+        name: item_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete favorite item method.
+      tags:
+      - favorites
+  /api/v1/images/:
+    patch:
+      consumes:
+      - application/json
+      description: Update image method.
+      parameters:
+      - description: Image data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/image.UpdateImageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update image method.
+      tags:
+      - images
+    post:
+      consumes:
+      - application/json
+      description: Create image method.
+      parameters:
+      - description: Image data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/image.CreateImageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create image method.
+      tags:
+      - images
+  /api/v1/images/{org_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all images method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image List
+          schema:
+            items:
+              $ref: '#/definitions/image.Image'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all images method.
+      tags:
+      - images
+  /api/v1/images/{org_id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete image method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete image method.
+      tags:
+      - images
+    get:
+      consumes:
+      - application/json
+      description: Get image by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image data
+          schema:
+            $ref: '#/definitions/image.Image'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get image by id method.
+      tags:
+      - images
+  /api/v1/items/:
+    patch:
+      consumes:
+      - application/json
+      description: Update item method.
+      parameters:
+      - description: Item data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/item.UpdateItemInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update item method.
+      tags:
+      - items
+    post:
+      consumes:
+      - application/json
+      description: Create item method.
+      parameters:
+      - description: Item data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/item.CreateItemInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Item ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create item method.
+      tags:
+      - items
+  /api/v1/items/{org_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all items method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Item List
+          schema:
+            items:
+              $ref: '#/definitions/item.Item'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all items method.
+      tags:
+      - items
+  /api/v1/items/{org_id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete item method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete item method.
+      tags:
+      - items
+    get:
+      consumes:
+      - application/json
+      description: Get item by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: item data
+          schema:
+            $ref: '#/definitions/item.Item'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get item by id method.
+      tags:
+      - items
+  /api/v1/orders/:
+    patch:
+      consumes:
+      - application/json
+      description: Update order method.
+      parameters:
+      - description: Order data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/order.UpdateOrderInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update order method.
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Create order method.
+      parameters:
+      - description: Order data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/order.CreateOrderInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create order method.
+      tags:
+      - orders
+  /api/v1/orders/{org_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all orders method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order List
+          schema:
+            items:
+              $ref: '#/definitions/order.Order'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all orders method.
+      tags:
+      - orders
+  /api/v1/orders/{org_id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete order method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete order method.
+      tags:
+      - orders
+    get:
+      consumes:
+      - application/json
+      description: Get order by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order data
+          schema:
+            $ref: '#/definitions/order.Order'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get order by id method.
+      tags:
+      - orders
+  /api/v1/organizations/:
+    get:
+      consumes:
+      - application/json
+      description: Get all organizations method.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Organization List
+          schema:
+            items:
+              $ref: '#/definitions/organization.Organization'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all organizations method.
+      tags:
+      - organizations
+    patch:
+      consumes:
+      - application/json
+      description: Update organization method.
+      parameters:
+      - description: Organization data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/organization.UpdateOrganizationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update organization method.
+      tags:
+      - organizations
+    post:
+      consumes:
+      - application/json
+      description: Create organization method.
+      parameters:
+      - description: Organization data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/organization.CreateOrganizationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Organization ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create organization method.
+      tags:
+      - organizations
+  /api/v1/organizations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete organization method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete organization method.
+      tags:
+      - organizations
+    get:
+      consumes:
+      - application/json
+      description: Get organization by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Organization data
+          schema:
+            $ref: '#/definitions/organization.Organization'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get organization by id method.
+      tags:
+      - organizations
+  /api/v1/rules/:
+    get:
+      consumes:
+      - application/json
+      description: Get all rules method.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rule List
+          schema:
+            items:
+              $ref: '#/definitions/rule.Rule'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all rules method.
+      tags:
+      - rules
+    patch:
+      consumes:
+      - application/json
+      description: Update rule method.
+      parameters:
+      - description: Rule data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/rule.UpdateRuleInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update rule method.
+      tags:
+      - rules
+    post:
+      consumes:
+      - application/json
+      description: Create rule method.
+      parameters:
+      - description: Rule data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/rule.CreateRuleInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rule ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create rule method.
+      tags:
+      - rules
+  /api/v1/rules/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete rule method.
+      parameters:
+      - description: Rule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete rule method.
+      tags:
+      - rules
+    get:
+      consumes:
+      - application/json
+      description: Get rule by id method.
+      parameters:
+      - description: Rule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rule data
+          schema:
+            $ref: '#/definitions/rule.Rule'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get rule by id method.
+      tags:
+      - rules
+  /api/v1/specifications/:
+    patch:
+      consumes:
+      - application/json
+      description: Update specification method.
+      parameters:
+      - description: Specification data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/specification.UpdateSpecificationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update specification method.
+      tags:
+      - specifications
+    post:
+      consumes:
+      - application/json
+      description: Create specification method.
+      parameters:
+      - description: Specification data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/specification.CreateSpecificationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Specification ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create specification method.
+      tags:
+      - specifications
+  /api/v1/specifications/{org_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all specifications method.
+      parameters:
+      - description: Specification ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Specification List
+          schema:
+            items:
+              $ref: '#/definitions/specification.Specification'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all specifications method.
+      tags:
+      - specifications
+  /api/v1/specifications/{org_id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete specification method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Specification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete specification method.
+      tags:
+      - specifications
+    get:
+      consumes:
+      - application/json
+      description: Get specification by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Specification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Specification data
+          schema:
+            $ref: '#/definitions/specification.Specification'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get specification by id method.
+      tags:
+      - specifications
+  /api/v1/tables/:
+    patch:
+      consumes:
+      - application/json
+      description: Update table method.
+      parameters:
+      - description: Table data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/table.UpdateTableInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update table method.
+      tags:
+      - tables
+    post:
+      consumes:
+      - application/json
+      description: Create table method.
+      parameters:
+      - description: Table data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/table.CreateTableInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create table method.
+      tags:
+      - tables
+  /api/v1/tables/{org_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all tables method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table List
+          schema:
+            items:
+              $ref: '#/definitions/table.Table'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all tables method.
+      tags:
+      - tables
+  /api/v1/tables/{org_id}/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete table method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete table method.
+      tags:
+      - tables
+    get:
+      consumes:
+      - application/json
+      description: Get table by id method.
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        type: string
+      - description: Table ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Table data
+          schema:
+            $ref: '#/definitions/table.Table'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get table by id method.
+      tags:
+      - tables
+  /api/v1/users/:
+    get:
+      consumes:
+      - application/json
+      description: Get all users method.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User List
+          schema:
+            items:
+              $ref: '#/definitions/user.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all users method.
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Update user method.
+      parameters:
+      - description: User data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update user method.
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create user method.
+      parameters:
+      - description: User data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create user method.
+      tags:
+      - users
+  /api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user method.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete user method.
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get user by id method.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get user by id method.
+      tags:
+      - users
+  /api/v1/users/roles/:
+    get:
+      consumes:
+      - application/json
+      description: Get all roles method.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role List
+          schema:
+            items:
+              $ref: '#/definitions/role.Role'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get all roles method.
+      tags:
+      - roles
+  /refresh/:
+    post:
+      consumes:
+      - application/json
+      description: Refresh token method.
+      parameters:
+      - description: Refresh token
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/token.RefreshToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data and Tokens
+          schema:
+            $ref: '#/definitions/http.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Refresh token method.
+      tags:
+      - authentication
+  /signin/:
+    post:
+      consumes:
+      - application/json
+      description: SignIn user method.
+      parameters:
+      - description: Username and Password
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.SignInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User data and Tokens
+          schema:
+            $ref: '#/definitions/http.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: SignIn user method.
+      tags:
+      - authentication
+  /signup/:
+    post:
+      consumes:
+      - application/json
+      description: SignUp user method.
+      parameters:
+      - description: User data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User ID
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: SignUp user method.
+      tags:
+      - authentication
 securityDefinitions:
   Bearer:
     in: header
