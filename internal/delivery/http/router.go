@@ -21,6 +21,7 @@ func (d *Delivery) InitRoutes(mode string) *gin.Engine {
 	router.Use(d.corsMiddleware())
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(ginzap.RecoveryWithZap(logger.Logger, true))
+	router.Use(Tracer())
 	router.RedirectTrailingSlash = false
 
 	auth := router.Group("/auth")

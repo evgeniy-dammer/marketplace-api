@@ -8,11 +8,20 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/golang-jwt/jwt"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // AuthenticationGenerateToken generates authorization token.
 func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string, username string, password string) (user.User, token.Tokens, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationGenerateToken")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	var usr user.User
 
 	var tokens token.Tokens
@@ -68,6 +77,13 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 
 // AuthenticationParseToken checks access token and returns user id.
 func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken string) (string, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationParseToken")
+		defer span.Finish()
+
+		_ = context.New(ctxt)
+	}
+
 	tkn, err := jwt.ParseWithClaims(accessToken, &token.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, usecase.ErrInvalidSigningMethod
@@ -90,6 +106,13 @@ func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken stri
 
 // AuthenticationCreateUser hashes the password and insert User into system.
 func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationCreateUser")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	pass, err := usecase.GeneratePasswordHash(input.Password, usecase.Params)
 	if err != nil {
 		return "", err
@@ -104,6 +127,13 @@ func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.Creat
 
 // AuthenticationGetUserRole returns users role name.
 func (s *UseCase) AuthenticationGetUserRole(ctx context.Context, id string) (string, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationGetUserRole")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	role, err := s.adapterStorage.AuthenticationGetUserRole(ctx, id)
 
 	return role, errors.Wrap(err, "can not get role")

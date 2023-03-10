@@ -20,3 +20,7 @@ func InitLogger() error {
 
 	return err
 }
+
+func Info(msg string, fields ...zap.Field) {
+	Logger.Info(msg, fields...)
+}

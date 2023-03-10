@@ -11,7 +11,7 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/config"
 	deliveryHttp "github.com/evgeniy-dammer/emenu-api/internal/delivery/http"
 	postgresStorage "github.com/evgeniy-dammer/emenu-api/internal/repository/storage/postgres"
-	redisCache "github.com/evgeniy-dammer/emenu-api/internal/repository/storage/redis"
+	redisStorage "github.com/evgeniy-dammer/emenu-api/internal/repository/storage/redis"
 	useCaseAuthentication "github.com/evgeniy-dammer/emenu-api/internal/usecase/authentication"
 	useCaseCategory "github.com/evgeniy-dammer/emenu-api/internal/usecase/category"
 	useCaseComment "github.com/evgeniy-dammer/emenu-api/internal/usecase/comment"
@@ -27,11 +27,13 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/evgeniy-dammer/emenu-api/pkg/server"
 	"github.com/evgeniy-dammer/emenu-api/pkg/store/postgres"
-	redisStorage "github.com/evgeniy-dammer/emenu-api/pkg/store/redis"
+	redisStore "github.com/evgeniy-dammer/emenu-api/pkg/store/redis"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+	"github.com/opentracing/opentracing-go/log"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -76,7 +78,7 @@ func main() {
 
 	if viper.GetBool("cache.mode") {
 		// establishing cache connection
-		rcache, err = redisStorage.NewRedisCache(redis.Options{
+		rcache, err = redisStore.NewRedisCache(redis.Options{
 			Addr:     net.JoinHostPort(viper.GetString("cache.host"), viper.GetString("cache.port")),
 			Password: "", // os.Getenv("REDIS_PASSWORD"),
 			DB:       viper.GetInt("cache.database"),
@@ -88,13 +90,30 @@ func main() {
 		logger.Logger.Info("cache is turned off")
 	}
 
+	if viper.GetBool("service.tracing") {
+		closer, err := tracing.New()
+		if err != nil {
+			panic(err)
+		}
+		defer func() {
+			if err = closer.Close(); err != nil {
+				log.Error(err)
+			}
+		}()
+	} else {
+		logger.Logger.Info("tracing is turned off")
+	}
+
 	// repositories
 	repoStorage := postgresStorage.New(
 		database,
 		postgresStorage.Options{Timeout: time.Duration(viper.GetInt("database.timeout")) * time.Second},
 	)
 
-	repoCache := redisCache.New(rcache)
+	repoCache := redisStorage.New(
+		rcache,
+		redisStorage.Options{Timeout: time.Duration(viper.GetInt("database.timeout")) * time.Second},
+	)
 
 	// use cases
 	ucAuthentication := useCaseAuthentication.New(repoStorage, repoCache)

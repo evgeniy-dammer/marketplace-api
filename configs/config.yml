@@ -1,6 +1,7 @@
 service:
   name: "emenu-api"
   production: false # true, false
+  tracing: true # true, false
 
 server:
   port: "1111"
@@ -25,6 +26,10 @@ cache:
   host: "localhost"
   port: "6379"
   database: 0
+
+tracing:
+  host: "127.0.0.1"
+  port: 6831
 
 migrations:
   directory: "./migrations"

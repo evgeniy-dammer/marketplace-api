@@ -5,13 +5,22 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // AuthenticationGetUser returns users id by username and password hash.
-func (r *Repository) AuthenticationGetUser(ctx context.Context, userID string, username string) (user.User, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) AuthenticationGetUser(ctxr context.Context, userID string, username string) (user.User, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.AuthenticationGetUser")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var usr user.User
 
@@ -32,15 +41,22 @@ func (r *Repository) AuthenticationGetUser(ctx context.Context, userID string, u
 		userTable, userRoleTable, roleTable, statusTable, where,
 	)
 
-	err := r.database.Get(&usr, query)
+	err := r.database.GetContext(ctx, &usr, query)
 
 	return usr, errors.Wrap(err, "user select error")
 }
 
 // AuthenticationCreateUser insert user into database.
-func (r *Repository) AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) AuthenticationCreateUser(ctxr context.Context, input user.CreateUserInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.AuthenticationCreateUser")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var userID string
 
@@ -54,7 +70,7 @@ func (r *Repository) AuthenticationCreateUser(ctx context.Context, input user.Cr
 		userTable,
 	)
 
-	row := trx.QueryRow(createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName)
+	row := trx.QueryRowContext(ctx, createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName)
 
 	if err = row.Scan(&userID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -66,7 +82,7 @@ func (r *Repository) AuthenticationCreateUser(ctx context.Context, input user.Cr
 
 	createUsersRoleQuery := fmt.Sprintf("INSERT INTO %s (user_id, role_id) VALUES ($1, $2)", userRoleTable)
 
-	if _, err = trx.Exec(createUsersRoleQuery, userID, input.RoleID); err != nil {
+	if _, err = trx.ExecContext(ctx, createUsersRoleQuery, userID, input.RoleID); err != nil {
 		if err = trx.Rollback(); err != nil {
 			return "", errors.Wrap(err, "role table rollback error")
 		}
@@ -78,9 +94,16 @@ func (r *Repository) AuthenticationCreateUser(ctx context.Context, input user.Cr
 }
 
 // AuthenticationGetUserRole returns users role name
-func (r *Repository) AuthenticationGetUserRole(ctx context.Context, userID string) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) AuthenticationGetUserRole(ctxr context.Context, userID string) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.AuthenticationGetUserRole")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var name string
 
@@ -91,7 +114,7 @@ func (r *Repository) AuthenticationGetUserRole(ctx context.Context, userID strin
 		roleTable, userRoleTable, userTable, userID,
 	)
 
-	err := r.database.Get(&name, query)
+	err := r.database.GetContext(ctx, &name, query)
 
 	return name, errors.Wrap(err, "role name select error")
 }

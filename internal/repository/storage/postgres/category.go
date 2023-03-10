@@ -7,13 +7,22 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/category"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // CategoryGetAll selects all categories from database.
-func (r *Repository) CategoryGetAll(ctx context.Context, userID string, organizationID string) ([]category.Category, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CategoryGetAll(ctxr context.Context, userID string, organizationID string) ([]category.Category, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var categories []category.Category
 
@@ -22,15 +31,22 @@ func (r *Repository) CategoryGetAll(ctx context.Context, userID string, organiza
 			"WHERE is_deleted = false AND organization_id = $1",
 		categoryTable)
 
-	err := r.database.Select(&categories, query, organizationID)
+	err := r.database.SelectContext(ctx, &categories, query, organizationID)
 
 	return categories, errors.Wrap(err, "categories select query error")
 }
 
 // CategoryGetOne select category by id from database.
-func (r *Repository) CategoryGetOne(ctx context.Context, userID string, organizationID string, categoryID string) (category.Category, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CategoryGetOne(ctxr context.Context, userID string, organizationID string, categoryID string) (category.Category, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var user category.Category
 
@@ -40,15 +56,22 @@ func (r *Repository) CategoryGetOne(ctx context.Context, userID string, organiza
 		categoryTable,
 	)
 
-	err := r.database.Get(&user, query, categoryID, organizationID)
+	err := r.database.GetContext(ctx, &user, query, categoryID, organizationID)
 
 	return user, errors.Wrap(err, "category select query error")
 }
 
 // CategoryCreate insert category into database.
-func (r *Repository) CategoryCreate(ctx context.Context, userID string, input category.CreateCategoryInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CategoryCreate(ctxr context.Context, userID string, input category.CreateCategoryInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var categoryID string
 
@@ -58,7 +81,8 @@ func (r *Repository) CategoryCreate(ctx context.Context, userID string, input ca
 		categoryTable,
 	)
 
-	row := r.database.QueryRow(
+	row := r.database.QueryRowContext(
+		ctx,
 		query,
 		input.NameTm,
 		input.NameRu,
@@ -76,9 +100,16 @@ func (r *Repository) CategoryCreate(ctx context.Context, userID string, input ca
 }
 
 // CategoryUpdate updates category by id in database.
-func (r *Repository) CategoryUpdate(ctx context.Context, userID string, input category.UpdateCategoryInput) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CategoryUpdate(ctxr context.Context, userID string, input category.UpdateCategoryInput) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	setValues := make([]string, 0, 8)
 	args := make([]interface{}, 0, 8)
@@ -130,22 +161,29 @@ func (r *Repository) CategoryUpdate(ctx context.Context, userID string, input ca
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND id = '%s' AND organization_id = '%s'",
 		categoryTable, setQuery, *input.ID, *input.OrganizationID)
-	_, err := r.database.Exec(query, args...)
+	_, err := r.database.ExecContext(ctx, query, args...)
 
 	return errors.Wrap(err, "category update query error")
 }
 
 // CategoryDelete deletes category by id from database.
-func (r *Repository) CategoryDelete(ctx context.Context, userID string, organizationID string, categoryID string) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CategoryDelete(ctxr context.Context, userID string, organizationID string, categoryID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 WHERE is_deleted = false AND id = $3 AND organization_id = $4",
 		categoryTable,
 	)
 
-	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, categoryID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, categoryID, organizationID)
 
 	return errors.Wrap(err, "category delete query error")
 }

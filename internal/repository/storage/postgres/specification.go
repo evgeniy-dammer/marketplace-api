@@ -6,13 +6,22 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // SpecificationGetAll selects all specifications from database.
-func (r *Repository) SpecificationGetAll(ctx context.Context, userID string, organizationID string) ([]specification.Specification, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) SpecificationGetAll(ctxr context.Context, userID string, organizationID string) ([]specification.Specification, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var specifications []specification.Specification
 
@@ -22,15 +31,22 @@ func (r *Repository) SpecificationGetAll(ctx context.Context, userID string, org
 		specificationTable,
 	)
 
-	err := r.database.Select(&specifications, query, organizationID)
+	err := r.database.SelectContext(ctx, &specifications, query, organizationID)
 
 	return specifications, errors.Wrap(err, "specifications select query error")
 }
 
 // SpecificationGetOne select specification by id from database.
-func (r *Repository) SpecificationGetOne(ctx context.Context, userID string, organizationID string, specificationID string) (specification.Specification, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) SpecificationGetOne(ctxr context.Context, userID string, organizationID string, specificationID string) (specification.Specification, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var spec specification.Specification
 
@@ -40,15 +56,22 @@ func (r *Repository) SpecificationGetOne(ctx context.Context, userID string, org
 		specificationTable,
 	)
 
-	err := r.database.Get(&spec, query, organizationID, specificationID)
+	err := r.database.GetContext(ctx, &spec, query, organizationID, specificationID)
 
 	return spec, errors.Wrap(err, "specification select query error")
 }
 
 // SpecificationCreate insert specification into database.
-func (r *Repository) SpecificationCreate(ctx context.Context, userID string, input specification.CreateSpecificationInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) SpecificationCreate(ctxr context.Context, userID string, input specification.CreateSpecificationInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var specificationID string
 
@@ -58,7 +81,8 @@ func (r *Repository) SpecificationCreate(ctx context.Context, userID string, inp
 		specificationTable,
 	)
 
-	row := r.database.QueryRow(
+	row := r.database.QueryRowContext(
+		ctx,
 		query,
 		input.ItemID,
 		input.OrganizationID,
@@ -79,9 +103,16 @@ func (r *Repository) SpecificationCreate(ctx context.Context, userID string, inp
 }
 
 // SpecificationUpdate updates specification by id in database.
-func (r *Repository) SpecificationUpdate(ctx context.Context, userID string, input specification.UpdateSpecificationInput) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) SpecificationUpdate(ctxr context.Context, userID string, input specification.UpdateSpecificationInput) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	setValues := make([]string, 0, 12)
 	args := make([]interface{}, 0, 12)
@@ -156,19 +187,26 @@ func (r *Repository) SpecificationUpdate(ctx context.Context, userID string, inp
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE organization_id = '%s' AND id = '%s'",
 		specificationTable, setQuery, *input.OrganizationID, *input.ID)
 
-	_, err := r.database.Exec(query, args...)
+	_, err := r.database.ExecContext(ctx, query, args...)
 
 	return errors.Wrap(err, "specification update query error")
 }
 
 // SpecificationDelete deletes specification by id from database.
-func (r *Repository) SpecificationDelete(ctx context.Context, userID string, organizationID string, specificationID string) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) SpecificationDelete(ctxr context.Context, userID string, organizationID string, specificationID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND organization_id = $2", specificationTable)
 
-	_, err := r.database.Exec(query, specificationID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, specificationID, organizationID)
 
 	return errors.Wrap(err, "specification delete query error")
 }

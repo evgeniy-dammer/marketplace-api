@@ -7,27 +7,43 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/table"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // TableGetAll selects all tables from database.
-func (r *Repository) TableGetAll(ctx context.Context, userID string, organizationID string) ([]table.Table, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) TableGetAll(ctxr context.Context, userID string, organizationID string) ([]table.Table, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var tables []table.Table
 
 	query := fmt.Sprintf("SELECT id, name, organization_id FROM %s WHERE is_deleted = false AND organization_id = $1 ",
 		tableTable)
-	err := r.database.Select(&tables, query, organizationID)
+	err := r.database.SelectContext(ctx, &tables, query, organizationID)
 
 	return tables, errors.Wrap(err, "tables select query error")
 }
 
 // TableGetOne select table by id from database.
-func (r *Repository) TableGetOne(ctx context.Context, userID string, organizationID string, tableID string) (table.Table, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) TableGetOne(ctxr context.Context, userID string, organizationID string, tableID string) (table.Table, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var tble table.Table
 
@@ -35,30 +51,44 @@ func (r *Repository) TableGetOne(ctx context.Context, userID string, organizatio
 		"SELECT id, name, organization_id FROM %s WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		tableTable,
 	)
-	err := r.database.Get(&tble, query, organizationID, tableID)
+	err := r.database.GetContext(ctx, &tble, query, organizationID, tableID)
 
 	return tble, errors.Wrap(err, "table select query error")
 }
 
 // TableCreate insert table into database.
-func (r *Repository) TableCreate(ctx context.Context, userID string, input table.CreateTableInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) TableCreate(ctxr context.Context, userID string, input table.CreateTableInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var tableID string
 
 	query := fmt.Sprintf("INSERT INTO %s (name, organization_id, user_created) VALUES ($1, $2, $3) RETURNING id",
 		tableTable)
-	row := r.database.QueryRow(query, input.Name, input.OrganizationID, userID)
+	row := r.database.QueryRowContext(ctx, query, input.Name, input.OrganizationID, userID)
 	err := row.Scan(&tableID)
 
 	return tableID, errors.Wrap(err, "table create query error")
 }
 
 // TableUpdate updates table by id in database.
-func (r *Repository) TableUpdate(ctx context.Context, userID string, input table.UpdateTableInput) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) TableUpdate(ctxr context.Context, userID string, input table.UpdateTableInput) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	setValues := make([]string, 0, 3)
 	args := make([]interface{}, 0, 3)
@@ -86,15 +116,22 @@ func (r *Repository) TableUpdate(ctx context.Context, userID string, input table
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
 		tableTable, setQuery, *input.OrganizationID, *input.ID)
-	_, err := r.database.Exec(query, args...)
+	_, err := r.database.ExecContext(ctx, query, args...)
 
 	return errors.Wrap(err, "table update query error")
 }
 
 // TableDelete deletes table by id from database.
-func (r *Repository) TableDelete(ctx context.Context, userID string, organizationID string, tableID string) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) TableDelete(ctxr context.Context, userID string, organizationID string, tableID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
@@ -102,7 +139,7 @@ func (r *Repository) TableDelete(ctx context.Context, userID string, organizatio
 		tableTable,
 	)
 
-	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, tableID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, tableID, organizationID)
 
 	return errors.Wrap(err, "table delete query error")
 }

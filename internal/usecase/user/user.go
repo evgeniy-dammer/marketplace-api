@@ -6,12 +6,21 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 // UserGetAll returns all users from the system.
 func (s *UseCase) UserGetAll(ctx context.Context, search string, status string, roleID string) ([]user.User, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	users, err := s.adapterStorage.UserGetAll(ctx, search, status, roleID)
 
 	return users, errors.Wrap(err, "users select failed")
@@ -19,6 +28,13 @@ func (s *UseCase) UserGetAll(ctx context.Context, search string, status string, 
 
 // UserGetAllRoles returns all user roles from the system.
 func (s *UseCase) UserGetAllRoles(ctx context.Context) ([]role.Role, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserGetAllRoles")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	roles, err := s.adapterStorage.UserGetAllRoles(ctx)
 
 	return roles, errors.Wrap(err, "roles select failed")
@@ -26,6 +42,13 @@ func (s *UseCase) UserGetAllRoles(ctx context.Context) ([]role.Role, error) {
 
 // UserGetOne returns user by id from the system.
 func (s *UseCase) UserGetOne(ctx context.Context, userID string) (user.User, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	var usr user.User
 
 	if s.adapterCache != nil {
@@ -73,6 +96,13 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string) (user.User,
 
 // UserCreate hashes the password and insert User into system.
 func (s *UseCase) UserCreate(ctx context.Context, userID string, input user.CreateUserInput) (string, error) {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	pass, err := usecase.GeneratePasswordHash(input.Password, usecase.Params)
 	if err != nil {
 		return "", err
@@ -87,6 +117,13 @@ func (s *UseCase) UserCreate(ctx context.Context, userID string, input user.Crea
 
 // UserUpdate updates user by id in the system.
 func (s *UseCase) UserUpdate(ctx context.Context, userID string, input user.UpdateUserInput) error {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	if err := input.Validate(); err != nil {
 		return errors.Wrap(err, "validation error")
 	}
@@ -105,6 +142,13 @@ func (s *UseCase) UserUpdate(ctx context.Context, userID string, input user.Upda
 
 // UserDelete deletes user by id from the system.
 func (s *UseCase) UserDelete(ctx context.Context, userID string, dUserID string) error {
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
 	err := s.adapterStorage.UserDelete(ctx, userID, dUserID)
 
 	return errors.Wrap(err, "user delete failed")

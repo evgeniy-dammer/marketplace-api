@@ -9,8 +9,12 @@ import (
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	log "github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/gin-gonic/gin"
 	cors "github.com/itsjamie/gin-cors"
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
+	"github.com/uber/jaeger-client-go"
 )
 
 // userIdentity validate access token.
@@ -123,4 +127,54 @@ func enforce(sub string, obj string, act string, adapter persist.Adapter) (bool,
 	}
 
 	return ok, nil
+}
+
+func Tracer() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		span := opentracing.SpanFromContext(ctx.Request.Context())
+
+		if span == nil {
+			span = StartSpanWithHeader(&ctx.Request.Header, "rest-request-"+ctx.Request.Method, ctx.Request.Method, ctx.Request.URL.Path) //nolint:lll
+		}
+
+		defer span.Finish()
+
+		ctx.Request = ctx.Request.WithContext(opentracing.ContextWithSpan(ctx.Request.Context(), span))
+
+		if traceID, ok := span.Context().(jaeger.SpanContext); ok {
+			ctx.Header("uber-trace-id", traceID.TraceID().String())
+		}
+
+		ctx.Next()
+
+		ext.HTTPStatusCode.Set(span, uint16(ctx.Writer.Status()))
+
+		if len(ctx.Errors) == 0 {
+			log.Info("", getContextFields(ctx)...)
+		}
+	}
+}
+
+func StartSpanWithHeader(header *http.Header, operationName, method, path string) opentracing.Span {
+	var wireContext opentracing.SpanContext
+
+	if header != nil {
+		wireContext, _ = opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(*header))
+	}
+
+	return StartSpanWithParent(wireContext, operationName, method, path)
+}
+
+// StartSpanWithParent will start a new span with a parent span.
+func StartSpanWithParent(parent opentracing.SpanContext, operationName, method, path string) opentracing.Span {
+	options := []opentracing.StartSpanOption{
+		opentracing.Tag{Key: ext.SpanKindRPCServer.Key, Value: ext.SpanKindRPCServer.Value},
+		opentracing.Tag{Key: string(ext.HTTPMethod), Value: method},
+		opentracing.Tag{Key: string(ext.HTTPUrl), Value: path},
+	}
+	if parent != nil {
+		options = append(options, opentracing.ChildOf(parent))
+	}
+
+	return opentracing.StartSpan(operationName, options...)
 }

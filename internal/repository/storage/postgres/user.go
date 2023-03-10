@@ -8,13 +8,22 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/role"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // UserGetAll selects all users from database.
-func (r *Repository) UserGetAll(ctx context.Context, search string, status string, roleID string) ([]user.User, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UserGetAll(ctxr context.Context, search string, status string, roleID string) ([]user.User, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var users []user.User
 
@@ -55,29 +64,43 @@ func (r *Repository) UserGetAll(ctx context.Context, search string, status strin
 		userTable, userRoleTable, roleTable, statusTable, search, roleID, status,
 	)
 
-	err := r.database.Select(&users, query)
+	err := r.database.SelectContext(ctx, &users, query)
 
 	return users, errors.Wrap(err, "users select query error")
 }
 
 // UserGetAllRoles selects all user roles from database.
-func (r *Repository) UserGetAllRoles(ctx context.Context) ([]role.Role, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserGetAllRoles")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var roles []role.Role
 
 	query := fmt.Sprintf("SELECT id, name FROM %s ", roleTable)
 
-	err := r.database.Select(&roles, query)
+	err := r.database.SelectContext(ctx, &roles, query)
 
 	return roles, errors.Wrap(err, "roles select query error")
 }
 
 // UserGetOne select user by id from database.
-func (r *Repository) UserGetOne(ctx context.Context, userID string) (user.User, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var usr user.User
 
@@ -87,15 +110,22 @@ func (r *Repository) UserGetOne(ctx context.Context, userID string) (user.User, 
 			"INNER JOIN %s ro ON ur.role_id = ro.id "+
 			"INNER JOIN %s st ON st.id = us.status_id "+
 			"WHERE is_deleted = false AND us.id = $1", userTable, userRoleTable, roleTable, statusTable)
-	err := r.database.Get(&usr, query, userID)
+	err := r.database.GetContext(ctx, &usr, query, userID)
 
 	return usr, errors.Wrap(err, "user select query error")
 }
 
 // UserCreate insert user into database.
-func (r *Repository) UserCreate(ctx context.Context, userID string, input user.CreateUserInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UserCreate(ctxr context.Context, userID string, input user.CreateUserInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var insertID string
 
@@ -108,7 +138,7 @@ func (r *Repository) UserCreate(ctx context.Context, userID string, input user.C
 		"INSERT INTO %s (phone, password, first_name, last_name, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		userTable,
 	)
-	row := trx.QueryRow(createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName, userID)
+	row := trx.QueryRowContext(ctx, createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName, userID)
 
 	if err = row.Scan(&insertID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -120,7 +150,7 @@ func (r *Repository) UserCreate(ctx context.Context, userID string, input user.C
 
 	createUsersRoleQuery := fmt.Sprintf("INSERT INTO %s (user_id, role_id) VALUES ($1, $2)", userRoleTable)
 
-	if _, err = trx.Exec(createUsersRoleQuery, insertID, input.RoleID); err != nil {
+	if _, err = trx.ExecContext(ctx, createUsersRoleQuery, insertID, input.RoleID); err != nil {
 		if err = trx.Rollback(); err != nil {
 			return "", errors.Wrap(err, "role rollback error")
 		}
@@ -132,9 +162,16 @@ func (r *Repository) UserCreate(ctx context.Context, userID string, input user.C
 }
 
 // UserUpdate updates user by id in database.
-func (r *Repository) UserUpdate(ctx context.Context, userID string, input user.UpdateUserInput) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UserUpdate(ctxr context.Context, userID string, input user.UpdateUserInput) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	setValues := make([]string, 0, 4)
 	args := make([]interface{}, 0, 4)
@@ -167,22 +204,29 @@ func (r *Repository) UserUpdate(ctx context.Context, userID string, input user.U
 
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND id = '%s'", userTable, setQuery, *input.ID)
-	_, err := r.database.Exec(query, args...)
+	_, err := r.database.ExecContext(ctx, query, args...)
 
 	return errors.Wrap(err, "user update query error")
 }
 
 // UserDelete deletes user by id from database.
-func (r *Repository) UserDelete(ctx context.Context, userID string, dUserID string) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UserDelete(ctxr context.Context, userID string, dUserID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 WHERE is_deleted = false AND id = $3",
 		userTable,
 	)
 
-	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, dUserID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, dUserID)
 
 	return errors.Wrap(err, "user delete query error")
 }

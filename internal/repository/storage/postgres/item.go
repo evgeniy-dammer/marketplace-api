@@ -7,14 +7,23 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/item"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"golang.org/x/sync/errgroup"
 )
 
 // ItemGetAll selects all items from database.
-func (r *Repository) ItemGetAll(ctx context.Context, userID string, organizationID string) ([]item.Item, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ItemGetAll(ctxr context.Context, userID string, organizationID string) ([]item.Item, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var items []item.Item
 
@@ -28,7 +37,7 @@ func (r *Repository) ItemGetAll(ctx context.Context, userID string, organization
 		itemTable,
 	)
 
-	err := r.database.Select(&items, query, organizationID)
+	err := r.database.SelectContext(ctx, &items, query, organizationID)
 
 	for i := 0; i < len(items); i++ {
 		index := i
@@ -40,7 +49,7 @@ func (r *Repository) ItemGetAll(ctx context.Context, userID string, organization
 				imageTable,
 			)
 
-			err = r.database.Select(&items[index].Images, queryImages, items[index].ID)
+			err = r.database.SelectContext(ctx, &items[index].Images, queryImages, items[index].ID)
 
 			return errors.Wrap(err, "images select query error")
 		})
@@ -53,9 +62,16 @@ func (r *Repository) ItemGetAll(ctx context.Context, userID string, organization
 }
 
 // ItemGetOne select item by id from database.
-func (r *Repository) ItemGetOne(ctx context.Context, userID string, organizationID string, itemID string) (item.Item, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ItemGetOne(ctxr context.Context, userID string, organizationID string, itemID string) (item.Item, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var itm item.Item
 
@@ -69,7 +85,7 @@ func (r *Repository) ItemGetOne(ctx context.Context, userID string, organization
 		itemTable,
 	)
 
-	err := r.database.Get(&itm, query, organizationID, itemID)
+	err := r.database.GetContext(ctx, &itm, query, organizationID, itemID)
 	if err != nil {
 		return itm, errors.Wrap(err, "item select query error")
 	}
@@ -80,7 +96,7 @@ func (r *Repository) ItemGetOne(ctx context.Context, userID string, organization
 			imageTable,
 		)
 
-		err = r.database.Select(&itm.Images, queryImages, itm.ID)
+		err = r.database.SelectContext(ctx, &itm.Images, queryImages, itm.ID)
 
 		return errors.Wrap(err, "images select query error")
 	})
@@ -92,7 +108,7 @@ func (r *Repository) ItemGetOne(ctx context.Context, userID string, organization
 			specificationTable,
 		)
 
-		err = r.database.Select(&itm.Specification, querySpecifications, itm.ID)
+		err = r.database.SelectContext(ctx, &itm.Specification, querySpecifications, itm.ID)
 
 		return errors.Wrap(err, "specification select query error")
 	})
@@ -104,7 +120,7 @@ func (r *Repository) ItemGetOne(ctx context.Context, userID string, organization
 			commentTable,
 		)
 
-		err = r.database.Select(&itm.Comments, queryComments, itm.ID)
+		err = r.database.SelectContext(ctx, &itm.Comments, queryComments, itm.ID)
 
 		return errors.Wrap(err, "comments select query error")
 	})
@@ -115,9 +131,16 @@ func (r *Repository) ItemGetOne(ctx context.Context, userID string, organization
 }
 
 // ItemCreate insert item into database.
-func (r *Repository) ItemCreate(ctx context.Context, userID string, input item.CreateItemInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ItemCreate(ctxr context.Context, userID string, input item.CreateItemInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var itemID string
 
@@ -129,7 +152,8 @@ func (r *Repository) ItemCreate(ctx context.Context, userID string, input item.C
 		itemTable,
 	)
 
-	row := r.database.QueryRow(
+	row := r.database.QueryRowContext(
+		ctx,
 		query,
 		input.NameTm,
 		input.NameRu,
@@ -153,9 +177,16 @@ func (r *Repository) ItemCreate(ctx context.Context, userID string, input item.C
 }
 
 // ItemUpdate updates item by id in database.
-func (r *Repository) ItemUpdate(ctx context.Context, userID string, input item.UpdateItemInput) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ItemUpdate(ctxr context.Context, userID string, input item.UpdateItemInput) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	setValues := make([]string, 0, 14)
 	args := make([]interface{}, 0, 14)
@@ -250,15 +281,22 @@ func (r *Repository) ItemUpdate(ctx context.Context, userID string, input item.U
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
 		itemTable, setQuery, *input.OrganizationID, *input.ID)
 
-	_, err := r.database.Exec(query, args...)
+	_, err := r.database.ExecContext(ctx, query, args...)
 
 	return errors.Wrap(err, "item update query error")
 }
 
 // ItemDelete deletes item by id from database.
-func (r *Repository) ItemDelete(ctx context.Context, userID string, organizationID string, itemID string) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ItemDelete(ctxr context.Context, userID string, organizationID string, itemID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
@@ -266,7 +304,7 @@ func (r *Repository) ItemDelete(ctx context.Context, userID string, organization
 		itemTable,
 	)
 
-	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, itemID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, itemID, organizationID)
 
 	return errors.Wrap(err, "item delete query error")
 }

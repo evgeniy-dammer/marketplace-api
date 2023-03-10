@@ -7,13 +7,22 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // CommentGetAll selects all comments from database.
-func (r *Repository) CommentGetAll(ctx context.Context, userID string, organizationID string) ([]comment.Comment, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CommentGetAll(ctxr context.Context, userID string, organizationID string) ([]comment.Comment, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var comments []comment.Comment
 
@@ -23,15 +32,22 @@ func (r *Repository) CommentGetAll(ctx context.Context, userID string, organizat
 		commentTable,
 	)
 
-	err := r.database.Select(&comments, query, organizationID)
+	err := r.database.SelectContext(ctx, &comments, query, organizationID)
 
 	return comments, errors.Wrap(err, "comments select query error")
 }
 
 // CommentGetOne select comment by id from database.
-func (r *Repository) CommentGetOne(ctx context.Context, userID string, organizationID string, commentID string) (comment.Comment, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CommentGetOne(ctxr context.Context, userID string, organizationID string, commentID string) (comment.Comment, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var commnt comment.Comment
 
@@ -40,15 +56,22 @@ func (r *Repository) CommentGetOne(ctx context.Context, userID string, organizat
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		commentTable,
 	)
-	err := r.database.Get(&commnt, query, organizationID, commentID)
+	err := r.database.GetContext(ctx, &commnt, query, organizationID, commentID)
 
 	return commnt, errors.Wrap(err, "comment select query error")
 }
 
 // CommentCreate insert comment into database.
-func (r *Repository) CommentCreate(ctx context.Context, userID string, input comment.CreateCommentInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CommentCreate(ctxr context.Context, userID string, input comment.CreateCommentInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var commentID string
 
@@ -58,7 +81,8 @@ func (r *Repository) CommentCreate(ctx context.Context, userID string, input com
 		commentTable,
 	)
 
-	row := r.database.QueryRow(
+	row := r.database.QueryRowContext(
+		ctx,
 		query,
 		input.ItemID,
 		input.OrganizationID,
@@ -74,9 +98,16 @@ func (r *Repository) CommentCreate(ctx context.Context, userID string, input com
 }
 
 // CommentUpdate updates comment by id in database.
-func (r *Repository) CommentUpdate(ctx context.Context, userID string, input comment.UpdateCommentInput) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CommentUpdate(ctxr context.Context, userID string, input comment.UpdateCommentInput) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	setValues := make([]string, 0, 7)
 	args := make([]interface{}, 0, 7)
@@ -123,15 +154,22 @@ func (r *Repository) CommentUpdate(ctx context.Context, userID string, input com
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
 		commentTable, setQuery, *input.OrganizationID, *input.ID)
 
-	_, err := r.database.Exec(query, args...)
+	_, err := r.database.ExecContext(ctx, query, args...)
 
 	return errors.Wrap(err, "comment update query error")
 }
 
 // CommentDelete deletes comment by id from database.
-func (r *Repository) CommentDelete(ctx context.Context, userID string, organizationID string, commentID string) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CommentDelete(ctxr context.Context, userID string, organizationID string, commentID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
@@ -139,7 +177,7 @@ func (r *Repository) CommentDelete(ctx context.Context, userID string, organizat
 		commentTable,
 	)
 
-	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, commentID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, commentID, organizationID)
 
 	return errors.Wrap(err, "comment delete query error")
 }

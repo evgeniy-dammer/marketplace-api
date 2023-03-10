@@ -7,13 +7,22 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/image"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // ImageGetAll selects all images from database.
-func (r *Repository) ImageGetAll(ctx context.Context, userID string, organizationID string) ([]image.Image, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ImageGetAll(ctxr context.Context, userID string, organizationID string) ([]image.Image, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageGetAll")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var images []image.Image
 
@@ -23,15 +32,22 @@ func (r *Repository) ImageGetAll(ctx context.Context, userID string, organizatio
 		imageTable,
 	)
 
-	err := r.database.Select(&images, query, organizationID)
+	err := r.database.SelectContext(ctx, &images, query, organizationID)
 
 	return images, errors.Wrap(err, "images select query error")
 }
 
 // ImageGetOne select image by id from database.
-func (r *Repository) ImageGetOne(ctx context.Context, userID string, organizationID string, imageID string) (image.Image, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ImageGetOne(ctxr context.Context, userID string, organizationID string, imageID string) (image.Image, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageGetOne")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var img image.Image
 
@@ -40,15 +56,22 @@ func (r *Repository) ImageGetOne(ctx context.Context, userID string, organizatio
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		imageTable,
 	)
-	err := r.database.Get(&img, query, organizationID, imageID)
+	err := r.database.GetContext(ctx, &img, query, organizationID, imageID)
 
 	return img, errors.Wrap(err, "image select query error")
 }
 
 // ImageCreate insert image into database.
-func (r *Repository) ImageCreate(ctx context.Context, userID string, input image.CreateImageInput) (string, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ImageCreate(ctxr context.Context, userID string, input image.CreateImageInput) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageCreate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	var imageID string
 
@@ -58,7 +81,8 @@ func (r *Repository) ImageCreate(ctx context.Context, userID string, input image
 		imageTable,
 	)
 
-	row := r.database.QueryRow(
+	row := r.database.QueryRowContext(
+		ctx,
 		query,
 		input.ObjectID,
 		input.ObjectType,
@@ -76,9 +100,16 @@ func (r *Repository) ImageCreate(ctx context.Context, userID string, input image
 }
 
 // ImageUpdate updates image by id in database.
-func (r *Repository) ImageUpdate(ctx context.Context, userID string, input image.UpdateImageInput) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ImageUpdate(ctxr context.Context, userID string, input image.UpdateImageInput) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	setValues := make([]string, 0, 8)
 	args := make([]interface{}, 0, 8)
@@ -137,15 +168,22 @@ func (r *Repository) ImageUpdate(ctx context.Context, userID string, input image
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
 		imageTable, setQuery, *input.OrganizationID, *input.ID)
 
-	_, err := r.database.Exec(query, args...)
+	_, err := r.database.ExecContext(ctx, query, args...)
 
 	return errors.Wrap(err, "image update query error")
 }
 
 // ImageDelete deletes image by id from database.
-func (r *Repository) ImageDelete(ctx context.Context, userID string, organizationID string, imageID string) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) ImageDelete(ctxr context.Context, userID string, organizationID string, imageID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	if viper.GetBool("service.tracing") {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
 
 	query := fmt.Sprintf(
 		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
@@ -153,7 +191,7 @@ func (r *Repository) ImageDelete(ctx context.Context, userID string, organizatio
 		imageTable,
 	)
 
-	_, err := r.database.Exec(query, time.Now().Format("2006-01-02 15:04:05"), userID, imageID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, imageID, organizationID)
 
 	return errors.Wrap(err, "image delete query error")
 }
