@@ -116,7 +116,7 @@ func (d *Delivery) getAllRoles(ginCtx *gin.Context) {
 func (d *Delivery) createUser(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -156,7 +156,7 @@ func (d *Delivery) createUser(ginCtx *gin.Context) {
 func (d *Delivery) updateUser(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -194,7 +194,7 @@ func (d *Delivery) updateUser(ginCtx *gin.Context) {
 func (d *Delivery) deleteUser(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

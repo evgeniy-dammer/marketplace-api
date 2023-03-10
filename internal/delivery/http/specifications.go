@@ -25,7 +25,7 @@ import (
 func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -65,7 +65,7 @@ func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
 func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -111,7 +111,7 @@ func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -150,7 +150,7 @@ func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -189,7 +189,7 @@ func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 func (d *Delivery) deleteSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

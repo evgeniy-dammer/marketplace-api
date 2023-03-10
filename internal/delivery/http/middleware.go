@@ -45,32 +45,51 @@ func (d *Delivery) userIdentity(ginCtx *gin.Context) {
 	ginCtx.Set(userCtx, userID)
 }
 
-// getUserId returns user id from authorization context.
-func (d *Delivery) getUserIDAndRole(ginCtx *gin.Context) (string, string, error) {
-	ctx := context.New(ginCtx)
-
+// getUserID returns user id from authorization context.
+func (d *Delivery) getUserID(ginCtx *gin.Context) (string, error) {
 	userID, exists := ginCtx.Get(userCtx)
 	if !exists {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrUserIsNotFound)
 
-		return "", "", ErrUserIsNotFound
+		return "", ErrUserIsNotFound
 	}
 
 	idString, exists := userID.(string)
 	if !exists {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrInvalidUserID)
 
-		return "", "", ErrUserIsNotFound
+		return "", ErrUserIsNotFound
+	}
+
+	return idString, nil
+}
+
+// getUserRole returns users role from authorization context.
+func (d *Delivery) getUserRole(ginCtx *gin.Context) (string, error) {
+	ctx := context.New(ginCtx)
+
+	userID, exists := ginCtx.Get(userCtx)
+	if !exists {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrUserIsNotFound)
+
+		return "", ErrUserIsNotFound
+	}
+
+	idString, exists := userID.(string)
+	if !exists {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrInvalidUserID)
+
+		return "", ErrUserIsNotFound
 	}
 
 	role, err := d.ucAuthentication.AuthenticationGetUserRole(ctx, idString)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrRoleIsNotFound)
 
-		return "", "", ErrUserIsNotFound
+		return "", ErrUserIsNotFound
 	}
 
-	return idString, role, nil
+	return role, nil
 }
 
 // corsMiddleware middleware.
@@ -89,7 +108,7 @@ func (d *Delivery) corsMiddleware() gin.HandlerFunc {
 // Authorize determines if current subject has been authorized to take an action on an object.
 func (d *Delivery) Authorize(obj string, act string, adapter persist.Adapter) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		_, userRole, err := d.getUserIDAndRole(ctx)
+		userRole, err := d.getUserRole(ctx)
 		if err != nil {
 			return
 		}

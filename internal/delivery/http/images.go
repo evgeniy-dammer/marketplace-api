@@ -25,7 +25,7 @@ import (
 func (d *Delivery) getImages(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -65,7 +65,7 @@ func (d *Delivery) getImages(ginCtx *gin.Context) {
 func (d *Delivery) getImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -111,7 +111,7 @@ func (d *Delivery) getImage(ginCtx *gin.Context) {
 func (d *Delivery) createImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -150,7 +150,7 @@ func (d *Delivery) createImage(ginCtx *gin.Context) {
 func (d *Delivery) updateImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -189,7 +189,7 @@ func (d *Delivery) updateImage(ginCtx *gin.Context) {
 func (d *Delivery) deleteImage(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

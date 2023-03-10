@@ -25,7 +25,7 @@ import (
 func (d *Delivery) getItems(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -65,7 +65,7 @@ func (d *Delivery) getItems(ginCtx *gin.Context) {
 func (d *Delivery) getItem(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -111,7 +111,7 @@ func (d *Delivery) getItem(ginCtx *gin.Context) {
 func (d *Delivery) createItem(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (d *Delivery) createItem(ginCtx *gin.Context) {
 func (d *Delivery) updateItem(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -190,7 +190,7 @@ func (d *Delivery) updateItem(ginCtx *gin.Context) {
 func (d *Delivery) deleteItem(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

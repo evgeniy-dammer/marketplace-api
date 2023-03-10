@@ -24,7 +24,7 @@ import (
 func (d *Delivery) getOrganizations(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -56,7 +56,7 @@ func (d *Delivery) getOrganizations(ginCtx *gin.Context) {
 func (d *Delivery) getOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (d *Delivery) getOrganization(ginCtx *gin.Context) {
 func (d *Delivery) createOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -134,7 +134,7 @@ func (d *Delivery) createOrganization(ginCtx *gin.Context) {
 func (d *Delivery) updateOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -178,7 +178,7 @@ func (d *Delivery) updateOrganization(ginCtx *gin.Context) {
 func (d *Delivery) deleteOrganization(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

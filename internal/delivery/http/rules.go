@@ -24,7 +24,7 @@ import (
 func (d *Delivery) getRules(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -56,7 +56,7 @@ func (d *Delivery) getRules(ginCtx *gin.Context) {
 func (d *Delivery) getRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (d *Delivery) getRule(ginCtx *gin.Context) {
 func (d *Delivery) createRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -134,7 +134,7 @@ func (d *Delivery) createRule(ginCtx *gin.Context) {
 func (d *Delivery) updateRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -172,7 +172,7 @@ func (d *Delivery) updateRule(ginCtx *gin.Context) {
 func (d *Delivery) deleteRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

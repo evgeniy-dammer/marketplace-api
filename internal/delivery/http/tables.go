@@ -25,7 +25,7 @@ import (
 func (d *Delivery) getTables(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -65,7 +65,7 @@ func (d *Delivery) getTables(ginCtx *gin.Context) {
 func (d *Delivery) getTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -111,7 +111,7 @@ func (d *Delivery) getTable(ginCtx *gin.Context) {
 func (d *Delivery) createTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -150,7 +150,7 @@ func (d *Delivery) createTable(ginCtx *gin.Context) {
 func (d *Delivery) updateTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -189,7 +189,7 @@ func (d *Delivery) updateTable(ginCtx *gin.Context) {
 func (d *Delivery) deleteTable(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

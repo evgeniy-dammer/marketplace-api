@@ -25,7 +25,7 @@ import (
 func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -64,7 +64,7 @@ func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 func (d *Delivery) deleteFavorite(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

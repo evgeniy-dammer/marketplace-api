@@ -25,7 +25,7 @@ import (
 func (d *Delivery) getComments(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -66,7 +66,7 @@ func (d *Delivery) getComments(ginCtx *gin.Context) {
 func (d *Delivery) getComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -114,7 +114,7 @@ func (d *Delivery) getComment(ginCtx *gin.Context) {
 func (d *Delivery) createComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -153,7 +153,7 @@ func (d *Delivery) createComment(ginCtx *gin.Context) {
 func (d *Delivery) updateComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -192,7 +192,7 @@ func (d *Delivery) updateComment(ginCtx *gin.Context) {
 func (d *Delivery) deleteComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}

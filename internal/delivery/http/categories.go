@@ -25,7 +25,7 @@ import (
 func (d *Delivery) getCategories(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -66,7 +66,7 @@ func (d *Delivery) getCategories(ginCtx *gin.Context) {
 func (d *Delivery) getCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -112,7 +112,7 @@ func (d *Delivery) getCategory(ginCtx *gin.Context) {
 func (d *Delivery) createCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (d *Delivery) createCategory(ginCtx *gin.Context) {
 func (d *Delivery) updateCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
@@ -190,7 +190,7 @@ func (d *Delivery) updateCategory(ginCtx *gin.Context) {
 func (d *Delivery) deleteCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
-	userID, _, err := d.getUserIDAndRole(ginCtx)
+	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
