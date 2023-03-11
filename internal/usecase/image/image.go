@@ -5,12 +5,11 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // ImageGetAll returns all images from the system.
 func (s *UseCase) ImageGetAll(ctx context.Context, userID string, organizationID string) ([]image.Image, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.ImageGetAll")
 		defer span.Finish()
 
@@ -24,7 +23,7 @@ func (s *UseCase) ImageGetAll(ctx context.Context, userID string, organizationID
 
 // ImageGetOne returns image by id from the system.
 func (s *UseCase) ImageGetOne(ctx context.Context, userID string, organizationID string, imageID string) (image.Image, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.ImageGetOne")
 		defer span.Finish()
 
@@ -38,7 +37,7 @@ func (s *UseCase) ImageGetOne(ctx context.Context, userID string, organizationID
 
 // ImageCreate inserts image into system.
 func (s *UseCase) ImageCreate(ctx context.Context, userID string, input image.CreateImageInput) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.ImageCreate")
 		defer span.Finish()
 
@@ -52,7 +51,7 @@ func (s *UseCase) ImageCreate(ctx context.Context, userID string, input image.Cr
 
 // ImageUpdate updates image by id in the system.
 func (s *UseCase) ImageUpdate(ctx context.Context, userID string, input image.UpdateImageInput) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.ImageUpdate")
 		defer span.Finish()
 
@@ -70,7 +69,7 @@ func (s *UseCase) ImageUpdate(ctx context.Context, userID string, input image.Up
 
 // ImageDelete deletes image by id from the system.
 func (s *UseCase) ImageDelete(ctx context.Context, userID string, organizationID string, imageID string) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.ImageDelete")
 		defer span.Finish()
 

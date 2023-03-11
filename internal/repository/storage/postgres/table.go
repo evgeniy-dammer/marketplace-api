@@ -9,7 +9,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // TableGetAll selects all tables from database.
@@ -17,8 +16,8 @@ func (r *Repository) TableGetAll(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.TableGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -38,8 +37,8 @@ func (r *Repository) TableGetOne(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.TableGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -61,8 +60,8 @@ func (r *Repository) TableCreate(ctxr context.Context, userID string, input tabl
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.TableCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -83,8 +82,8 @@ func (r *Repository) TableUpdate(ctxr context.Context, userID string, input tabl
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.TableUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -126,8 +125,8 @@ func (r *Repository) TableDelete(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.TableDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.TableDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

@@ -7,15 +7,16 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/golang-jwt/jwt"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 // AuthenticationGenerateToken generates authorization token.
 func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string, username string, password string) (user.User, token.Tokens, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationGenerateToken")
 		defer span.Finish()
 
@@ -54,8 +55,8 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 	expiresAt := time.Now().Add(usecase.TokenTTL).Unix()
 	refreshExpiresAt := time.Now().Add(usecase.RefreshTokenTTL).Unix()
 
-	token := usecase.CreateNewToken(userID, expiresAt, issuedAt)
-	tokens.AccessToken, err = token.SignedString([]byte(usecase.SigningKey))
+	tkn := usecase.CreateNewToken(userID, expiresAt, issuedAt)
+	tokens.AccessToken, err = tkn.SignedString([]byte(usecase.SigningKey))
 
 	if err != nil {
 		return usr, tokens, errors.Wrap(err, "can not get access token")
@@ -77,7 +78,7 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 
 // AuthenticationParseToken checks access token and returns user id.
 func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken string) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationParseToken")
 		defer span.Finish()
 
@@ -106,7 +107,7 @@ func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken stri
 
 // AuthenticationCreateUser hashes the password and insert User into system.
 func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationCreateUser")
 		defer span.Finish()
 
@@ -126,15 +127,42 @@ func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.Creat
 }
 
 // AuthenticationGetUserRole returns users role name.
-func (s *UseCase) AuthenticationGetUserRole(ctx context.Context, id string) (string, error) {
-	if viper.GetBool("service.tracing") {
+func (s *UseCase) AuthenticationGetUserRole(ctx context.Context, userID string) (string, error) {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.AuthenticationGetUserRole")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
 	}
 
-	role, err := s.adapterStorage.AuthenticationGetUserRole(ctx, id)
+	if s.isCacheOn {
+		return getUserRoleWithCache(ctx, s, userID)
+	}
+
+	role, err := s.adapterStorage.AuthenticationGetUserRole(ctx, userID)
 
 	return role, errors.Wrap(err, "can not get role")
+}
+
+func getUserRoleWithCache(ctx context.Context, s *UseCase, userID string) (string, error) {
+	role, err := s.adapterCache.AuthenticationGetUserRole(ctx, userID)
+	if err != nil {
+		logger.Logger.Error("unable to get user role from cache", zap.String("error", err.Error()))
+	}
+
+	if role != "" {
+		return role, nil
+	}
+
+	role, err = s.adapterStorage.AuthenticationGetUserRole(ctx, userID)
+
+	if err != nil {
+		return role, errors.Wrap(err, "user role select failed")
+	}
+
+	if err = s.adapterCache.AuthenticationSetUserRole(ctx, userID, role); err != nil {
+		logger.Logger.Error("unable to add user role into cache", zap.String("error", err.Error()))
+	}
+
+	return role, nil
 }

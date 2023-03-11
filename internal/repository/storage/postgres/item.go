@@ -9,7 +9,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -18,8 +17,8 @@ func (r *Repository) ItemGetAll(ctxr context.Context, userID string, organizatio
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -66,8 +65,8 @@ func (r *Repository) ItemGetOne(ctxr context.Context, userID string, organizatio
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -135,8 +134,8 @@ func (r *Repository) ItemCreate(ctxr context.Context, userID string, input item.
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -181,8 +180,8 @@ func (r *Repository) ItemUpdate(ctxr context.Context, userID string, input item.
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -291,8 +290,8 @@ func (r *Repository) ItemDelete(ctxr context.Context, userID string, organizatio
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ItemDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

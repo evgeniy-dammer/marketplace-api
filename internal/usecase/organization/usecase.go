@@ -9,9 +9,11 @@ import (
 type UseCase struct {
 	adapterStorage storage.Organization
 	adapterCache   cache.Organization
+	isTracingOn    bool
+	isCacheOn      bool
 }
 
 // New is a constructor for UseCase.
-func New(storage storage.Organization, cache cache.Organization) *UseCase {
-	return &UseCase{adapterStorage: storage, adapterCache: cache}
+func New(storage storage.Organization, cache cache.Organization, isTracingOn bool, isCacheOn bool) *UseCase {
+	return &UseCase{adapterStorage: storage, adapterCache: cache, isTracingOn: isTracingOn, isCacheOn: isCacheOn}
 }

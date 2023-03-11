@@ -9,7 +9,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // OrderGetAll selects all orders from database.
@@ -17,8 +16,8 @@ func (r *Repository) OrderGetAll(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrderGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -42,8 +41,8 @@ func (r *Repository) OrderGetOne(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrderGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -66,8 +65,8 @@ func (r *Repository) OrderCreate(ctxr context.Context, userID string, input orde
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrderCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -119,8 +118,8 @@ func (r *Repository) OrderUpdate(ctxr context.Context, userID string, input orde
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrderUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -213,8 +212,8 @@ func (r *Repository) OrderDelete(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrderDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

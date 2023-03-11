@@ -9,7 +9,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // ImageGetAll selects all images from database.
@@ -17,8 +16,8 @@ func (r *Repository) ImageGetAll(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ImageGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -42,8 +41,8 @@ func (r *Repository) ImageGetOne(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ImageGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -66,8 +65,8 @@ func (r *Repository) ImageCreate(ctxr context.Context, userID string, input imag
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ImageCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -104,8 +103,8 @@ func (r *Repository) ImageUpdate(ctxr context.Context, userID string, input imag
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ImageUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -178,8 +177,8 @@ func (r *Repository) ImageDelete(ctxr context.Context, userID string, organizati
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.ImageDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ImageDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

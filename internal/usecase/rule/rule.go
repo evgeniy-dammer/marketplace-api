@@ -5,12 +5,11 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // RuleGetAll returns all rules from the system.
 func (s *UseCase) RuleGetAll(ctx context.Context, userID string) ([]rule.Rule, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.RuleGetAll")
 		defer span.Finish()
 
@@ -24,7 +23,7 @@ func (s *UseCase) RuleGetAll(ctx context.Context, userID string) ([]rule.Rule, e
 
 // RuleGetOne returns rule by id from the system.
 func (s *UseCase) RuleGetOne(ctx context.Context, userID string, ruleID string) (rule.Rule, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.RuleGetOne")
 		defer span.Finish()
 
@@ -38,7 +37,7 @@ func (s *UseCase) RuleGetOne(ctx context.Context, userID string, ruleID string) 
 
 // RuleCreate inserts rule into system.
 func (s *UseCase) RuleCreate(ctx context.Context, userID string, input rule.CreateRuleInput) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.RuleCreate")
 		defer span.Finish()
 
@@ -52,7 +51,7 @@ func (s *UseCase) RuleCreate(ctx context.Context, userID string, input rule.Crea
 
 // RuleUpdate updates rule by id in the system.
 func (s *UseCase) RuleUpdate(ctx context.Context, userID string, input rule.UpdateRuleInput) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.RuleUpdate")
 		defer span.Finish()
 
@@ -70,7 +69,7 @@ func (s *UseCase) RuleUpdate(ctx context.Context, userID string, input rule.Upda
 
 // RuleDelete deletes rule by id from the system.
 func (s *UseCase) RuleDelete(ctx context.Context, userID string, ruleID string) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.RuleDelete")
 		defer span.Finish()
 

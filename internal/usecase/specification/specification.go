@@ -5,12 +5,11 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // SpecificationGetAll returns all specifications from the system.
 func (s *UseCase) SpecificationGetAll(ctx context.Context, userID string, organizationID string) ([]specification.Specification, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationGetAll")
 		defer span.Finish()
 
@@ -24,7 +23,7 @@ func (s *UseCase) SpecificationGetAll(ctx context.Context, userID string, organi
 
 // SpecificationGetOne returns specification by id from the system.
 func (s *UseCase) SpecificationGetOne(ctx context.Context, userID string, organizationID string, specificationID string) (specification.Specification, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationGetOne")
 		defer span.Finish()
 
@@ -38,7 +37,7 @@ func (s *UseCase) SpecificationGetOne(ctx context.Context, userID string, organi
 
 // SpecificationCreate inserts specification into system.
 func (s *UseCase) SpecificationCreate(ctx context.Context, userID string, input specification.CreateSpecificationInput) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationCreate")
 		defer span.Finish()
 
@@ -52,7 +51,7 @@ func (s *UseCase) SpecificationCreate(ctx context.Context, userID string, input 
 
 // SpecificationUpdate updates specification by id in the system.
 func (s *UseCase) SpecificationUpdate(ctx context.Context, userID string, input specification.UpdateSpecificationInput) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationUpdate")
 		defer span.Finish()
 
@@ -70,7 +69,7 @@ func (s *UseCase) SpecificationUpdate(ctx context.Context, userID string, input 
 
 // SpecificationDelete deletes specification by id from the system.
 func (s *UseCase) SpecificationDelete(ctx context.Context, userID string, organizationID string, specificationID string) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationDelete")
 		defer span.Finish()
 

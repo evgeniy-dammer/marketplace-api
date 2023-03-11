@@ -5,12 +5,11 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // OrderGetAll returns all orders from the system.
 func (s *UseCase) OrderGetAll(ctx context.Context, userID string, organizationID string) ([]order.Order, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.OrderGetAll")
 		defer span.Finish()
 
@@ -24,7 +23,7 @@ func (s *UseCase) OrderGetAll(ctx context.Context, userID string, organizationID
 
 // OrderGetOne returns order by id from the system.
 func (s *UseCase) OrderGetOne(ctx context.Context, userID string, organizationID string, orderID string) (order.Order, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.OrderGetOne")
 		defer span.Finish()
 
@@ -38,7 +37,7 @@ func (s *UseCase) OrderGetOne(ctx context.Context, userID string, organizationID
 
 // OrderCreate inserts order into system.
 func (s *UseCase) OrderCreate(ctx context.Context, userID string, input order.CreateOrderInput) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.OrderCreate")
 		defer span.Finish()
 
@@ -52,7 +51,7 @@ func (s *UseCase) OrderCreate(ctx context.Context, userID string, input order.Cr
 
 // OrderUpdate updates order by id in the system.
 func (s *UseCase) OrderUpdate(ctx context.Context, userID string, input order.UpdateOrderInput) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.OrderUpdate")
 		defer span.Finish()
 
@@ -70,7 +69,7 @@ func (s *UseCase) OrderUpdate(ctx context.Context, userID string, input order.Up
 
 // OrderDelete deletes order by id from the system.
 func (s *UseCase) OrderDelete(ctx context.Context, userID string, organizationID string, orderID string) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.OrderDelete")
 		defer span.Finish()
 

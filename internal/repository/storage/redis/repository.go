@@ -3,21 +3,24 @@ package redis
 import (
 	"time"
 
-	"github.com/go-redis/cache/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 type Repository struct {
-	options Options
-	cache   *cache.Cache
+	options     Options
+	client      *redis.Client
+	isTracingOn bool
 }
 
 type Options struct {
 	Timeout time.Duration
+	Ttl     time.Duration
 }
 
-func New(cache *cache.Cache, options Options) *Repository {
+func New(client *redis.Client, options Options, isTracingOn bool) *Repository {
 	repository := &Repository{
-		cache: cache,
+		client:      client,
+		isTracingOn: isTracingOn,
 	}
 
 	repository.SetOptions(options)

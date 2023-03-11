@@ -9,7 +9,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // CommentGetAll selects all comments from database.
@@ -17,8 +16,8 @@ func (r *Repository) CommentGetAll(ctxr context.Context, userID string, organiza
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -42,8 +41,8 @@ func (r *Repository) CommentGetOne(ctxr context.Context, userID string, organiza
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -66,8 +65,8 @@ func (r *Repository) CommentCreate(ctxr context.Context, userID string, input co
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -102,8 +101,8 @@ func (r *Repository) CommentUpdate(ctxr context.Context, userID string, input co
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -164,8 +163,8 @@ func (r *Repository) CommentDelete(ctxr context.Context, userID string, organiza
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CommentDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

@@ -5,12 +5,11 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // CommentGetAll returns all comments from the system.
 func (s *UseCase) CommentGetAll(ctx context.Context, userID string, organizationID string) ([]comment.Comment, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.CommentGetAll")
 		defer span.Finish()
 
@@ -24,7 +23,7 @@ func (s *UseCase) CommentGetAll(ctx context.Context, userID string, organization
 
 // CommentGetOne returns comment by id from the system.
 func (s *UseCase) CommentGetOne(ctx context.Context, userID string, organizationID string, commentID string) (comment.Comment, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.CommentGetOne")
 		defer span.Finish()
 
@@ -38,7 +37,7 @@ func (s *UseCase) CommentGetOne(ctx context.Context, userID string, organization
 
 // CommentCreate inserts comment into system.
 func (s *UseCase) CommentCreate(ctx context.Context, userID string, input comment.CreateCommentInput) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.CommentCreate")
 		defer span.Finish()
 
@@ -52,7 +51,7 @@ func (s *UseCase) CommentCreate(ctx context.Context, userID string, input commen
 
 // CommentUpdate updates comment by id in the system.
 func (s *UseCase) CommentUpdate(ctx context.Context, userID string, input comment.UpdateCommentInput) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.CommentUpdate")
 		defer span.Finish()
 
@@ -70,7 +69,7 @@ func (s *UseCase) CommentUpdate(ctx context.Context, userID string, input commen
 
 // CommentDelete deletes comment by id from the system.
 func (s *UseCase) CommentDelete(ctx context.Context, userID string, organizationID string, commentID string) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.CommentDelete")
 		defer span.Finish()
 

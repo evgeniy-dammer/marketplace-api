@@ -9,7 +9,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // CategoryGetAll selects all categories from database.
@@ -17,8 +16,8 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, userID string, organiz
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -41,8 +40,8 @@ func (r *Repository) CategoryGetOne(ctxr context.Context, userID string, organiz
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -66,8 +65,8 @@ func (r *Repository) CategoryCreate(ctxr context.Context, userID string, input c
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -104,8 +103,8 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, userID string, input c
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -171,8 +170,8 @@ func (r *Repository) CategoryDelete(ctxr context.Context, userID string, organiz
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

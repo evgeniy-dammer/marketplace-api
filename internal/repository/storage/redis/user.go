@@ -1,22 +1,21 @@
 package redis
 
 import (
-	"fmt"
+	"encoding/json"
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
-// UserGetOne select user by id from database.
+// UserGetOne gets user by id from cache.
 func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Cache.UserGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -24,30 +23,75 @@ func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User,
 
 	var usr user.User
 
-	keyCache := fmt.Sprintf("%s-%s: %s", "user", "id", userID)
-	err := r.cache.Get(ctx, keyCache, usr)
+	bytes, err := r.client.Get(ctx, userKey+userID).Bytes()
 	if err != nil {
-		return usr, errors.Wrap(err, "postCacheRepository.GetPostByID.redisClient.Get")
+		return usr, errors.Wrap(err, "unable to get user from cache")
 	}
 
-	/*if err = json.Unmarshal([]byte(postBytes), &user); err != nil {
-		return user, errors.Wrap(err, "postCacheRepository.GetPostByID.json.Unmarshal")
-	}*/
+	if err = json.Unmarshal(bytes, &usr); err != nil {
+		return usr, errors.Wrap(err, "unable to unmarshal")
+	}
 
 	return usr, nil
 }
 
-// UserCreate insert user into database.
-func (r *Repository) UserCreate(ctxr context.Context, userID string, input user.CreateUserInput) error {
+// UserCreate sets user into cache.
+func (r *Repository) UserCreate(ctxr context.Context, usr user.User) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.CategoryGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Cache.UserCreate")
 		defer span.Finish()
 
-		_ = context.New(ctxt)
+		ctx = context.New(ctxt)
 	}
 
+	bytes, err := json.Marshal(usr)
+	if err != nil {
+		return errors.Wrap(err, "unable to marshal json")
+	}
+
+	err = r.client.Set(ctx, userKey+usr.ID, bytes, r.options.Ttl).Err()
+
+	return err
+}
+
+// UserUpdate updates user by id in cache.
+func (r *Repository) UserUpdate(ctxr context.Context, usr user.User) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Cache.UserUpdate")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
+	bytes, err := json.Marshal(usr)
+	if err != nil {
+		return errors.Wrap(err, "unable to marshal json")
+	}
+
+	r.client.Set(ctx, userKey+usr.ID, bytes, r.options.Ttl)
+
 	return nil
+}
+
+// UserDelete deletes user by id from cache.
+func (r *Repository) UserDelete(ctxr context.Context, userID string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Cache.UserDelete")
+		defer span.Finish()
+
+		ctx = context.New(ctxt)
+	}
+
+	err := r.client.Del(ctx, userKey+userID).Err()
+
+	return err
 }

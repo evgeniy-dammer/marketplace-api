@@ -7,7 +7,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // AuthenticationGetUser returns users id by username and password hash.
@@ -15,8 +14,8 @@ func (r *Repository) AuthenticationGetUser(ctxr context.Context, userID string, 
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.AuthenticationGetUser")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.AuthenticationGetUser")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -51,8 +50,8 @@ func (r *Repository) AuthenticationCreateUser(ctxr context.Context, input user.C
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.AuthenticationCreateUser")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.AuthenticationCreateUser")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -98,8 +97,8 @@ func (r *Repository) AuthenticationGetUserRole(ctxr context.Context, userID stri
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.AuthenticationGetUserRole")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.AuthenticationGetUserRole")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

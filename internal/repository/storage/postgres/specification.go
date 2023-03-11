@@ -8,7 +8,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // SpecificationGetAll selects all specifications from database.
@@ -16,8 +15,8 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, userID string, or
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -41,8 +40,8 @@ func (r *Repository) SpecificationGetOne(ctxr context.Context, userID string, or
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -66,8 +65,8 @@ func (r *Repository) SpecificationCreate(ctxr context.Context, userID string, in
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -107,8 +106,8 @@ func (r *Repository) SpecificationUpdate(ctxr context.Context, userID string, in
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -197,8 +196,8 @@ func (r *Repository) SpecificationDelete(ctxr context.Context, userID string, or
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.SpecificationDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

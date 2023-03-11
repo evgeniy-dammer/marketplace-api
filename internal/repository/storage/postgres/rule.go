@@ -8,7 +8,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // RuleGetAll selects all rules from database.
@@ -16,8 +15,8 @@ func (r *Repository) RuleGetAll(ctxr context.Context, userID string) ([]rule.Rul
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.RuleGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.RuleGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -36,8 +35,8 @@ func (r *Repository) RuleGetOne(ctxr context.Context, userID string, ruleID stri
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.RuleGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.RuleGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -56,8 +55,8 @@ func (r *Repository) RuleCreate(ctxr context.Context, userID string, input rule.
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.RuleCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.RuleCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -79,8 +78,8 @@ func (r *Repository) RuleUpdate(ctxr context.Context, userID string, input rule.
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.RuleUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.RuleUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -143,8 +142,8 @@ func (r *Repository) RuleDelete(ctxr context.Context, userID string, ruleID stri
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.RuleDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.RuleDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

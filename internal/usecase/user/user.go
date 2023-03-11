@@ -8,13 +8,12 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 // UserGetAll returns all users from the system.
 func (s *UseCase) UserGetAll(ctx context.Context, search string, status string, roleID string) ([]user.User, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserGetAll")
 		defer span.Finish()
 
@@ -28,7 +27,7 @@ func (s *UseCase) UserGetAll(ctx context.Context, search string, status string, 
 
 // UserGetAllRoles returns all user roles from the system.
 func (s *UseCase) UserGetAllRoles(ctx context.Context) ([]role.Role, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserGetAllRoles")
 		defer span.Finish()
 
@@ -42,7 +41,7 @@ func (s *UseCase) UserGetAllRoles(ctx context.Context) ([]role.Role, error) {
 
 // UserGetOne returns user by id from the system.
 func (s *UseCase) UserGetOne(ctx context.Context, userID string) (user.User, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserGetOne")
 		defer span.Finish()
 
@@ -51,7 +50,7 @@ func (s *UseCase) UserGetOne(ctx context.Context, userID string) (user.User, err
 
 	var usr user.User
 
-	if s.adapterCache != nil {
+	if s.isCacheOn {
 		return getOneWithCache(ctx, s, userID)
 	}
 
@@ -79,15 +78,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string) (user.User,
 		return usr, errors.Wrap(err, "user select failed")
 	}
 
-	createUser := user.CreateUserInput{
-		Phone:     usr.Phone,
-		Password:  usr.Password,
-		FirstName: usr.FirstName,
-		LastName:  usr.LastName,
-		RoleID:    usr.RoleID,
-	}
-
-	if err = s.adapterCache.UserCreate(ctx, userID, createUser); err != nil {
+	if err = s.adapterCache.UserCreate(ctx, usr); err != nil {
 		logger.Logger.Error("unable to add user into cache", zap.String("error", err.Error()))
 	}
 
@@ -96,7 +87,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string) (user.User,
 
 // UserCreate hashes the password and insert User into system.
 func (s *UseCase) UserCreate(ctx context.Context, userID string, input user.CreateUserInput) (string, error) {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserCreate")
 		defer span.Finish()
 
@@ -111,13 +102,28 @@ func (s *UseCase) UserCreate(ctx context.Context, userID string, input user.Crea
 	input.Password = pass
 
 	ID, err := s.adapterStorage.UserCreate(ctx, userID, input)
+	if err != nil {
+		return "", errors.Wrap(err, "user create in database failed")
+	}
 
-	return ID, errors.Wrap(err, "user create failed")
+	if s.isCacheOn {
+		usr, err := s.adapterStorage.UserGetOne(ctx, ID)
+		if err != nil {
+			return "", errors.Wrap(err, "user select from database failed")
+		}
+
+		err = s.adapterCache.UserCreate(ctx, usr)
+		if err != nil {
+			return "", errors.Wrap(err, "user create in cache failed")
+		}
+	}
+
+	return ID, nil
 }
 
 // UserUpdate updates user by id in the system.
 func (s *UseCase) UserUpdate(ctx context.Context, userID string, input user.UpdateUserInput) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserUpdate")
 		defer span.Finish()
 
@@ -137,12 +143,29 @@ func (s *UseCase) UserUpdate(ctx context.Context, userID string, input user.Upda
 		input.Password = &pass
 	}
 
-	return errors.Wrap(s.adapterStorage.UserUpdate(ctx, userID, input), "user update failed")
+	err := s.adapterStorage.UserUpdate(ctx, userID, input)
+	if err != nil {
+		return errors.Wrap(err, "user update in database failed")
+	}
+
+	if s.isCacheOn {
+		usr, err := s.adapterStorage.UserGetOne(ctx, *input.ID)
+		if err != nil {
+			return errors.Wrap(err, "user select from database failed")
+		}
+
+		err = s.adapterCache.UserUpdate(ctx, usr)
+		if err != nil {
+			return errors.Wrap(err, "user update in cache failed")
+		}
+	}
+
+	return nil
 }
 
 // UserDelete deletes user by id from the system.
 func (s *UseCase) UserDelete(ctx context.Context, userID string, dUserID string) error {
-	if viper.GetBool("service.tracing") {
+	if s.isTracingOn {
 		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.UserDelete")
 		defer span.Finish()
 
@@ -150,6 +173,16 @@ func (s *UseCase) UserDelete(ctx context.Context, userID string, dUserID string)
 	}
 
 	err := s.adapterStorage.UserDelete(ctx, userID, dUserID)
+	if err != nil {
+		return errors.Wrap(err, "user delete failed")
+	}
 
-	return errors.Wrap(err, "user delete failed")
+	if s.isCacheOn {
+		err = s.adapterCache.UserDelete(ctx, dUserID)
+		if err != nil {
+			return errors.Wrap(err, "user update in cache failed")
+		}
+	}
+
+	return nil
 }

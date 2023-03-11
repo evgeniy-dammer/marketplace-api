@@ -22,12 +22,17 @@ type Cache struct {
 }
 
 // Authentication interface.
-type Authentication interface{}
+type Authentication interface {
+	AuthenticationGetUserRole(ctx context.Context, userID string) (string, error)
+	AuthenticationSetUserRole(ctx context.Context, userID string, role string) error
+}
 
 // User interface.
 type User interface {
 	UserGetOne(ctx context.Context, userID string) (user.User, error)
-	UserCreate(ctx context.Context, userID string, input user.CreateUserInput) error
+	UserCreate(ctx context.Context, user user.User) error
+	UserUpdate(ctx context.Context, user user.User) error
+	UserDelete(ctx context.Context, userID string) error
 }
 
 // Organization interface.

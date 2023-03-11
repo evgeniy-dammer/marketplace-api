@@ -10,7 +10,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // UserGetAll selects all users from database.
@@ -18,8 +17,8 @@ func (r *Repository) UserGetAll(ctxr context.Context, search string, status stri
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -74,8 +73,8 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) 
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserGetAllRoles")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserGetAllRoles")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -95,8 +94,8 @@ func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User,
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -120,8 +119,8 @@ func (r *Repository) UserCreate(ctxr context.Context, userID string, input user.
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -166,8 +165,8 @@ func (r *Repository) UserUpdate(ctxr context.Context, userID string, input user.
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -214,8 +213,8 @@ func (r *Repository) UserDelete(ctxr context.Context, userID string, dUserID str
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.UserDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

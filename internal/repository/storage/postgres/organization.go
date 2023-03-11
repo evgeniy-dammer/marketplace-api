@@ -9,7 +9,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // OrganizationGetAll selects all organizations from database.
@@ -17,8 +16,8 @@ func (r *Repository) OrganizationGetAll(ctxr context.Context, userID string) ([]
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrganizationGetAll")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationGetAll")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -39,8 +38,8 @@ func (r *Repository) OrganizationGetOne(ctxr context.Context, userID string, org
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrganizationGetOne")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationGetOne")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -61,8 +60,8 @@ func (r *Repository) OrganizationCreate(ctxr context.Context, userID string, inp
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrganizationCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -86,8 +85,8 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, userID string, inp
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrganizationUpdate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationUpdate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -137,8 +136,8 @@ func (r *Repository) OrganizationDelete(ctxr context.Context, userID string, org
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.OrganizationDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)

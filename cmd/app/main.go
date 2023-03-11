@@ -27,13 +27,10 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
 	"github.com/evgeniy-dammer/emenu-api/pkg/server"
 	"github.com/evgeniy-dammer/emenu-api/pkg/store/postgres"
-	redisStore "github.com/evgeniy-dammer/emenu-api/pkg/store/redis"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
-	"github.com/go-redis/cache/v8"
-	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
-	"github.com/opentracing/opentracing-go/log"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -53,6 +50,11 @@ func main() {
 	if err != nil {
 		logger.Logger.Fatal("logger initialization failed", zap.String("error", err.Error()))
 	}
+
+	// service settings
+	isCacheOn := viper.GetBool("service.cache")
+	isTracingOn := viper.GetBool("service.tracing")
+	routerMode := viper.GetString("service.router")
 
 	// establishing database connection
 	database, adapter, err := postgres.NewPostgresDB(postgres.DBConfig{
@@ -74,15 +76,24 @@ func main() {
 		}
 	}(database)
 
-	var rcache *cache.Cache
+	var redisClient *redis.Client
 
-	if viper.GetBool("cache.mode") {
-		// establishing cache connection
-		rcache, err = redisStore.NewRedisCache(redis.Options{
+	if isCacheOn {
+		redisClient = redis.NewClient(&redis.Options{
 			Addr:     net.JoinHostPort(viper.GetString("cache.host"), viper.GetString("cache.port")),
 			Password: "", // os.Getenv("REDIS_PASSWORD"),
 			DB:       viper.GetInt("cache.database"),
 		})
+
+		defer func(redisClient *redis.Client) {
+			err = redisClient.Close()
+			if err != nil {
+				logger.Logger.Fatal("unable to close redis client", zap.String("error", err.Error()))
+			}
+		}(redisClient)
+
+		_, err = redisClient.Ping(context.TODO()).Result()
+
 		if err != nil {
 			logger.Logger.Fatal("cache initialization failed", zap.String("error", err.Error()))
 		}
@@ -90,14 +101,14 @@ func main() {
 		logger.Logger.Info("cache is turned off")
 	}
 
-	if viper.GetBool("service.tracing") {
+	if isTracingOn {
 		closer, err := tracing.New()
 		if err != nil {
-			panic(err)
+			logger.Logger.Fatal("unable to create new tracing closer", zap.String("error", err.Error()))
 		}
 		defer func() {
 			if err = closer.Close(); err != nil {
-				log.Error(err)
+				logger.Logger.Fatal("unable to close closer", zap.String("error", err.Error()))
 			}
 		}()
 	} else {
@@ -108,26 +119,31 @@ func main() {
 	repoStorage := postgresStorage.New(
 		database,
 		postgresStorage.Options{Timeout: time.Duration(viper.GetInt("database.timeout")) * time.Second},
+		isTracingOn,
 	)
 
 	repoCache := redisStorage.New(
-		rcache,
-		redisStorage.Options{Timeout: time.Duration(viper.GetInt("database.timeout")) * time.Second},
+		redisClient,
+		redisStorage.Options{
+			Timeout: time.Duration(viper.GetInt("cache.timeout")) * time.Second,
+			Ttl:     time.Duration(viper.GetInt("cache.ttl")) * time.Minute,
+		},
+		isTracingOn,
 	)
 
 	// use cases
-	ucAuthentication := useCaseAuthentication.New(repoStorage, repoCache)
-	ucUser := useCaseUser.New(repoStorage, repoCache)
-	ucOrganization := useCaseOrganization.New(repoStorage, repoCache)
-	ucCategory := useCaseCategory.New(repoStorage, repoCache)
-	ucItem := useCaseItem.New(repoStorage, repoCache)
-	ucTable := useCaseTable.New(repoStorage, repoCache)
-	ucOrder := useCaseOrder.New(repoStorage, repoCache)
-	ucImage := useCaseImage.New(repoStorage, repoCache)
-	ucComment := useCaseComment.New(repoStorage, repoCache)
-	ucSpecification := useCaseSpecification.New(repoStorage, repoCache)
-	ucFavorite := useCaseFavorite.New(repoStorage, repoCache)
-	ucRule := useCaseRule.New(repoStorage, repoCache)
+	ucAuthentication := useCaseAuthentication.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucUser := useCaseUser.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucOrganization := useCaseOrganization.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucCategory := useCaseCategory.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucItem := useCaseItem.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucTable := useCaseTable.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucOrder := useCaseOrder.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucImage := useCaseImage.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucComment := useCaseComment.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucSpecification := useCaseSpecification.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucFavorite := useCaseFavorite.New(repoStorage, repoCache, isTracingOn)
+	ucRule := useCaseRule.New(repoStorage, repoCache, isTracingOn, isCacheOn)
 
 	// deliveries
 	deliveryHTTP := deliveryHttp.New(
@@ -151,7 +167,7 @@ func main() {
 
 	srvConfig := server.Config{
 		Port:           viper.GetString("server.port"),
-		Handler:        deliveryHTTP.InitRoutes(viper.GetString("router.mode")),
+		Handler:        deliveryHTTP.InitRoutes(routerMode),
 		ReadTimeout:    viper.GetInt("server.read_timeout"),
 		WriteTimeout:   viper.GetInt("server.write_timeout"),
 		IdleTimeout:    viper.GetInt("server.idle_timeout"),

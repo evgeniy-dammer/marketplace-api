@@ -7,7 +7,6 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 )
 
 // FavoriteCreate insert favorite into database.
@@ -15,8 +14,8 @@ func (r *Repository) FavoriteCreate(ctxr context.Context, userID string, favorit
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.FavoriteCreate")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.FavoriteCreate")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
@@ -37,8 +36,8 @@ func (r *Repository) FavoriteDelete(ctxr context.Context, userID string, itemID 
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
-	if viper.GetBool("service.tracing") {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "RepositoryDatabase.FavoriteDelete")
+	if r.isTracingOn {
+		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.FavoriteDelete")
 		defer span.Finish()
 
 		ctx = context.New(ctxt)
