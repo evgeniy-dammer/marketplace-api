@@ -7,7 +7,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
@@ -17,8 +17,8 @@ func (r *Repository) CommentGetAll(ctxr context.Context, userID string, organiza
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CommentGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -42,8 +42,8 @@ func (r *Repository) CommentGetOne(ctxr context.Context, userID string, organiza
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CommentGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -66,8 +66,8 @@ func (r *Repository) CommentCreate(ctxr context.Context, userID string, input co
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CommentCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -102,8 +102,8 @@ func (r *Repository) CommentUpdate(ctxr context.Context, userID string, input co
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CommentUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -164,8 +164,8 @@ func (r *Repository) CommentDelete(ctxr context.Context, userID string, organiza
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CommentDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CommentDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/rule"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,6 +24,13 @@ import (
 // @Router /api/v1/rules/ [get].
 func (d *Delivery) getRules(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getRules")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -55,6 +63,13 @@ func (d *Delivery) getRules(ginCtx *gin.Context) {
 // @Router /api/v1/rules/{id} [get].
 func (d *Delivery) getRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getRule")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -95,6 +110,13 @@ func (d *Delivery) getRule(ginCtx *gin.Context) {
 func (d *Delivery) createRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.createRule")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -134,6 +156,13 @@ func (d *Delivery) createRule(ginCtx *gin.Context) {
 func (d *Delivery) updateRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.updateRule")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -171,6 +200,13 @@ func (d *Delivery) updateRule(ginCtx *gin.Context) {
 // @Router /api/v1/rules/{id} [delete].
 func (d *Delivery) deleteRule(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.deleteRule")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {

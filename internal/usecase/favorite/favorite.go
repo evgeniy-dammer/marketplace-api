@@ -3,15 +3,15 @@ package favorite
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/favorite"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // FavoriteCreate inserts favorite into system.
 func (s *UseCase) FavoriteCreate(ctx context.Context, userID string, favorite favorite.Favorite) error {
 	if s.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.FavoriteCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.FavoriteCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -24,8 +24,8 @@ func (s *UseCase) FavoriteCreate(ctx context.Context, userID string, favorite fa
 // FavoriteDelete deletes favorite by id from the system.
 func (s *UseCase) FavoriteDelete(ctx context.Context, userID string, itemID string) error {
 	if s.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.FavoriteDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.FavoriteDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
@@ -16,8 +16,8 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, userID string, or
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.SpecificationGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -41,8 +41,8 @@ func (r *Repository) SpecificationGetOne(ctxr context.Context, userID string, or
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.SpecificationGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -66,8 +66,8 @@ func (r *Repository) SpecificationCreate(ctxr context.Context, userID string, in
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.SpecificationCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -107,8 +107,8 @@ func (r *Repository) SpecificationUpdate(ctxr context.Context, userID string, in
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.SpecificationUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -197,8 +197,8 @@ func (r *Repository) SpecificationDelete(ctxr context.Context, userID string, or
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.SpecificationDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.SpecificationDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

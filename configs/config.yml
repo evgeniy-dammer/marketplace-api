@@ -28,8 +28,7 @@ cache:
   ttl: 20
 
 tracing:
-  host: "127.0.0.1"
-  port: 6831
+  url: "http://localhost:14268/api/traces"
 
 migrations:
   directory: "./migrations"

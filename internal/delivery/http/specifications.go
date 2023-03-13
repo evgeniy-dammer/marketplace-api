@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,13 @@ import (
 // @Router /api/v1/specifications/{org_id} [get].
 func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getSpecifications")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -64,6 +72,13 @@ func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
 // @Router /api/v1/specifications/{org_id}/{id} [get].
 func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getSpecification")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -111,6 +126,13 @@ func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.createSpecification")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -150,6 +172,13 @@ func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.updateSpecification")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -188,6 +217,13 @@ func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 // @Router /api/v1/specifications/{org_id}/{id} [delete].
 func (d *Delivery) deleteSpecification(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.deleteSpecification")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {

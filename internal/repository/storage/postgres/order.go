@@ -7,7 +7,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/order"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
@@ -17,8 +17,8 @@ func (r *Repository) OrderGetAll(ctxr context.Context, userID string, organizati
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrderGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -42,8 +42,8 @@ func (r *Repository) OrderGetOne(ctxr context.Context, userID string, organizati
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrderGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -66,8 +66,8 @@ func (r *Repository) OrderCreate(ctxr context.Context, userID string, input orde
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrderCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -119,8 +119,8 @@ func (r *Repository) OrderUpdate(ctxr context.Context, userID string, input orde
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrderUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -213,8 +213,8 @@ func (r *Repository) OrderDelete(ctxr context.Context, userID string, organizati
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrderDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrderDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

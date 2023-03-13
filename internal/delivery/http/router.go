@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 // InitRoutes initialize routes.
@@ -17,12 +18,13 @@ func (d *Delivery) InitRoutes(mode string) *gin.Engine {
 	gin.SetMode(mode)
 
 	router := gin.New()
-	pprof.Register(router, "dev/pprof")
+	router.Use(otelgin.Middleware("my-server"))
 	router.Use(d.corsMiddleware())
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(ginzap.RecoveryWithZap(logger.Logger, true))
-	router.Use(Tracer())
 	router.RedirectTrailingSlash = false
+
+	pprof.Register(router, "dev/pprof")
 
 	auth := router.Group("/auth")
 	{

@@ -1,6 +1,26 @@
 package redis
 
 const (
-	userKey = "user."
-	roleKey = "role."
+	userKey           = "user."
+	usersKey          = "users."
+	roleKey           = "role."
+	rolesKey          = "roles.all"
+	ruleKey           = "rule."
+	rulesKey          = "rules."
+	organizationKey   = "organization."
+	organizationsKey  = "organizations."
+	categoryKey       = "category."
+	categoriesKey     = "categories."
+	itemKey           = "item."
+	itemsKey          = "items."
+	tableKey          = "table."
+	tablesKey         = "tables."
+	specificationKey  = "specification."
+	specificationsKey = "specifications."
+	commentKey        = "comment."
+	commentsKey       = "comments."
+	imageKey          = "image."
+	imagesKey         = "images."
+	orderKey          = "order."
+	ordersKey         = "orders."
 )

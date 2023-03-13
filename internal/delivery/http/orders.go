@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/order"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,13 @@ import (
 // @Router /api/v1/orders/{org_id} [get].
 func (d *Delivery) getOrders(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getOrders")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -64,6 +72,13 @@ func (d *Delivery) getOrders(ginCtx *gin.Context) {
 // @Router /api/v1/orders/{org_id}/{id} [get].
 func (d *Delivery) getOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getOrder")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -111,6 +126,13 @@ func (d *Delivery) getOrder(ginCtx *gin.Context) {
 func (d *Delivery) createOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.createOrder")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -150,6 +172,13 @@ func (d *Delivery) createOrder(ginCtx *gin.Context) {
 func (d *Delivery) updateOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.updateOrder")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -188,6 +217,13 @@ func (d *Delivery) updateOrder(ginCtx *gin.Context) {
 // @Router /api/v1/orders/{org_id}/{id} [delete].
 func (d *Delivery) deleteOrder(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.deleteOrder")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/item"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
@@ -18,8 +18,8 @@ func (r *Repository) ItemGetAll(ctxr context.Context, userID string, organizatio
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.ItemGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -66,8 +66,8 @@ func (r *Repository) ItemGetOne(ctxr context.Context, userID string, organizatio
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.ItemGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -135,8 +135,8 @@ func (r *Repository) ItemCreate(ctxr context.Context, userID string, input item.
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.ItemCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -181,8 +181,8 @@ func (r *Repository) ItemUpdate(ctxr context.Context, userID string, input item.
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.ItemUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -291,8 +291,8 @@ func (r *Repository) ItemDelete(ctxr context.Context, userID string, organizatio
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.ItemDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.ItemDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

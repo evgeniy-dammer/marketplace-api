@@ -3,17 +3,23 @@ package specification
 import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // SpecificationGetAll returns all specifications from the system.
 func (s *UseCase) SpecificationGetAll(ctx context.Context, userID string, organizationID string) ([]specification.Specification, error) {
 	if s.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
+	}
+
+	if s.isCacheOn {
+		return getAllWithCache(ctx, s, userID, organizationID)
 	}
 
 	specifications, err := s.adapterStorage.SpecificationGetAll(ctx, userID, organizationID)
@@ -21,39 +27,109 @@ func (s *UseCase) SpecificationGetAll(ctx context.Context, userID string, organi
 	return specifications, errors.Wrap(err, "specifications select error")
 }
 
+// getAllWithCache returns specifications from cache if exists.
+func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizationID string) ([]specification.Specification, error) {
+	specifications, err := s.adapterCache.SpecificationGetAll(ctx, organizationID)
+	if err != nil {
+		logger.Logger.Error("unable to get specifications from cache", zap.String("error", err.Error()))
+	}
+
+	if len(specifications) > 0 {
+		return specifications, nil
+	}
+
+	specifications, err = s.adapterStorage.SpecificationGetAll(ctx, userID, organizationID)
+	if err != nil {
+		return specifications, errors.Wrap(err, "specifications select failed")
+	}
+
+	if err = s.adapterCache.SpecificationSetAll(ctx, organizationID, specifications); err != nil {
+		logger.Logger.Error("unable to add specifications into cache", zap.String("error", err.Error()))
+	}
+
+	return specifications, nil
+}
+
 // SpecificationGetOne returns specification by id from the system.
 func (s *UseCase) SpecificationGetOne(ctx context.Context, userID string, organizationID string, specificationID string) (specification.Specification, error) {
 	if s.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
 
-	specification, err := s.adapterStorage.SpecificationGetOne(ctx, userID, organizationID, specificationID)
+	if s.isCacheOn {
+		return getOneWithCache(ctx, s, userID, organizationID, specificationID)
+	}
 
-	return specification, errors.Wrap(err, "specification select error")
+	spec, err := s.adapterStorage.SpecificationGetOne(ctx, userID, organizationID, specificationID)
+
+	return spec, errors.Wrap(err, "specification select error")
+}
+
+// getOneWithCache returns specification by id from cache if exists.
+func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizationID string, specificationID string) (specification.Specification, error) {
+	spec, err := s.adapterCache.SpecificationGetOne(ctx, specificationID)
+	if err != nil {
+		logger.Logger.Error("unable to get specification from cache", zap.String("error", err.Error()))
+	}
+
+	if spec != (specification.Specification{}) {
+		return spec, nil
+	}
+
+	spec, err = s.adapterStorage.SpecificationGetOne(ctx, userID, organizationID, specificationID)
+	if err != nil {
+		return spec, errors.Wrap(err, "specification select failed")
+	}
+
+	if err = s.adapterCache.SpecificationCreate(ctx, spec); err != nil {
+		logger.Logger.Error("unable to add specification into cache", zap.String("error", err.Error()))
+	}
+
+	return spec, nil
 }
 
 // SpecificationCreate inserts specification into system.
 func (s *UseCase) SpecificationCreate(ctx context.Context, userID string, input specification.CreateSpecificationInput) (string, error) {
 	if s.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
 
 	specificationID, err := s.adapterStorage.SpecificationCreate(ctx, userID, input)
+	if err != nil {
+		return specificationID, errors.Wrap(err, "specification create error")
+	}
 
-	return specificationID, errors.Wrap(err, "specification create error")
+	if s.isCacheOn {
+		spec, err := s.adapterStorage.SpecificationGetOne(ctx, userID, input.OrganizationID, specificationID)
+		if err != nil {
+			return "", errors.Wrap(err, "specification select from database failed")
+		}
+
+		err = s.adapterCache.SpecificationCreate(ctx, spec)
+		if err != nil {
+			return "", errors.Wrap(err, "specification create in cache failed")
+		}
+
+		err = s.adapterCache.SpecificationInvalidate(ctx)
+		if err != nil {
+			return "", errors.Wrap(err, "specification invalidate users in cache failed")
+		}
+	}
+
+	return specificationID, nil
 }
 
 // SpecificationUpdate updates specification by id in the system.
 func (s *UseCase) SpecificationUpdate(ctx context.Context, userID string, input specification.UpdateSpecificationInput) error {
 	if s.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -63,20 +139,55 @@ func (s *UseCase) SpecificationUpdate(ctx context.Context, userID string, input 
 	}
 
 	err := s.adapterStorage.SpecificationUpdate(ctx, userID, input)
+	if err != nil {
+		return errors.Wrap(err, "specification update in database failed")
+	}
 
-	return errors.Wrap(err, "specification update error")
+	if s.isCacheOn {
+		spec, err := s.adapterStorage.SpecificationGetOne(ctx, userID, *input.OrganizationID, *input.ID)
+		if err != nil {
+			return errors.Wrap(err, "specification select from database failed")
+		}
+
+		err = s.adapterCache.SpecificationUpdate(ctx, spec)
+		if err != nil {
+			return errors.Wrap(err, "specification update in cache failed")
+		}
+
+		err = s.adapterCache.SpecificationInvalidate(ctx)
+		if err != nil {
+			return errors.Wrap(err, "specification invalidate users in cache failed")
+		}
+	}
+
+	return nil
 }
 
 // SpecificationDelete deletes specification by id from the system.
 func (s *UseCase) SpecificationDelete(ctx context.Context, userID string, organizationID string, specificationID string) error {
 	if s.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctx, "Usecase.SpecificationDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
 
 	err := s.adapterStorage.SpecificationDelete(ctx, userID, organizationID, specificationID)
+	if err != nil {
+		return errors.Wrap(err, "specification delete failed")
+	}
 
-	return errors.Wrap(err, "specification delete error")
+	if s.isCacheOn {
+		err = s.adapterCache.SpecificationDelete(ctx, specificationID)
+		if err != nil {
+			return errors.Wrap(err, "specification update in cache failed")
+		}
+
+		err = s.adapterCache.SpecificationInvalidate(ctx)
+		if err != nil {
+			return errors.Wrap(err, "invalidate specifications in cache failed")
+		}
+	}
+
+	return nil
 }

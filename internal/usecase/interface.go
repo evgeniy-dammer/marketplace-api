@@ -22,7 +22,11 @@ type Authentication interface {
 	AuthenticationGenerateToken(ctx context.Context, id string, username string, password string) (user.User, token.Tokens, error)
 	AuthenticationParseToken(ctx context.Context, token string) (string, error)
 	AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error)
-	AuthenticationGetUserRole(ctx context.Context, id string) (string, error)
+}
+
+// Authorization interface.
+type Authorization interface {
+	AuthorizationGetUserRole(ctx context.Context, id string) (string, error)
 }
 
 // User interface.

@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/favorite"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,13 @@ import (
 // @Router /api/v1/favorites/ [post].
 func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.createFavorite")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -63,6 +71,13 @@ func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 // @Router /api/v1/favorites/{item_id} [delete].
 func (d *Delivery) deleteFavorite(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.deleteFavorite")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {

@@ -1,36 +1,31 @@
 package tracing
 
 import (
-	"fmt"
-	"io"
-
-	"github.com/opentracing/opentracing-go"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"github.com/uber/jaeger-client-go"
-	"github.com/uber/jaeger-client-go/config"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 )
 
-func New() (io.Closer, error) {
-	cfg := &config.Configuration{
-		ServiceName: viper.GetString("service.name"),
-		RPCMetrics:  true,
-		Sampler: &config.SamplerConfig{
-			Type:  "const",
-			Param: 1,
-		},
-		Reporter: &config.ReporterConfig{
-			LogSpans:           false,
-			LocalAgentHostPort: fmt.Sprintf("%s:%d", viper.GetString("tracing.host"), viper.GetUint32("tracing.port")),
-		},
-	}
+var Tracer = otel.Tracer(viper.GetString("service.name"))
 
-	tracer, closer, err := cfg.NewTracer(config.Logger(jaeger.StdLogger))
+func InitTracer(url string, name string) (*trace.TracerProvider, error) {
+	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to create a new tracer")
+		return nil, err
 	}
 
-	opentracing.SetGlobalTracer(tracer)
+	tracerProvider := trace.NewTracerProvider(
+		trace.WithBatcher(exporter),
+		trace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName(name),
+		)),
+	)
 
-	return closer, nil
+	otel.SetTracerProvider(tracerProvider)
+
+	return tracerProvider, nil
 }

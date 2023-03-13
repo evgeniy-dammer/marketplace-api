@@ -7,7 +7,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
@@ -17,8 +17,8 @@ func (r *Repository) OrganizationGetAll(ctxr context.Context, userID string) ([]
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrganizationGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -39,8 +39,8 @@ func (r *Repository) OrganizationGetOne(ctxr context.Context, userID string, org
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrganizationGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -61,8 +61,8 @@ func (r *Repository) OrganizationCreate(ctxr context.Context, userID string, inp
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrganizationCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -86,8 +86,8 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, userID string, inp
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrganizationUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -137,8 +137,8 @@ func (r *Repository) OrganizationDelete(ctxr context.Context, userID string, org
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.OrganizationDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.OrganizationDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

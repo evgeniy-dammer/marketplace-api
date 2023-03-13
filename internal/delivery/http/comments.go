@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,13 @@ import (
 // @Router /api/v1/comments/{org_id} [get].
 func (d *Delivery) getComments(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getComments")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -66,13 +74,19 @@ func (d *Delivery) getComments(ginCtx *gin.Context) {
 func (d *Delivery) getComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getComment")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
 
 	organizationID := ginCtx.Param("org_id")
-
 	if organizationID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
@@ -114,6 +128,13 @@ func (d *Delivery) getComment(ginCtx *gin.Context) {
 func (d *Delivery) createComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.createComment")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -152,6 +173,13 @@ func (d *Delivery) createComment(ginCtx *gin.Context) {
 // @Router /api/v1/comments/ [patch].
 func (d *Delivery) updateComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.updateComment")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -192,13 +220,19 @@ func (d *Delivery) updateComment(ginCtx *gin.Context) {
 func (d *Delivery) deleteComment(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.deleteComment")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
 
 	organizationID := ginCtx.Param("org_id")
-
 	if organizationID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 

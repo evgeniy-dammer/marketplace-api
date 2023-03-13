@@ -8,7 +8,7 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/role"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
@@ -18,8 +18,8 @@ func (r *Repository) UserGetAll(ctxr context.Context, search string, status stri
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.UserGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -74,8 +74,8 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) 
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserGetAllRoles")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.UserGetAllRoles")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -95,8 +95,8 @@ func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User,
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.UserGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -120,8 +120,8 @@ func (r *Repository) UserCreate(ctxr context.Context, userID string, input user.
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.UserCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -166,8 +166,8 @@ func (r *Repository) UserUpdate(ctxr context.Context, userID string, input user.
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.UserUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -214,8 +214,8 @@ func (r *Repository) UserDelete(ctxr context.Context, userID string, dUserID str
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.UserDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.UserDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

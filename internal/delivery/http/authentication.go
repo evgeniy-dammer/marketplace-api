@@ -7,6 +7,7 @@ import (
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,13 @@ import (
 // @Router /signin/ [post].
 func (d *Delivery) signIn(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.signIn")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	var input user.SignInInput
 
@@ -62,6 +70,13 @@ func (d *Delivery) signIn(ginCtx *gin.Context) {
 func (d *Delivery) signUp(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.signUp")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	var input user.CreateUserInput
 	if err := ginCtx.BindJSON(&input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
@@ -93,6 +108,13 @@ func (d *Delivery) signUp(ginCtx *gin.Context) {
 // @Router /refresh/ [post].
 func (d *Delivery) refresh(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.refresh")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	var input token.RefreshToken
 

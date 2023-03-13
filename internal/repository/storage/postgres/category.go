@@ -7,7 +7,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/category"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
@@ -17,8 +17,8 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, userID string, organiz
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryGetAll")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CategoryGetAll")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -29,6 +29,8 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, userID string, organiz
 		"SELECT id, name_tm, name_ru, name_tr, name_en, parent_id, level, organization_id FROM %s "+
 			"WHERE is_deleted = false AND organization_id = $1",
 		categoryTable)
+
+	fmt.Println(organizationID)
 
 	err := r.database.SelectContext(ctx, &categories, query, organizationID)
 
@@ -41,8 +43,8 @@ func (r *Repository) CategoryGetOne(ctxr context.Context, userID string, organiz
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryGetOne")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CategoryGetOne")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -66,8 +68,8 @@ func (r *Repository) CategoryCreate(ctxr context.Context, userID string, input c
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CategoryCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -104,8 +106,8 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, userID string, input c
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryUpdate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CategoryUpdate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -171,8 +173,8 @@ func (r *Repository) CategoryDelete(ctxr context.Context, userID string, organiz
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.CategoryDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.CategoryDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}

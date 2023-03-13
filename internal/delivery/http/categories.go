@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/category"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,13 @@ import (
 // @Router /api/v1/categories/{org_id} [get].
 func (d *Delivery) getCategories(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getCategories")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -65,6 +73,13 @@ func (d *Delivery) getCategories(ginCtx *gin.Context) {
 // @Router /api/v1/categories/{org_id}/{id} [get].
 func (d *Delivery) getCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getCategory")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -112,6 +127,13 @@ func (d *Delivery) getCategory(ginCtx *gin.Context) {
 func (d *Delivery) createCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.createCategory")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -150,6 +172,13 @@ func (d *Delivery) createCategory(ginCtx *gin.Context) {
 // @Router /api/v1/categories/ [patch].
 func (d *Delivery) updateCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.updateCategory")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -190,13 +219,19 @@ func (d *Delivery) updateCategory(ginCtx *gin.Context) {
 func (d *Delivery) deleteCategory(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.deleteCategory")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
 	}
 
 	organizationID := ginCtx.Param("org_id")
-
 	if organizationID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
@@ -204,7 +239,6 @@ func (d *Delivery) deleteCategory(ginCtx *gin.Context) {
 	}
 
 	categoryID := ginCtx.Param("id")
-
 	if categoryID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 

@@ -6,6 +6,7 @@ import (
 	_ "github.com/evgeniy-dammer/emenu-api/internal/domain/role"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,13 @@ import (
 // @Router /api/v1/users/ [get].
 func (d *Delivery) getAllUsers(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getAllUsers")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	search := ginCtx.Query("search")
 	roleID := ginCtx.Query("role_id")
@@ -55,6 +63,13 @@ func (d *Delivery) getAllUsers(ginCtx *gin.Context) {
 // @Router /api/v1/users/{id} [get].
 func (d *Delivery) getUser(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getUser")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID := ginCtx.Param("id")
 	if userID == "" {
@@ -89,6 +104,13 @@ func (d *Delivery) getUser(ginCtx *gin.Context) {
 func (d *Delivery) getAllRoles(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getAllRoles")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	results, err := d.ucUser.UserGetAllRoles(ctx)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
@@ -115,6 +137,13 @@ func (d *Delivery) getAllRoles(ginCtx *gin.Context) {
 // @Router /api/v1/users/ [post].
 func (d *Delivery) createUser(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.createUser")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
@@ -156,6 +185,13 @@ func (d *Delivery) createUser(ginCtx *gin.Context) {
 func (d *Delivery) updateUser(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
 
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.updateUser")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {
 		return
@@ -193,6 +229,13 @@ func (d *Delivery) updateUser(ginCtx *gin.Context) {
 // @Router /api/v1/users/{id} [delete].
 func (d *Delivery) deleteUser(ginCtx *gin.Context) {
 	ctx := context.New(ginCtx)
+
+	if d.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.deleteUser")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
 
 	userID, err := d.getUserID(ginCtx)
 	if err != nil {

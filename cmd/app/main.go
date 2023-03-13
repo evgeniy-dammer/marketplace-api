@@ -13,6 +13,7 @@ import (
 	postgresStorage "github.com/evgeniy-dammer/emenu-api/internal/repository/storage/postgres"
 	redisStorage "github.com/evgeniy-dammer/emenu-api/internal/repository/storage/redis"
 	useCaseAuthentication "github.com/evgeniy-dammer/emenu-api/internal/usecase/authentication"
+	useCaseAuthorization "github.com/evgeniy-dammer/emenu-api/internal/usecase/authorization"
 	useCaseCategory "github.com/evgeniy-dammer/emenu-api/internal/usecase/category"
 	useCaseComment "github.com/evgeniy-dammer/emenu-api/internal/usecase/comment"
 	useCaseFavorite "github.com/evgeniy-dammer/emenu-api/internal/usecase/favorite"
@@ -102,13 +103,13 @@ func main() {
 	}
 
 	if isTracingOn {
-		closer, err := tracing.New()
+		tracerProvider, err := tracing.InitTracer(viper.GetString("tracing.url"), viper.GetString("service.name"))
 		if err != nil {
-			logger.Logger.Fatal("unable to create new tracing closer", zap.String("error", err.Error()))
+			logger.Logger.Fatal("unable to start tracer provider", zap.String("error", err.Error()))
 		}
 		defer func() {
-			if err = closer.Close(); err != nil {
-				logger.Logger.Fatal("unable to close closer", zap.String("error", err.Error()))
+			if err := tracerProvider.Shutdown(context.Background()); err != nil {
+				logger.Logger.Fatal("unable to shutdown tracer provider", zap.String("error", err.Error()))
 			}
 		}()
 	} else {
@@ -133,6 +134,7 @@ func main() {
 
 	// use cases
 	ucAuthentication := useCaseAuthentication.New(repoStorage, repoCache, isTracingOn, isCacheOn)
+	ucAuthorization := useCaseAuthorization.New(repoStorage, repoCache, isTracingOn, isCacheOn)
 	ucUser := useCaseUser.New(repoStorage, repoCache, isTracingOn, isCacheOn)
 	ucOrganization := useCaseOrganization.New(repoStorage, repoCache, isTracingOn, isCacheOn)
 	ucCategory := useCaseCategory.New(repoStorage, repoCache, isTracingOn, isCacheOn)
@@ -148,6 +150,7 @@ func main() {
 	// deliveries
 	deliveryHTTP := deliveryHttp.New(
 		ucAuthentication,
+		ucAuthorization,
 		ucUser,
 		ucOrganization,
 		ucCategory,
@@ -160,6 +163,7 @@ func main() {
 		ucFavorite,
 		ucRule,
 		adapter,
+		isTracingOn,
 	)
 
 	// create new server

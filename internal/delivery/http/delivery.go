@@ -18,6 +18,7 @@ import (
 // Delivery delivery.
 type Delivery struct {
 	ucAuthentication usecase.Authentication
+	ucAuthorization  usecase.Authorization
 	ucUser           usecase.User
 	ucOrganization   usecase.Organization
 	ucCategory       usecase.Category
@@ -30,11 +31,13 @@ type Delivery struct {
 	ucFavorite       usecase.Favorite
 	ucRule           usecase.Rule
 	adapter          *pgadapter.Adapter
+	isTracingOn      bool
 }
 
 // New constructor for Delivery.
 func New(
 	ucAuthentication usecase.Authentication,
+	ucAuthorization usecase.Authorization,
 	ucUser usecase.User,
 	ucOrganization usecase.Organization,
 	ucCategory usecase.Category,
@@ -47,9 +50,11 @@ func New(
 	ucFavorite usecase.Favorite,
 	ucRule usecase.Rule,
 	adapter *pgadapter.Adapter,
+	isTracingOn bool,
 ) *Delivery {
 	return &Delivery{
 		ucAuthentication: ucAuthentication,
+		ucAuthorization:  ucAuthorization,
 		ucUser:           ucUser,
 		ucOrganization:   ucOrganization,
 		ucCategory:       ucCategory,
@@ -62,5 +67,6 @@ func New(
 		ucFavorite:       ucFavorite,
 		ucRule:           ucRule,
 		adapter:          adapter,
+		isTracingOn:      isTracingOn,
 	}
 }

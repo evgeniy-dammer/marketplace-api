@@ -19,6 +19,7 @@ import (
 // Storage interface.
 type Storage struct {
 	Authentication
+	Authorization
 	User
 	Organization
 	Category
@@ -36,7 +37,11 @@ type Storage struct {
 type Authentication interface {
 	AuthenticationGetUser(ctx context.Context, id string, username string) (user.User, error)
 	AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error)
-	AuthenticationGetUserRole(ctx context.Context, id string) (string, error)
+}
+
+// Authorization interface.
+type Authorization interface {
+	AuthorizationGetUserRole(ctx context.Context, id string) (string, error)
 }
 
 // User interface.

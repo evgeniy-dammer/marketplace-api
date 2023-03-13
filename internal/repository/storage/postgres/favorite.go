@@ -5,7 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/favorite"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/opentracing/opentracing-go"
+	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
@@ -15,8 +15,8 @@ func (r *Repository) FavoriteCreate(ctxr context.Context, userID string, favorit
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.FavoriteCreate")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.FavoriteCreate")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
@@ -37,8 +37,8 @@ func (r *Repository) FavoriteDelete(ctxr context.Context, userID string, itemID 
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		span, ctxt := opentracing.StartSpanFromContext(ctxr, "Database.FavoriteDelete")
-		defer span.Finish()
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.FavoriteDelete")
+		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
