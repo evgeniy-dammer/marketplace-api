@@ -54,6 +54,13 @@ services:
     depends_on:
       - marketplace-db
 
+  marketplace-tracing:
+    container_name: marketplace-tracing
+    image: jaegertracing/all-in-one:latest
+    network_mode: host
+    depends_on:
+      - marketplace-api
+
 volumes:
   marketplace-db:
     external: true
