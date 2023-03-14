@@ -9,10 +9,6 @@ migrup:
 migrdown:
 	migrate -path ./schema -database 'postgres://marketplace:${DB_PASSWORD}@localhost:5432/marketplace?sslmode=disable' down
 
-
-
-
-
 build: clean
 	go mod download
 	go build -tags=jsoniter -o marketplace-api cmd/app/main.go
@@ -49,9 +45,6 @@ contrun:
 
 contstop:
 	docker stop marketplace-api
-
-
-
 
 protos: # execute from root directory
 	protoc -I proto/ \
