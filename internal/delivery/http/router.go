@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/docs"
-	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/docs"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-contrib/zap"
@@ -18,13 +18,15 @@ func (d *Delivery) InitRoutes(mode string) *gin.Engine {
 	gin.SetMode(mode)
 
 	router := gin.New()
-	router.Use(otelgin.Middleware("my-server"))
+	router.Use(otelgin.Middleware("marketplace-api"))
 	router.Use(d.corsMiddleware())
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(ginzap.RecoveryWithZap(logger.Logger, true))
 	router.RedirectTrailingSlash = false
 
-	pprof.Register(router, "dev/pprof")
+	if mode == "debug" {
+		pprof.Register(router, "dev/pprof")
+	}
 
 	auth := router.Group("/auth")
 	{

@@ -8,8 +8,8 @@ import (
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/persist"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 	cors "github.com/itsjamie/gin-cors"
 )

@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(in *jlexer.Lexer, out *ListFavorite) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite(in *jlexer.Lexer, out *ListFavorite) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -45,7 +45,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(out *jwriter.Writer, in ListFavorite) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite(out *jwriter.Writer, in ListFavorite) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -63,27 +63,27 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(
 // MarshalJSON supports json.Marshaler interface
 func (v ListFavorite) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ListFavorite) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ListFavorite) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ListFavorite) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1(in *jlexer.Lexer, out *Favorite) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite1(in *jlexer.Lexer, out *Favorite) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -114,7 +114,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1(out *jwriter.Writer, in Favorite) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite1(out *jwriter.Writer, in Favorite) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -129,23 +129,23 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1
 // MarshalJSON supports json.Marshaler interface
 func (v Favorite) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Favorite) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Favorite) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Favorite) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainFavorite1(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainFavorite1(l, v)
 }

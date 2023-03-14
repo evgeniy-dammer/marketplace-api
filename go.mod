@@ -1,4 +1,4 @@
-module github.com/evgeniy-dammer/emenu-api
+module github.com/evgeniy-dammer/marketplace-api
 
 go 1.20
 

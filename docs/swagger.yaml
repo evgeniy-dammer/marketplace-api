@@ -1034,8 +1034,8 @@ info:
   contact:
     email: evgeniydammer@gmail.com
     name: Evgeniy Dammer
-  description: Emenu API service
-  title: Emenu API
+  description: marketplace API service
+  title: marketplace API
   version: "1.0"
 paths:
   /api/v1/categories/:

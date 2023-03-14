@@ -1,8 +1,8 @@
 package specification
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/internal/usecase/adapters/cache"
-	"github.com/evgeniy-dammer/emenu-api/internal/usecase/adapters/storage"
+	"github.com/evgeniy-dammer/marketplace-api/internal/usecase/adapters/cache"
+	"github.com/evgeniy-dammer/marketplace-api/internal/usecase/adapters/storage"
 )
 
 // UseCase is an organization usecase.

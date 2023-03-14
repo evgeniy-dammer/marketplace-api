@@ -3,11 +3,11 @@ package authentication
 import (
 	"time"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
-	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/token"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
+	"github.com/evgeniy-dammer/marketplace-api/internal/usecase"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/golang-jwt/jwt"
 	"github.com/pkg/errors"
 )

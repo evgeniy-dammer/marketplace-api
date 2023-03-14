@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(in *jlexer.Lexer, out *Role) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole(in *jlexer.Lexer, out *Role) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -50,7 +50,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(in *
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(out *jwriter.Writer, in Role) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole(out *jwriter.Writer, in Role) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -70,27 +70,27 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(out 
 // MarshalJSON supports json.Marshaler interface
 func (v Role) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Role) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Role) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Role) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(in *jlexer.Lexer, out *ListRole) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole1(in *jlexer.Lexer, out *ListRole) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -118,7 +118,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(in 
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(out *jwriter.Writer, in ListRole) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole1(out *jwriter.Writer, in ListRole) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -136,23 +136,23 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(out
 // MarshalJSON supports json.Marshaler interface
 func (v ListRole) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ListRole) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ListRole) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ListRole) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainRole1(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainRole1(l, v)
 }

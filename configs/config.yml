@@ -1,5 +1,5 @@
 service:
-  name: "emenu-api"
+  name: "marketplace-api"
   production: false # true, false
   tracing: true # true, false
   cache: true # true, false
@@ -15,8 +15,8 @@ server:
 database:
   host: "localhost"
   port: "5432"
-  username: "emenu"
-  dbname: "emenu"
+  username: "marketplace"
+  dbname: "marketplace"
   sslmode: "disable"
   timeout: 30
 

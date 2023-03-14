@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/token"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 

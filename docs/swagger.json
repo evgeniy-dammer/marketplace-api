@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Emenu API service",
-        "title": "Emenu API",
+        "description": "marketplace API service",
+        "title": "marketplace API",
         "contact": {
             "name": "Evgeniy Dammer",
             "email": "evgeniydammer@gmail.com"

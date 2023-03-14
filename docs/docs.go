@@ -4912,8 +4912,8 @@ var SwaggerInfo_swagger = &swag.Spec{
 	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Emenu API",
-	Description:      "Emenu API service",
+	Title:            "marketplace API",
+	Description:      "marketplace API service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate_swagger,
 }

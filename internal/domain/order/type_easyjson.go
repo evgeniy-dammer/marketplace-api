@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(in *jlexer.Lexer, out *UpdateOrderInput) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder(in *jlexer.Lexer, out *UpdateOrderInput) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -127,7 +127,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(in 
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(out *jwriter.Writer, in UpdateOrderInput) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder(out *jwriter.Writer, in UpdateOrderInput) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -202,27 +202,27 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(out
 // MarshalJSON supports json.Marshaler interface
 func (v UpdateOrderInput) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v UpdateOrderInput) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *UpdateOrderInput) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *UpdateOrderInput) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(in *jlexer.Lexer, out *OrderItem) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder1(in *jlexer.Lexer, out *OrderItem) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -263,7 +263,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(in
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(out *jwriter.Writer, in OrderItem) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder1(out *jwriter.Writer, in OrderItem) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -303,27 +303,27 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(ou
 // MarshalJSON supports json.Marshaler interface
 func (v OrderItem) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v OrderItem) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *OrderItem) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *OrderItem) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder1(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder1(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(in *jlexer.Lexer, out *Order) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder2(in *jlexer.Lexer, out *Order) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -391,7 +391,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(in
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(out *jwriter.Writer, in Order) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder2(out *jwriter.Writer, in Order) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -455,27 +455,27 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(ou
 // MarshalJSON supports json.Marshaler interface
 func (v Order) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Order) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Order) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Order) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder2(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder2(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(in *jlexer.Lexer, out *ListOrder) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder3(in *jlexer.Lexer, out *ListOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -503,7 +503,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(in
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(out *jwriter.Writer, in ListOrder) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder3(out *jwriter.Writer, in ListOrder) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -521,27 +521,27 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(ou
 // MarshalJSON supports json.Marshaler interface
 func (v ListOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ListOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ListOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ListOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder3(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder3(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(in *jlexer.Lexer, out *CreateOrderItemInput) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder4(in *jlexer.Lexer, out *CreateOrderItemInput) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -578,7 +578,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(in
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(out *jwriter.Writer, in CreateOrderItemInput) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder4(out *jwriter.Writer, in CreateOrderItemInput) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -608,27 +608,27 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(ou
 // MarshalJSON supports json.Marshaler interface
 func (v CreateOrderItemInput) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v CreateOrderItemInput) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *CreateOrderItemInput) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *CreateOrderItemInput) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder4(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder4(l, v)
 }
-func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(in *jlexer.Lexer, out *CreateOrderInput) {
+func easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder5(in *jlexer.Lexer, out *CreateOrderInput) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -690,7 +690,7 @@ func easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(in
 		in.Consumed()
 	}
 }
-func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(out *jwriter.Writer, in CreateOrderInput) {
+func easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder5(out *jwriter.Writer, in CreateOrderInput) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -750,23 +750,23 @@ func easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(ou
 // MarshalJSON supports json.Marshaler interface
 func (v CreateOrderInput) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(&w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v CreateOrderInput) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBc289ab0EncodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(w, v)
+	easyjsonBc289ab0EncodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *CreateOrderInput) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(&r, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *CreateOrderInput) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBc289ab0DecodeGithubComEvgeniyDammerEmenuApiInternalDomainOrder5(l, v)
+	easyjsonBc289ab0DecodeGithubComEvgeniyDammermarketplaceApiInternalDomainOrder5(l, v)
 }

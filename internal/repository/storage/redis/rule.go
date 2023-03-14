@@ -1,9 +1,9 @@
 package redis
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/rule"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/rule"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )

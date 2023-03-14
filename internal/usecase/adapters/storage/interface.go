@@ -1,19 +1,19 @@
 package storage
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/category"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/comment"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/favorite"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/image"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/item"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/order"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/organization"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/role"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/rule"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/table"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/category"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/comment"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/favorite"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/item"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/order"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/organization"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/rule"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/specification"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/table"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 )
 
 // Storage interface.

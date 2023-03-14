@@ -1,10 +1,10 @@
 package category
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/category"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
-	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/category"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

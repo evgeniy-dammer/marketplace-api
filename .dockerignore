@@ -5,6 +5,6 @@
 docker-compose.yaml
 Makefile
 README.md
-emenu-api
+marketplace-api
 schema
 proto

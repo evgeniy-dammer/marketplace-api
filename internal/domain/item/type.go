@@ -1,9 +1,9 @@
 package item
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/comment"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/image"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/comment"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/specification"
 	"github.com/pkg/errors"
 )
 

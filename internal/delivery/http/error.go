@@ -3,7 +3,7 @@ package http
 import (
 	"errors"
 
-	"github.com/evgeniy-dammer/emenu-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 

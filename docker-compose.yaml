@@ -1,8 +1,8 @@
 version: "3.9"
 
 services:
-  emenu-cache:
-    container_name: emenu-cache
+  marketplace-cache:
+    container_name: marketplace-cache
     image: redis:alpine
     network_mode: host
     hostname: cache
@@ -15,47 +15,47 @@ services:
       #- REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
     volumes:
       #- /path/to/your_redis.conf:/opt/bitnami/cache/mounted-etc/cache.conf
-      - emenu-cache:/bitnami/cache/data
+      - marketplace-cache:/bitnami/cache/data
 
-  emenu-db:
-    container_name: emenu-db
+  marketplace-db:
+    container_name: marketplace-db
     image: postgres:alpine
     network_mode: host
     restart: always
     env_file:
       - .env
     environment:
-      - POSTGRES_DB=emenu
-      - POSTGRES_USER=emenu
+      - POSTGRES_DB=marketplace
+      - POSTGRES_USER=marketplace
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - emenu-db:/var/lib/postgresql/data
+      - marketplace-db:/var/lib/postgresql/data
 
-  emenu-api:
-    container_name: emenu-api
+  marketplace-api:
+    container_name: marketplace-api
     build: .
     network_mode: host
     restart: always
     env_file:
       - .env
     depends_on:
-      - emenu-db
-      - emenu-cache
+      - marketplace-db
+      - marketplace-cache
 
-  emenu-migrate:
-    container_name: emenu-migrate
+  marketplace-migrate:
+    container_name: marketplace-migrate
     image: migrate/migrate:4
     network_mode: host
     env_file:
       - .env
     volumes:
       - ./schema:/schema
-    command: [ "-path", "./schema", "-database",  'storage://emenu:${DB_PASSWORD}@0.0.0.0:5432/emenu?sslmode=disable', "up" ]
+    command: [ "-path", "./schema", "-database",  'storage://marketplace:${DB_PASSWORD}@0.0.0.0:5432/marketplace?sslmode=disable', "up" ]
     depends_on:
-      - emenu-db
+      - marketplace-db
 
 volumes:
-  emenu-db:
+  marketplace-db:
     external: true
-  emenu-cache:
+  marketplace-cache:
     external: true

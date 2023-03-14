@@ -3,9 +3,9 @@ package postgres
 import (
 	"fmt"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/favorite"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/favorite"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 

@@ -1,8 +1,8 @@
 package http
 
 import (
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/token"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
 )
 
 // AuthResponse is an auth response data.

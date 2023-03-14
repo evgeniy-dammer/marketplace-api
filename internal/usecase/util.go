@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/token"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/token"
 	"github.com/golang-jwt/jwt"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/argon2"
@@ -68,19 +68,13 @@ func GenerateRandomBytes(n uint32) ([]byte, error) {
 }
 
 func ComparePasswordAndHash(password, encodedHash string) (bool, error) {
-	// Extract the parameters, salt and derived key from the encoded password
-	// hash.
 	param, salt, hash, err := DecodeHash(encodedHash)
 	if err != nil {
 		return false, err
 	}
 
-	// Derive the key from the other password using the same parameters.
 	otherHash := argon2.IDKey([]byte(password), salt, param.Iterations, param.Memory, param.Parallelism, param.KeyLength)
 
-	// Check that the contents of the hashed passwords are identical. Note
-	// that we are using the subtle.ConstantTimeCompare() function for this
-	// to help prevent timing attacks.
 	if subtle.ConstantTimeCompare(hash, otherHash) == 1 {
 		return true, nil
 	}

@@ -2,12 +2,12 @@ package http
 
 import (
 	"github.com/casbin/casbin-pg-adapter"
-	"github.com/evgeniy-dammer/emenu-api/internal/usecase"
+	"github.com/evgeniy-dammer/marketplace-api/internal/usecase"
 )
 
-// @title Emenu API
+// @title marketplace API
 // @version 1.0
-// @description Emenu API service
+// @description marketplace API service
 // @contact.name Evgeniy Dammer
 // @contact.email evgeniydammer@gmail.com
 // @BasePath /

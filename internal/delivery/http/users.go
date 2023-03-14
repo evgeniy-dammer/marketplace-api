@@ -3,10 +3,10 @@ package http
 import (
 	"net/http"
 
-	_ "github.com/evgeniy-dammer/emenu-api/internal/domain/role"
-	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
-	"github.com/evgeniy-dammer/emenu-api/pkg/context"
-	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	_ "github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
 
