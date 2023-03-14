@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) CommentGetAll(ctxr context.Context, organizationID string) 
 		ctx = context.New(ctxt)
 	}
 
-	var comments []comment.Comment
+	comments := &comment.ListComment{}
 
 	bytes, err := r.client.Get(ctx, commentsKey+"o."+organizationID).Bytes()
 	if err != nil {
-		return comments, errors.Wrap(err, "unable to get comments from cache")
+		return *comments, errors.Wrap(err, "unable to get comments from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &comments); err != nil {
-		return comments, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, comments); err != nil {
+		return *comments, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return comments, nil
+	return *comments, nil
 }
 
 // CommentSetAll sets comments into cache.
@@ -47,7 +46,9 @@ func (r *Repository) CommentSetAll(ctxr context.Context, organizationID string, 
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(comments)
+	commentSlice := comment.ListComment(comments)
+
+	bytes, err := easyjson.Marshal(commentSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) CommentGetOne(ctxr context.Context, commentID string) (comm
 		return usr, errors.Wrap(err, "unable to get comment from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) CommentCreate(ctxr context.Context, usr comment.Comment) er
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) CommentUpdate(ctxr context.Context, usr comment.Comment) er
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -161,6 +162,22 @@ func (r *Repository) CommentInvalidate(ctxr context.Context) error {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
 			panic(err)
+		}
+	}
+
+	iter = r.client.Scan(ctx, 0, itemKey+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		err := r.client.Del(ctx, iter.Val()).Err()
+		if err != nil {
+			return err
+		}
+	}
+
+	iter = r.client.Scan(ctx, 0, itemsKey+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		err := r.client.Del(ctx, iter.Val()).Err()
+		if err != nil {
+			return err
 		}
 	}
 

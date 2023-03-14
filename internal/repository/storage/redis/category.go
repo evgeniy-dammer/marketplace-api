@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/category"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, organizationID string)
 		ctx = context.New(ctxt)
 	}
 
-	var categories []category.Category
+	categories := &category.ListCategory{}
 
 	bytes, err := r.client.Get(ctx, categoriesKey+"o."+organizationID).Bytes()
 	if err != nil {
-		return categories, errors.Wrap(err, "unable to get categories from cache")
+		return *categories, errors.Wrap(err, "unable to get categories from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &categories); err != nil {
-		return categories, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, categories); err != nil {
+		return *categories, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return categories, nil
+	return *categories, nil
 }
 
 // CategorySetAll sets categories into cache.
@@ -47,7 +46,9 @@ func (r *Repository) CategorySetAll(ctxr context.Context, organizationID string,
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(categories)
+	categorySlice := category.ListCategory(categories)
+
+	bytes, err := easyjson.Marshal(categorySlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) CategoryGetOne(ctxr context.Context, categoryID string) (ca
 		return usr, errors.Wrap(err, "unable to get category from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) CategoryCreate(ctxr context.Context, usr category.Category)
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, usr category.Category)
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}

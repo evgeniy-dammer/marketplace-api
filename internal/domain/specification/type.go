@@ -6,7 +6,14 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+// ListSpecification
+//
+//easyjson:json
+type ListSpecification []Specification
+
 // Specification entity.
+//
+//easyjson:json
 type Specification struct {
 	// Specification ID
 	ID string `json:"id" db:"id"`
@@ -35,6 +42,8 @@ type Specification struct {
 }
 
 // CreateSpecificationInput entity.
+//
+//easyjson:json
 type CreateSpecificationInput struct {
 	// Item ID
 	ItemID string `json:"item" db:"item_id" binding:"required"`
@@ -61,6 +70,8 @@ type CreateSpecificationInput struct {
 }
 
 // UpdateSpecificationInput is an input data for updating specification entity.
+//
+//easyjson:json
 type UpdateSpecificationInput struct {
 	// Specification ID
 	ID *string `json:"id"`

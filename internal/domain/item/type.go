@@ -9,7 +9,14 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+// ListItem
+//
+//easyjson:json
+type ListItem []Item
+
 // Item entity.
+//
+//easyjson:json
 type Item struct {
 	// Description English
 	DescriptionEn string `json:"descriptionen" db:"description_en"`
@@ -54,6 +61,8 @@ type Item struct {
 }
 
 // CreateItemInput entity.
+//
+//easyjson:json
 type CreateItemInput struct {
 	// Description English
 	DescriptionEn string `json:"descriptionen" db:"description_en"`
@@ -84,6 +93,8 @@ type CreateItemInput struct {
 }
 
 // UpdateItemInput is an input data for updating item entity.
+//
+//easyjson:json
 type UpdateItemInput struct {
 	// Item ID
 	ID *string `json:"id"`

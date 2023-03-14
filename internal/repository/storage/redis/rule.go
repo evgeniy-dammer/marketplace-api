@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/rule"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) RuleGetAll(ctxr context.Context) ([]rule.Rule, error) {
 		ctx = context.New(ctxt)
 	}
 
-	var rules []rule.Rule
+	rules := &rule.ListRule{}
 
 	bytes, err := r.client.Get(ctx, rulesKey).Bytes()
 	if err != nil {
-		return rules, errors.Wrap(err, "unable to get rules from cache")
+		return *rules, errors.Wrap(err, "unable to get rules from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &rules); err != nil {
-		return rules, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, rules); err != nil {
+		return *rules, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return rules, nil
+	return *rules, nil
 }
 
 // RuleSetAll sets rules into cache.
@@ -47,7 +46,9 @@ func (r *Repository) RuleSetAll(ctxr context.Context, rules []rule.Rule) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(rules)
+	ruleSlice := rule.ListRule(rules)
+
+	bytes, err := easyjson.Marshal(ruleSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -69,18 +70,18 @@ func (r *Repository) RuleGetOne(ctxr context.Context, ruleID string) (rule.Rule,
 		ctx = context.New(ctxt)
 	}
 
-	var usr rule.Rule
+	var rle rule.Rule
 
 	bytes, err := r.client.Get(ctx, ruleKey+ruleID).Bytes()
 	if err != nil {
-		return usr, errors.Wrap(err, "unable to get rule from cache")
+		return rle, errors.Wrap(err, "unable to get rule from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
-		return usr, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, &rle); err != nil {
+		return rle, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return usr, nil
+	return rle, nil
 }
 
 // RuleCreate sets rule into cache.
@@ -95,7 +96,7 @@ func (r *Repository) RuleCreate(ctxr context.Context, usr rule.Rule) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) RuleUpdate(ctxr context.Context, usr rule.Rule) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}

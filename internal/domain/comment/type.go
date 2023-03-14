@@ -6,7 +6,14 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+// ListComment
+//
+//easyjson:json
+type ListComment []Comment
+
 // Comment entity.
+//
+//easyjson:json
 type Comment struct {
 	// Comment ID
 	ID string `json:"id" db:"id"`
@@ -27,6 +34,8 @@ type Comment struct {
 }
 
 // CreateCommentInput entity.
+//
+//easyjson:json
 type CreateCommentInput struct {
 	// User ID
 	UserID string `json:"user" db:"user_created" binding:"required"`
@@ -43,6 +52,8 @@ type CreateCommentInput struct {
 }
 
 // UpdateCommentInput is an input data for updating comment entity.
+//
+//easyjson:json
 type UpdateCommentInput struct {
 	// Comment ID
 	ID *string `json:"id"`

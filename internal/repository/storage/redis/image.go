@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/image"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) ImageGetAll(ctxr context.Context, organizationID string) ([
 		ctx = context.New(ctxt)
 	}
 
-	var images []image.Image
+	images := &image.ListImage{}
 
 	bytes, err := r.client.Get(ctx, imagesKey+"o."+organizationID).Bytes()
 	if err != nil {
-		return images, errors.Wrap(err, "unable to get images from cache")
+		return *images, errors.Wrap(err, "unable to get images from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &images); err != nil {
-		return images, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, images); err != nil {
+		return *images, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return images, nil
+	return *images, nil
 }
 
 // ImageSetAll sets images into cache.
@@ -47,7 +46,9 @@ func (r *Repository) ImageSetAll(ctxr context.Context, organizationID string, im
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(images)
+	imageSlice := image.ListImage(images)
+
+	bytes, err := easyjson.Marshal(imageSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) ImageGetOne(ctxr context.Context, imageID string) (image.Im
 		return usr, errors.Wrap(err, "unable to get image from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) ImageCreate(ctxr context.Context, usr image.Image) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) ImageUpdate(ctxr context.Context, usr image.Image) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -160,7 +161,23 @@ func (r *Repository) ImageInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return err
+		}
+	}
+
+	iter = r.client.Scan(ctx, 0, itemKey+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		err := r.client.Del(ctx, iter.Val()).Err()
+		if err != nil {
+			return err
+		}
+	}
+
+	iter = r.client.Scan(ctx, 0, itemsKey+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		err := r.client.Del(ctx, iter.Val()).Err()
+		if err != nil {
+			return err
 		}
 	}
 

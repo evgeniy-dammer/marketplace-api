@@ -1,6 +1,13 @@
 package role
 
+// ListRole
+//
+//easyjson:json
+type ListRole []Role
+
 // Role entity.
+//
+//easyjson:json
 type Role struct {
 	// Role ID
 	ID string `json:"id"`

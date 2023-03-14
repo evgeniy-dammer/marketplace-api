@@ -6,7 +6,14 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+// ListOrganization
+//
+//easyjson:json
+type ListOrganization []Organization
+
 // Organization entity.
+//
+//easyjson:json
 type Organization struct {
 	// Organization ID
 	ID string `json:"id" db:"id"`
@@ -21,6 +28,8 @@ type Organization struct {
 }
 
 // CreateOrganizationInput entity.
+//
+//easyjson:json
 type CreateOrganizationInput struct {
 	// Organization name
 	Name string `json:"name" db:"name" binding:"required"`
@@ -33,6 +42,8 @@ type CreateOrganizationInput struct {
 }
 
 // UpdateOrganizationInput is an input data for updating organization entity.
+//
+//easyjson:json
 type UpdateOrganizationInput struct {
 	// Organization ID
 	ID *string `json:"id"`

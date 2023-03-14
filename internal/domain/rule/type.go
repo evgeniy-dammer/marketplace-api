@@ -6,7 +6,12 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+//easyjson:json
+type ListRule []Rule
+
 // Rule entity
+//
+//easyjson:json
 type Rule struct {
 	// Rule ID
 	ID string `json:"id" db:"id"`
@@ -27,6 +32,8 @@ type Rule struct {
 }
 
 // CreateRuleInput entity
+//
+//easyjson:json
 type CreateRuleInput struct {
 	// Type
 	Ptype string `json:"ptype" db:"ptype" binding:"required"`
@@ -45,6 +52,8 @@ type CreateRuleInput struct {
 }
 
 // UpdateRuleInput is an input data for updating rule entity.
+//
+//easyjson:json
 type UpdateRuleInput struct {
 	// Rule ID
 	ID *string `json:"id"`

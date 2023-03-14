@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/item"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) ItemGetAll(ctxr context.Context, organizationID string) ([]
 		ctx = context.New(ctxt)
 	}
 
-	var items []item.Item
+	items := &item.ListItem{}
 
 	bytes, err := r.client.Get(ctx, itemsKey+"o."+organizationID).Bytes()
 	if err != nil {
-		return items, errors.Wrap(err, "unable to get items from cache")
+		return *items, errors.Wrap(err, "unable to get items from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &items); err != nil {
-		return items, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, items); err != nil {
+		return *items, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return items, nil
+	return *items, nil
 }
 
 // ItemSetAll sets items into cache.
@@ -47,7 +46,9 @@ func (r *Repository) ItemSetAll(ctxr context.Context, organizationID string, ite
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(items)
+	itemSlice := item.ListItem(items)
+
+	bytes, err := easyjson.Marshal(itemSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) ItemGetOne(ctxr context.Context, itemID string) (item.Item,
 		return usr, errors.Wrap(err, "unable to get item from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) ItemCreate(ctxr context.Context, usr item.Item) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) ItemUpdate(ctxr context.Context, usr item.Item) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}

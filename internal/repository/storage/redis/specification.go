@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, organizationID st
 		ctx = context.New(ctxt)
 	}
 
-	var specifications []specification.Specification
+	specifications := &specification.ListSpecification{}
 
 	bytes, err := r.client.Get(ctx, specificationsKey+"o."+organizationID).Bytes()
 	if err != nil {
-		return specifications, errors.Wrap(err, "unable to get specifications from cache")
+		return *specifications, errors.Wrap(err, "unable to get specifications from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &specifications); err != nil {
-		return specifications, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, specifications); err != nil {
+		return *specifications, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return specifications, nil
+	return *specifications, nil
 }
 
 // SpecificationSetAll sets specifications into cache.
@@ -47,7 +46,9 @@ func (r *Repository) SpecificationSetAll(ctxr context.Context, organizationID st
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(specifications)
+	specificationSlice := specification.ListSpecification(specifications)
+
+	bytes, err := easyjson.Marshal(specificationSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) SpecificationGetOne(ctxr context.Context, specificationID s
 		return usr, errors.Wrap(err, "unable to get specification from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) SpecificationCreate(ctxr context.Context, usr specification
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) SpecificationUpdate(ctxr context.Context, usr specification
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -161,6 +162,22 @@ func (r *Repository) SpecificationInvalidate(ctxr context.Context) error {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
 			panic(err)
+		}
+	}
+
+	iter = r.client.Scan(ctx, 0, itemKey+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		err := r.client.Del(ctx, iter.Val()).Err()
+		if err != nil {
+			return err
+		}
+	}
+
+	iter = r.client.Scan(ctx, 0, itemsKey+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		err := r.client.Del(ctx, iter.Val()).Err()
+		if err != nil {
+			return err
 		}
 	}
 

@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/order"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) OrderGetAll(ctxr context.Context, organizationID string) ([
 		ctx = context.New(ctxt)
 	}
 
-	var orders []order.Order
+	orders := &order.ListOrder{}
 
 	bytes, err := r.client.Get(ctx, ordersKey+"o."+organizationID).Bytes()
 	if err != nil {
-		return orders, errors.Wrap(err, "unable to get orders from cache")
+		return *orders, errors.Wrap(err, "unable to get orders from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &orders); err != nil {
-		return orders, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, orders); err != nil {
+		return *orders, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return orders, nil
+	return *orders, nil
 }
 
 // OrderSetAll sets orders into cache.
@@ -47,7 +46,9 @@ func (r *Repository) OrderSetAll(ctxr context.Context, organizationID string, or
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(orders)
+	orderSlice := order.ListOrder(orders)
+
+	bytes, err := easyjson.Marshal(orderSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) OrderGetOne(ctxr context.Context, orderID string) (order.Or
 		return usr, errors.Wrap(err, "unable to get order from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) OrderCreate(ctxr context.Context, usr order.Order) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) OrderUpdate(ctxr context.Context, usr order.Order) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}

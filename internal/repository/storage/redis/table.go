@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/table"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) TableGetAll(ctxr context.Context, organizationID string) ([
 		ctx = context.New(ctxt)
 	}
 
-	var tables []table.Table
+	tables := &table.ListTable{}
 
 	bytes, err := r.client.Get(ctx, tablesKey+"o."+organizationID).Bytes()
 	if err != nil {
-		return tables, errors.Wrap(err, "unable to get tables from cache")
+		return *tables, errors.Wrap(err, "unable to get tables from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &tables); err != nil {
-		return tables, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, tables); err != nil {
+		return *tables, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return tables, nil
+	return *tables, nil
 }
 
 // TableSetAll sets tables into cache.
@@ -47,7 +46,9 @@ func (r *Repository) TableSetAll(ctxr context.Context, organizationID string, ta
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(tables)
+	tableSlice := table.ListTable(tables)
+
+	bytes, err := easyjson.Marshal(tableSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) TableGetOne(ctxr context.Context, tableID string) (table.Ta
 		return usr, errors.Wrap(err, "unable to get table from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) TableCreate(ctxr context.Context, usr table.Table) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) TableUpdate(ctxr context.Context, usr table.Table) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}

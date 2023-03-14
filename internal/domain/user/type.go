@@ -6,7 +6,12 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+//easyjson:json
+type ListUser []User
+
 // User entity.
+//
+//easyjson:json
 type User struct {
 	// User ID
 	ID string `json:"id" db:"id"`
@@ -27,6 +32,8 @@ type User struct {
 }
 
 // CreateUserInput entity.
+//
+//easyjson:json
 type CreateUserInput struct {
 	// Phone number
 	Phone string `json:"phone" db:"phone" binding:"required"`
@@ -49,6 +56,8 @@ type SignInInput struct {
 }
 
 // UpdateUserInput is an input data for updating user entity.
+//
+//easyjson:json
 type UpdateUserInput struct {
 	// User ID
 	ID *string `json:"id"`

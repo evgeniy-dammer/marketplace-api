@@ -32,6 +32,9 @@ fields:
 swagger:
 	swag init --parseDependency --generalInfo ./internal/delivery/http/delivery.go --output ./docs/
 
+json:
+	easyjson -all ./internal/domain/category/type.go
+
 imagebuild: imageremove
 	docker build -t emenu-api .
 

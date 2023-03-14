@@ -1,11 +1,10 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -21,18 +20,18 @@ func (r *Repository) OrganizationGetAll(ctxr context.Context) ([]organization.Or
 		ctx = context.New(ctxt)
 	}
 
-	var organizations []organization.Organization
+	organizations := &organization.ListOrganization{}
 
 	bytes, err := r.client.Get(ctx, organizationsKey).Bytes()
 	if err != nil {
-		return organizations, errors.Wrap(err, "unable to get organizations from cache")
+		return *organizations, errors.Wrap(err, "unable to get organizations from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &organizations); err != nil {
-		return organizations, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, organizations); err != nil {
+		return *organizations, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return organizations, nil
+	return *organizations, nil
 }
 
 // OrganizationSetAll sets organizations into cache.
@@ -47,7 +46,9 @@ func (r *Repository) OrganizationSetAll(ctxr context.Context, organizations []or
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(organizations)
+	organizationSlice := organization.ListOrganization(organizations)
+
+	bytes, err := easyjson.Marshal(organizationSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -76,7 +77,7 @@ func (r *Repository) OrganizationGetOne(ctxr context.Context, organizationID str
 		return usr, errors.Wrap(err, "unable to get organization from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -95,7 +96,7 @@ func (r *Repository) OrganizationCreate(ctxr context.Context, usr organization.O
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -117,7 +118,7 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, usr organization.O
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}

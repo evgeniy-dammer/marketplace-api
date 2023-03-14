@@ -1,12 +1,11 @@
 package redis
 
 import (
-	"encoding/json"
-
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/role"
 	"github.com/evgeniy-dammer/emenu-api/internal/domain/user"
 	"github.com/evgeniy-dammer/emenu-api/pkg/context"
 	"github.com/evgeniy-dammer/emenu-api/pkg/tracing"
+	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
@@ -22,18 +21,18 @@ func (r *Repository) UserGetAll(ctxr context.Context, search string, status stri
 		ctx = context.New(ctxt)
 	}
 
-	var users []user.User
+	users := &user.ListUser{}
 
 	bytes, err := r.client.Get(ctx, usersKey+"s."+search+".t."+status+".r."+roleID).Bytes()
 	if err != nil {
-		return users, errors.Wrap(err, "unable to get users from cache")
+		return *users, errors.Wrap(err, "unable to get users from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &users); err != nil {
-		return users, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, users); err != nil {
+		return *users, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return users, nil
+	return *users, nil
 }
 
 // UserSetAll sets users into cache.
@@ -48,7 +47,9 @@ func (r *Repository) UserSetAll(ctxr context.Context, users []user.User, search 
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(users)
+	userSlice := user.ListUser(users)
+
+	bytes, err := easyjson.Marshal(userSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -77,7 +78,7 @@ func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User,
 		return usr, errors.Wrap(err, "unable to get user from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &usr); err != nil {
+	if err = easyjson.Unmarshal(bytes, &usr); err != nil {
 		return usr, errors.Wrap(err, "unable to unmarshal")
 	}
 
@@ -96,7 +97,7 @@ func (r *Repository) UserCreate(ctxr context.Context, usr user.User) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -118,7 +119,7 @@ func (r *Repository) UserUpdate(ctxr context.Context, usr user.User) error {
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(usr)
+	bytes, err := easyjson.Marshal(usr)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}
@@ -180,18 +181,18 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) 
 		ctx = context.New(ctxt)
 	}
 
-	var roles []role.Role
+	roles := &role.ListRole{}
 
 	bytes, err := r.client.Get(ctx, rolesKey).Bytes()
 	if err != nil {
-		return roles, errors.Wrap(err, "unable to get roles from cache")
+		return *roles, errors.Wrap(err, "unable to get roles from cache")
 	}
 
-	if err = json.Unmarshal(bytes, &roles); err != nil {
-		return roles, errors.Wrap(err, "unable to unmarshal")
+	if err = easyjson.Unmarshal(bytes, roles); err != nil {
+		return *roles, errors.Wrap(err, "unable to unmarshal")
 	}
 
-	return roles, nil
+	return *roles, nil
 }
 
 // UserSetAllRoles sets all roles in cache.
@@ -206,7 +207,9 @@ func (r *Repository) UserSetAllRoles(ctxr context.Context, roles []role.Role) er
 		ctx = context.New(ctxt)
 	}
 
-	bytes, err := json.Marshal(roles)
+	roleSlice := role.ListRole(roles)
+
+	bytes, err := easyjson.Marshal(roleSlice)
 	if err != nil {
 		return errors.Wrap(err, "unable to marshal json")
 	}

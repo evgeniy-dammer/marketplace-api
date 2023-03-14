@@ -6,7 +6,14 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+// ListOrder
+//
+//easyjson:json
+type ListOrder []Order
+
 // Order entity.
+//
+//easyjson:json
 type Order struct {
 	// Order ID
 	ID string `json:"id" db:"id"`
@@ -29,6 +36,8 @@ type Order struct {
 }
 
 // CreateOrderInput entity.
+//
+//easyjson:json
 type CreateOrderInput struct {
 	// User ID
 	UserID string `json:"user,omitempty" db:"user_id"`
@@ -45,6 +54,8 @@ type CreateOrderInput struct {
 }
 
 // OrderItem entity.
+//
+//easyjson:json
 type OrderItem struct {
 	// OrderItem ID
 	ID string `json:"id" db:"id"`
@@ -61,6 +72,8 @@ type OrderItem struct {
 }
 
 // CreateOrderItemInput entity.
+//
+//easyjson:json
 type CreateOrderItemInput struct {
 	// Item ID
 	ItemID string `json:"item" db:"item_id" binding:"required"`
@@ -73,6 +86,8 @@ type CreateOrderItemInput struct {
 }
 
 // UpdateOrderInput is an input data for updating order entity.
+//
+//easyjson:json
 type UpdateOrderInput struct {
 	// Order ID
 	ID *string `json:"id"`

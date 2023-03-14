@@ -6,7 +6,14 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+// ListImage
+//
+//easyjson:json
+type ListImage []Image
+
 // Image entity.
+//
+//easyjson:json
 type Image struct {
 	// Image ID
 	ID string `json:"id"`
@@ -27,6 +34,8 @@ type Image struct {
 }
 
 // CreateImageInput entity.
+//
+//easyjson:json
 type CreateImageInput struct {
 	// Object ID
 	ObjectID string `json:"object" db:"object_id" binding:"required"`
@@ -45,6 +54,8 @@ type CreateImageInput struct {
 }
 
 // UpdateImageInput is an input data for updating image entity.
+//
+//easyjson:json
 type UpdateImageInput struct {
 	// Image ID
 	ID *string `json:"id"`

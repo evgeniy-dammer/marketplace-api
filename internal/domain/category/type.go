@@ -6,7 +6,14 @@ import (
 
 var ErrStructHasNoValues = errors.New("update structure has no values")
 
+// ListCategory
+//
+//easyjson:json
+type ListCategory []Category
+
 // Category entity.
+//
+//easyjson:json
 type Category struct {
 	// Category ID
 	ID string `json:"id" db:"id"`
@@ -27,6 +34,8 @@ type Category struct {
 }
 
 // CreateCategoryInput entity.
+//
+//easyjson:json
 type CreateCategoryInput struct {
 	// Name Turkmen
 	NameTm string `json:"nametm" db:"name_tm" binding:"required"`
@@ -45,6 +54,8 @@ type CreateCategoryInput struct {
 }
 
 // UpdateCategoryInput is an input data for updating category entity.
+//
+//easyjson:json
 type UpdateCategoryInput struct {
 	// Category ID
 	ID *string `json:"id"`
