@@ -7,12 +7,14 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // CommentGetAll selects all comments from database.
-func (r *Repository) CommentGetAll(ctxr context.Context, userID string, organizationID string) ([]comment.Comment, error) {
+func (r *Repository) CommentGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -31,13 +33,13 @@ func (r *Repository) CommentGetAll(ctxr context.Context, userID string, organiza
 		commentTable,
 	)
 
-	err := r.database.SelectContext(ctx, &comments, query, organizationID)
+	err := r.database.SelectContext(ctx, &comments, query, meta.OrganizationID)
 
 	return comments, errors.Wrap(err, "comments select query error")
 }
 
 // CommentGetOne select comment by id from database.
-func (r *Repository) CommentGetOne(ctxr context.Context, userID string, organizationID string, commentID string) (comment.Comment, error) {
+func (r *Repository) CommentGetOne(ctxr context.Context, meta query.MetaData, commentID string) (comment.Comment, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,13 +57,13 @@ func (r *Repository) CommentGetOne(ctxr context.Context, userID string, organiza
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		commentTable,
 	)
-	err := r.database.GetContext(ctx, &commnt, query, organizationID, commentID)
+	err := r.database.GetContext(ctx, &commnt, query, meta.OrganizationID, commentID)
 
 	return commnt, errors.Wrap(err, "comment select query error")
 }
 
 // CommentCreate insert comment into database.
-func (r *Repository) CommentCreate(ctxr context.Context, userID string, input comment.CreateCommentInput) (string, error) {
+func (r *Repository) CommentCreate(ctxr context.Context, meta query.MetaData, input comment.CreateCommentInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -88,7 +90,7 @@ func (r *Repository) CommentCreate(ctxr context.Context, userID string, input co
 		input.Content,
 		input.Status,
 		input.Rating,
-		userID,
+		meta.UserID,
 	)
 
 	err := row.Scan(&commentID)
@@ -97,7 +99,7 @@ func (r *Repository) CommentCreate(ctxr context.Context, userID string, input co
 }
 
 // CommentUpdate updates comment by id in database.
-func (r *Repository) CommentUpdate(ctxr context.Context, userID string, input comment.UpdateCommentInput) error {
+func (r *Repository) CommentUpdate(ctxr context.Context, meta query.MetaData, input comment.UpdateCommentInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -143,7 +145,7 @@ func (r *Repository) CommentUpdate(ctxr context.Context, userID string, input co
 	}
 
 	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, userID)
+	args = append(args, meta.UserID)
 	argID++
 
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
@@ -159,7 +161,7 @@ func (r *Repository) CommentUpdate(ctxr context.Context, userID string, input co
 }
 
 // CommentDelete deletes comment by id from database.
-func (r *Repository) CommentDelete(ctxr context.Context, userID string, organizationID string, commentID string) error {
+func (r *Repository) CommentDelete(ctxr context.Context, meta query.MetaData, commentID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -176,7 +178,7 @@ func (r *Repository) CommentDelete(ctxr context.Context, userID string, organiza
 		commentTable,
 	)
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, commentID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, commentID, meta.OrganizationID)
 
 	return errors.Wrap(err, "comment delete query error")
 }

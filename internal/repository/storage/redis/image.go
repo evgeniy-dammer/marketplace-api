@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // ImageGetAll gets images from cache.
-func (r *Repository) ImageGetAll(ctxr context.Context, organizationID string) ([]image.Image, error) {
+func (r *Repository) ImageGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -22,7 +24,7 @@ func (r *Repository) ImageGetAll(ctxr context.Context, organizationID string) ([
 
 	images := &image.ListImage{}
 
-	bytes, err := r.client.Get(ctx, imagesKey+"o."+organizationID).Bytes()
+	bytes, err := r.client.Get(ctx, imagesKey+"o."+meta.OrganizationID).Bytes()
 	if err != nil {
 		return *images, errors.Wrap(err, "unable to get images from cache")
 	}
@@ -35,7 +37,7 @@ func (r *Repository) ImageGetAll(ctxr context.Context, organizationID string) ([
 }
 
 // ImageSetAll sets images into cache.
-func (r *Repository) ImageSetAll(ctxr context.Context, organizationID string, images []image.Image) error {
+func (r *Repository) ImageSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, images []image.Image) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -53,7 +55,7 @@ func (r *Repository) ImageSetAll(ctxr context.Context, organizationID string, im
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, imagesKey+"o."+organizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, imagesKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
 
 	return err
 }

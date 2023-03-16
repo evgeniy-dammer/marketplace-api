@@ -4,13 +4,15 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 // ImageGetAll returns all images from the system.
-func (s *UseCase) ImageGetAll(ctx context.Context, userID string, organizationID string) ([]image.Image, error) {
+func (s *UseCase) ImageGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.ImageGetAll")
 		defer span.End()
@@ -19,17 +21,17 @@ func (s *UseCase) ImageGetAll(ctx context.Context, userID string, organizationID
 	}
 
 	if s.isCacheOn {
-		return getAllWithCache(ctx, s, userID, organizationID)
+		return s.getAllWithCache(ctx, meta, params)
 	}
 
-	images, err := s.adapterStorage.ImageGetAll(ctx, userID, organizationID)
+	images, err := s.adapterStorage.ImageGetAll(ctx, meta, params)
 
 	return images, errors.Wrap(err, "images select error")
 }
 
 // getAllWithCache returns images from cache if exists.
-func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizationID string) ([]image.Image, error) {
-	images, err := s.adapterCache.ImageGetAll(ctx, organizationID)
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) {
+	images, err := s.adapterCache.ImageGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get images from cache", zap.String("error", err.Error()))
 	}
@@ -38,12 +40,12 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 		return images, nil
 	}
 
-	images, err = s.adapterStorage.ImageGetAll(ctx, userID, organizationID)
+	images, err = s.adapterStorage.ImageGetAll(ctx, meta, params)
 	if err != nil {
 		return images, errors.Wrap(err, "images select failed")
 	}
 
-	if err = s.adapterCache.ImageSetAll(ctx, organizationID, images); err != nil {
+	if err = s.adapterCache.ImageSetAll(ctx, meta, params, images); err != nil {
 		logger.Logger.Error("unable to add images into cache", zap.String("error", err.Error()))
 	}
 
@@ -51,7 +53,7 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 }
 
 // ImageGetOne returns image by id from the system.
-func (s *UseCase) ImageGetOne(ctx context.Context, userID string, organizationID string, imageID string) (image.Image, error) {
+func (s *UseCase) ImageGetOne(ctx context.Context, meta query.MetaData, imageID string) (image.Image, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.ImageGetOne")
 		defer span.End()
@@ -60,16 +62,16 @@ func (s *UseCase) ImageGetOne(ctx context.Context, userID string, organizationID
 	}
 
 	if s.isCacheOn {
-		return getOneWithCache(ctx, s, userID, organizationID, imageID)
+		return s.getOneWithCache(ctx, meta, imageID)
 	}
 
-	imageSingle, err := s.adapterStorage.ImageGetOne(ctx, userID, organizationID, imageID)
+	imageSingle, err := s.adapterStorage.ImageGetOne(ctx, meta, imageID)
 
 	return imageSingle, errors.Wrap(err, "image select error")
 }
 
 // getOneWithCache returns image by id from cache if exists.
-func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizationID string, imageID string) (image.Image, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, imageID string) (image.Image, error) {
 	img, err := s.adapterCache.ImageGetOne(ctx, imageID)
 	if err != nil {
 		logger.Logger.Error("unable to get image from cache", zap.String("error", err.Error()))
@@ -79,7 +81,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 		return img, nil
 	}
 
-	img, err = s.adapterStorage.ImageGetOne(ctx, userID, organizationID, imageID)
+	img, err = s.adapterStorage.ImageGetOne(ctx, meta, imageID)
 	if err != nil {
 		return img, errors.Wrap(err, "image select failed")
 	}
@@ -92,7 +94,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 }
 
 // ImageCreate inserts image into system.
-func (s *UseCase) ImageCreate(ctx context.Context, userID string, input image.CreateImageInput) (string, error) {
+func (s *UseCase) ImageCreate(ctx context.Context, meta query.MetaData, input image.CreateImageInput) (string, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.ImageCreate")
 		defer span.End()
@@ -100,13 +102,13 @@ func (s *UseCase) ImageCreate(ctx context.Context, userID string, input image.Cr
 		ctx = context.New(ctxt)
 	}
 
-	imageID, err := s.adapterStorage.ImageCreate(ctx, userID, input)
+	imageID, err := s.adapterStorage.ImageCreate(ctx, meta, input)
 	if err != nil {
 		return imageID, errors.Wrap(err, "image create error")
 	}
 
 	if s.isCacheOn {
-		img, err := s.adapterStorage.ImageGetOne(ctx, userID, input.OrganizationID, imageID)
+		img, err := s.adapterStorage.ImageGetOne(ctx, meta, imageID)
 		if err != nil {
 			return "", errors.Wrap(err, "image select from database failed")
 		}
@@ -126,7 +128,7 @@ func (s *UseCase) ImageCreate(ctx context.Context, userID string, input image.Cr
 }
 
 // ImageUpdate updates image by id in the system.
-func (s *UseCase) ImageUpdate(ctx context.Context, userID string, input image.UpdateImageInput) error {
+func (s *UseCase) ImageUpdate(ctx context.Context, meta query.MetaData, input image.UpdateImageInput) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.ImageUpdate")
 		defer span.End()
@@ -138,13 +140,13 @@ func (s *UseCase) ImageUpdate(ctx context.Context, userID string, input image.Up
 		return errors.Wrap(err, "validation error")
 	}
 
-	err := s.adapterStorage.ImageUpdate(ctx, userID, input)
+	err := s.adapterStorage.ImageUpdate(ctx, meta, input)
 	if err != nil {
 		return errors.Wrap(err, "image update in database failed")
 	}
 
 	if s.isCacheOn {
-		img, err := s.adapterStorage.ImageGetOne(ctx, userID, *input.OrganizationID, *input.ID)
+		img, err := s.adapterStorage.ImageGetOne(ctx, meta, *input.ID)
 		if err != nil {
 			return errors.Wrap(err, "image select from database failed")
 		}
@@ -164,7 +166,7 @@ func (s *UseCase) ImageUpdate(ctx context.Context, userID string, input image.Up
 }
 
 // ImageDelete deletes image by id from the system.
-func (s *UseCase) ImageDelete(ctx context.Context, userID string, organizationID string, imageID string) error {
+func (s *UseCase) ImageDelete(ctx context.Context, meta query.MetaData, imageID string) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.ImageDelete")
 		defer span.End()
@@ -172,7 +174,7 @@ func (s *UseCase) ImageDelete(ctx context.Context, userID string, organizationID
 		ctx = context.New(ctxt)
 	}
 
-	err := s.adapterStorage.ImageDelete(ctx, userID, organizationID, imageID)
+	err := s.adapterStorage.ImageDelete(ctx, meta, imageID)
 	if err != nil {
 		return errors.Wrap(err, "image delete failed")
 	}

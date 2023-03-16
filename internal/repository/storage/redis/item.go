@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/item"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // ItemGetAll gets items from cache.
-func (r *Repository) ItemGetAll(ctxr context.Context, organizationID string) ([]item.Item, error) {
+func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -22,7 +24,7 @@ func (r *Repository) ItemGetAll(ctxr context.Context, organizationID string) ([]
 
 	items := &item.ListItem{}
 
-	bytes, err := r.client.Get(ctx, itemsKey+"o."+organizationID).Bytes()
+	bytes, err := r.client.Get(ctx, itemsKey+"o."+meta.OrganizationID).Bytes()
 	if err != nil {
 		return *items, errors.Wrap(err, "unable to get items from cache")
 	}
@@ -35,7 +37,7 @@ func (r *Repository) ItemGetAll(ctxr context.Context, organizationID string) ([]
 }
 
 // ItemSetAll sets items into cache.
-func (r *Repository) ItemSetAll(ctxr context.Context, organizationID string, items []item.Item) error {
+func (r *Repository) ItemSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, items []item.Item) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -53,7 +55,7 @@ func (r *Repository) ItemSetAll(ctxr context.Context, organizationID string, ite
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, itemsKey+"o."+organizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, itemsKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
 
 	return err
 }

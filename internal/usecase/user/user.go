@@ -6,13 +6,15 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/usecase"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 // UserGetAll returns all users from the system.
-func (s *UseCase) UserGetAll(ctx context.Context, search string, status string, roleID string) ([]user.User, error) {
+func (s *UseCase) UserGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserGetAll")
 		defer span.End()
@@ -21,17 +23,20 @@ func (s *UseCase) UserGetAll(ctx context.Context, search string, status string, 
 	}
 
 	if s.isCacheOn {
-		return getAllWithCache(ctx, s, search, status, roleID)
+		return s.getAllWithCache(ctx, meta, params)
 	}
 
-	users, err := s.adapterStorage.UserGetAll(ctx, search, status, roleID)
+	users, err := s.adapterStorage.UserGetAll(ctx, meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "users select failed")
+	}
 
-	return users, errors.Wrap(err, "users select failed")
+	return users, nil
 }
 
 // getAllWithCache returns users from cache if exists.
-func getAllWithCache(ctx context.Context, s *UseCase, search string, status string, roleID string) ([]user.User, error) {
-	users, err := s.adapterCache.UserGetAll(ctx, search, status, roleID)
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
+	users, err := s.adapterCache.UserGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get users from cache", zap.String("error", err.Error()))
 	}
@@ -40,13 +45,12 @@ func getAllWithCache(ctx context.Context, s *UseCase, search string, status stri
 		return users, nil
 	}
 
-	users, err = s.adapterStorage.UserGetAll(ctx, search, status, roleID)
-
+	users, err = s.adapterStorage.UserGetAll(ctx, meta, params)
 	if err != nil {
 		return users, errors.Wrap(err, "users select failed")
 	}
 
-	if err = s.adapterCache.UserSetAll(ctx, users, search, status, roleID); err != nil {
+	if err = s.adapterCache.UserSetAll(ctx, meta, params, users); err != nil {
 		logger.Logger.Error("unable to add users into cache", zap.String("error", err.Error()))
 	}
 
@@ -54,7 +58,7 @@ func getAllWithCache(ctx context.Context, s *UseCase, search string, status stri
 }
 
 // UserGetAllRoles returns all user roles from the system.
-func (s *UseCase) UserGetAllRoles(ctx context.Context) ([]role.Role, error) {
+func (s *UseCase) UserGetAllRoles(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserGetAllRoles")
 		defer span.End()
@@ -63,17 +67,20 @@ func (s *UseCase) UserGetAllRoles(ctx context.Context) ([]role.Role, error) {
 	}
 
 	if s.isCacheOn {
-		return getAllRolesWithCache(ctx, s)
+		return s.getAllRolesWithCache(ctx, meta, params)
 	}
 
-	roles, err := s.adapterStorage.UserGetAllRoles(ctx)
+	roles, err := s.adapterStorage.UserGetAllRoles(ctx, meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "roles select failed")
+	}
 
-	return roles, errors.Wrap(err, "roles select failed")
+	return roles, nil
 }
 
 // getAllRolesWithCache returns all user roles from cache if exists.
-func getAllRolesWithCache(ctx context.Context, s *UseCase) ([]role.Role, error) {
-	roles, err := s.adapterCache.UserGetAllRoles(ctx)
+func (s *UseCase) getAllRolesWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
+	roles, err := s.adapterCache.UserGetAllRoles(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get roles from cache", zap.String("error", err.Error()))
 	}
@@ -82,13 +89,12 @@ func getAllRolesWithCache(ctx context.Context, s *UseCase) ([]role.Role, error) 
 		return roles, nil
 	}
 
-	roles, err = s.adapterStorage.UserGetAllRoles(ctx)
-
+	roles, err = s.adapterStorage.UserGetAllRoles(ctx, meta, params)
 	if err != nil {
 		return roles, errors.Wrap(err, "roles select failed")
 	}
 
-	if err = s.adapterCache.UserSetAllRoles(ctx, roles); err != nil {
+	if err = s.adapterCache.UserSetAllRoles(ctx, meta, params, roles); err != nil {
 		logger.Logger.Error("unable to add roles into cache", zap.String("error", err.Error()))
 	}
 
@@ -96,7 +102,7 @@ func getAllRolesWithCache(ctx context.Context, s *UseCase) ([]role.Role, error) 
 }
 
 // UserGetOne returns user by id from the system.
-func (s *UseCase) UserGetOne(ctx context.Context, userID string) (user.User, error) {
+func (s *UseCase) UserGetOne(ctx context.Context, meta query.MetaData, userID string) (user.User, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserGetOne")
 		defer span.End()
@@ -105,19 +111,19 @@ func (s *UseCase) UserGetOne(ctx context.Context, userID string) (user.User, err
 	}
 
 	if s.isCacheOn {
-		return getOneWithCache(ctx, s, userID)
+		return s.getOneWithCache(ctx, meta, userID)
 	}
 
-	usr, err := s.adapterStorage.UserGetOne(ctx, userID)
+	usr, err := s.adapterStorage.UserGetOne(ctx, meta, userID)
 	if err != nil {
-		return usr, errors.Wrap(err, "user select failed")
+		return user.User{}, errors.Wrap(err, "user select failed")
 	}
 
 	return usr, nil
 }
 
 // getOneWithCache returns user by id from cache if exists.
-func getOneWithCache(ctx context.Context, s *UseCase, userID string) (user.User, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, userID string) (user.User, error) {
 	usr, err := s.adapterCache.UserGetOne(ctx, userID)
 	if err != nil {
 		logger.Logger.Error("unable to get user from cache", zap.String("error", err.Error()))
@@ -127,8 +133,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string) (user.User,
 		return usr, nil
 	}
 
-	usr, err = s.adapterStorage.UserGetOne(ctx, userID)
-
+	usr, err = s.adapterStorage.UserGetOne(ctx, meta, userID)
 	if err != nil {
 		return usr, errors.Wrap(err, "user select failed")
 	}
@@ -141,7 +146,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string) (user.User,
 }
 
 // UserCreate hashes the password and insert User into system.
-func (s *UseCase) UserCreate(ctx context.Context, userID string, input user.CreateUserInput) (string, error) {
+func (s *UseCase) UserCreate(ctx context.Context, meta query.MetaData, input user.CreateUserInput) (string, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserCreate")
 		defer span.End()
@@ -156,13 +161,13 @@ func (s *UseCase) UserCreate(ctx context.Context, userID string, input user.Crea
 
 	input.Password = pass
 
-	ID, err := s.adapterStorage.UserCreate(ctx, userID, input)
+	ID, err := s.adapterStorage.UserCreate(ctx, meta, input)
 	if err != nil {
 		return "", errors.Wrap(err, "user create in database failed")
 	}
 
 	if s.isCacheOn {
-		usr, err := s.adapterStorage.UserGetOne(ctx, ID)
+		usr, err := s.adapterStorage.UserGetOne(ctx, meta, ID)
 		if err != nil {
 			return "", errors.Wrap(err, "user select from database failed")
 		}
@@ -182,7 +187,7 @@ func (s *UseCase) UserCreate(ctx context.Context, userID string, input user.Crea
 }
 
 // UserUpdate updates user by id in the system.
-func (s *UseCase) UserUpdate(ctx context.Context, userID string, input user.UpdateUserInput) error {
+func (s *UseCase) UserUpdate(ctx context.Context, meta query.MetaData, input user.UpdateUserInput) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserUpdate")
 		defer span.End()
@@ -203,13 +208,13 @@ func (s *UseCase) UserUpdate(ctx context.Context, userID string, input user.Upda
 		input.Password = &pass
 	}
 
-	err := s.adapterStorage.UserUpdate(ctx, userID, input)
+	err := s.adapterStorage.UserUpdate(ctx, meta, input)
 	if err != nil {
 		return errors.Wrap(err, "user update in database failed")
 	}
 
 	if s.isCacheOn {
-		usr, err := s.adapterStorage.UserGetOne(ctx, *input.ID)
+		usr, err := s.adapterStorage.UserGetOne(ctx, meta, *input.ID)
 		if err != nil {
 			return errors.Wrap(err, "user select from database failed")
 		}
@@ -229,7 +234,7 @@ func (s *UseCase) UserUpdate(ctx context.Context, userID string, input user.Upda
 }
 
 // UserDelete deletes user by id from the system.
-func (s *UseCase) UserDelete(ctx context.Context, userID string, dUserID string) error {
+func (s *UseCase) UserDelete(ctx context.Context, meta query.MetaData, dUserID string) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserDelete")
 		defer span.End()
@@ -237,7 +242,7 @@ func (s *UseCase) UserDelete(ctx context.Context, userID string, dUserID string)
 		ctx = context.New(ctxt)
 	}
 
-	err := s.adapterStorage.UserDelete(ctx, userID, dUserID)
+	err := s.adapterStorage.UserDelete(ctx, meta, dUserID)
 	if err != nil {
 		return errors.Wrap(err, "user delete failed")
 	}

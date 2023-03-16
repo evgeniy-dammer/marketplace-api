@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/category"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -33,20 +34,14 @@ func (d *Delivery) getCategories(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
+	params := queryparameter.QueryParameter{}
 
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
-		return
-	}
-
-	results, err := d.ucCategory.CategoryGetAll(ctx, userID, organizationID)
+	results, err := d.ucCategory.CategoryGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -81,15 +76,8 @@ func (d *Delivery) getCategory(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -100,7 +88,7 @@ func (d *Delivery) getCategory(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucCategory.CategoryGetOne(ctx, userID, organizationID, categoryID)
+	list, err := d.ucCategory.CategoryGetOne(ctx, meta, categoryID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -134,7 +122,7 @@ func (d *Delivery) createCategory(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -146,7 +134,7 @@ func (d *Delivery) createCategory(ginCtx *gin.Context) {
 		return
 	}
 
-	categoryID, err := d.ucCategory.CategoryCreate(ctx, userID, input)
+	categoryID, err := d.ucCategory.CategoryCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -180,7 +168,7 @@ func (d *Delivery) updateCategory(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -192,7 +180,7 @@ func (d *Delivery) updateCategory(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucCategory.CategoryUpdate(ctx, userID, input); err != nil {
+	if err = d.ucCategory.CategoryUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -226,15 +214,8 @@ func (d *Delivery) deleteCategory(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -245,7 +226,7 @@ func (d *Delivery) deleteCategory(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucCategory.CategoryDelete(ctx, userID, organizationID, categoryID)
+	err = d.ucCategory.CategoryDelete(ctx, meta, categoryID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

@@ -6,12 +6,14 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/rule"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // RuleGetAll selects all rules from database.
-func (r *Repository) RuleGetAll(ctxr context.Context, userID string) ([]rule.Rule, error) {
+func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -31,7 +33,7 @@ func (r *Repository) RuleGetAll(ctxr context.Context, userID string) ([]rule.Rul
 }
 
 // RuleGetOne select rule by id from database.
-func (r *Repository) RuleGetOne(ctxr context.Context, userID string, ruleID string) (rule.Rule, error) {
+func (r *Repository) RuleGetOne(ctxr context.Context, meta query.MetaData, ruleID string) (rule.Rule, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -51,7 +53,7 @@ func (r *Repository) RuleGetOne(ctxr context.Context, userID string, ruleID stri
 }
 
 // RuleCreate insert rule into database.
-func (r *Repository) RuleCreate(ctxr context.Context, userID string, input rule.CreateRuleInput) (string, error) {
+func (r *Repository) RuleCreate(ctxr context.Context, meta query.MetaData, input rule.CreateRuleInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -74,7 +76,7 @@ func (r *Repository) RuleCreate(ctxr context.Context, userID string, input rule.
 }
 
 // RuleUpdate updates rule by id in database.
-func (r *Repository) RuleUpdate(ctxr context.Context, userID string, input rule.UpdateRuleInput) error {
+func (r *Repository) RuleUpdate(ctxr context.Context, meta query.MetaData, input rule.UpdateRuleInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -138,7 +140,7 @@ func (r *Repository) RuleUpdate(ctxr context.Context, userID string, input rule.
 }
 
 // RuleDelete deletes rule by id from database.
-func (r *Repository) RuleDelete(ctxr context.Context, userID string, ruleID string) error {
+func (r *Repository) RuleDelete(ctxr context.Context, meta query.MetaData, ruleID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 

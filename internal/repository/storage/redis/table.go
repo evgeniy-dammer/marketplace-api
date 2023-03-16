@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/table"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // TableGetAll gets tables from cache.
-func (r *Repository) TableGetAll(ctxr context.Context, organizationID string) ([]table.Table, error) {
+func (r *Repository) TableGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -22,7 +24,7 @@ func (r *Repository) TableGetAll(ctxr context.Context, organizationID string) ([
 
 	tables := &table.ListTable{}
 
-	bytes, err := r.client.Get(ctx, tablesKey+"o."+organizationID).Bytes()
+	bytes, err := r.client.Get(ctx, tablesKey+"o."+meta.OrganizationID).Bytes()
 	if err != nil {
 		return *tables, errors.Wrap(err, "unable to get tables from cache")
 	}
@@ -35,7 +37,7 @@ func (r *Repository) TableGetAll(ctxr context.Context, organizationID string) ([
 }
 
 // TableSetAll sets tables into cache.
-func (r *Repository) TableSetAll(ctxr context.Context, organizationID string, tables []table.Table) error {
+func (r *Repository) TableSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, tables []table.Table) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -53,7 +55,7 @@ func (r *Repository) TableSetAll(ctxr context.Context, organizationID string, ta
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, tablesKey+"o."+organizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, tablesKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
 
 	return err
 }

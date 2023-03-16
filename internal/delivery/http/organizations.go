@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -32,12 +33,14 @@ func (d *Delivery) getOrganizations(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	results, err := d.ucOrganization.OrganizationGetAll(ctx, userID)
+	params := queryparameter.QueryParameter{}
+
+	results, err := d.ucOrganization.OrganizationGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -71,7 +74,7 @@ func (d *Delivery) getOrganization(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -83,7 +86,7 @@ func (d *Delivery) getOrganization(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucOrganization.OrganizationGetOne(ctx, userID, organizationID)
+	list, err := d.ucOrganization.OrganizationGetOne(ctx, meta, organizationID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -117,7 +120,7 @@ func (d *Delivery) createOrganization(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -129,7 +132,7 @@ func (d *Delivery) createOrganization(ginCtx *gin.Context) {
 		return
 	}
 
-	organizationID, err := d.ucOrganization.OrganizationCreate(ctx, userID, input)
+	organizationID, err := d.ucOrganization.OrganizationCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -163,7 +166,7 @@ func (d *Delivery) updateOrganization(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -181,7 +184,7 @@ func (d *Delivery) updateOrganization(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucOrganization.OrganizationUpdate(ctx, userID, input); err != nil {
+	if err = d.ucOrganization.OrganizationUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -214,7 +217,7 @@ func (d *Delivery) deleteOrganization(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -226,7 +229,7 @@ func (d *Delivery) deleteOrganization(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucOrganization.OrganizationDelete(ctx, userID, organizationID)
+	err = d.ucOrganization.OrganizationDelete(ctx, meta, organizationID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

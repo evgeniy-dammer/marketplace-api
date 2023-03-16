@@ -6,12 +6,14 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // SpecificationGetAll selects all specifications from database.
-func (r *Repository) SpecificationGetAll(ctxr context.Context, userID string, organizationID string) ([]specification.Specification, error) {
+func (r *Repository) SpecificationGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -30,13 +32,13 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, userID string, or
 		specificationTable,
 	)
 
-	err := r.database.SelectContext(ctx, &specifications, query, organizationID)
+	err := r.database.SelectContext(ctx, &specifications, query, meta.OrganizationID)
 
 	return specifications, errors.Wrap(err, "specifications select query error")
 }
 
 // SpecificationGetOne select specification by id from database.
-func (r *Repository) SpecificationGetOne(ctxr context.Context, userID string, organizationID string, specificationID string) (specification.Specification, error) {
+func (r *Repository) SpecificationGetOne(ctxr context.Context, meta query.MetaData, specificationID string) (specification.Specification, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,13 +57,13 @@ func (r *Repository) SpecificationGetOne(ctxr context.Context, userID string, or
 		specificationTable,
 	)
 
-	err := r.database.GetContext(ctx, &spec, query, organizationID, specificationID)
+	err := r.database.GetContext(ctx, &spec, query, meta.OrganizationID, specificationID)
 
 	return spec, errors.Wrap(err, "specification select query error")
 }
 
 // SpecificationCreate insert specification into database.
-func (r *Repository) SpecificationCreate(ctxr context.Context, userID string, input specification.CreateSpecificationInput) (string, error) {
+func (r *Repository) SpecificationCreate(ctxr context.Context, meta query.MetaData, input specification.CreateSpecificationInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -102,7 +104,7 @@ func (r *Repository) SpecificationCreate(ctxr context.Context, userID string, in
 }
 
 // SpecificationUpdate updates specification by id in database.
-func (r *Repository) SpecificationUpdate(ctxr context.Context, userID string, input specification.UpdateSpecificationInput) error {
+func (r *Repository) SpecificationUpdate(ctxr context.Context, meta query.MetaData, input specification.UpdateSpecificationInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -192,7 +194,7 @@ func (r *Repository) SpecificationUpdate(ctxr context.Context, userID string, in
 }
 
 // SpecificationDelete deletes specification by id from database.
-func (r *Repository) SpecificationDelete(ctxr context.Context, userID string, organizationID string, specificationID string) error {
+func (r *Repository) SpecificationDelete(ctxr context.Context, meta query.MetaData, specificationID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -205,7 +207,7 @@ func (r *Repository) SpecificationDelete(ctxr context.Context, userID string, or
 
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND organization_id = $2", specificationTable)
 
-	_, err := r.database.ExecContext(ctx, query, specificationID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, specificationID, meta.OrganizationID)
 
 	return errors.Wrap(err, "specification delete query error")
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -33,19 +34,14 @@ func (d *Delivery) getImages(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
+	params := queryparameter.QueryParameter{}
 
-		return
-	}
-
-	results, err := d.ucImage.ImageGetAll(ctx, userID, organizationID)
+	results, err := d.ucImage.ImageGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -80,15 +76,8 @@ func (d *Delivery) getImage(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -99,7 +88,7 @@ func (d *Delivery) getImage(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucImage.ImageGetOne(ctx, userID, organizationID, imageID)
+	list, err := d.ucImage.ImageGetOne(ctx, meta, imageID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -133,7 +122,7 @@ func (d *Delivery) createImage(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -145,7 +134,7 @@ func (d *Delivery) createImage(ginCtx *gin.Context) {
 		return
 	}
 
-	imageID, err := d.ucImage.ImageCreate(ctx, userID, input)
+	imageID, err := d.ucImage.ImageCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -179,7 +168,7 @@ func (d *Delivery) updateImage(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -191,7 +180,7 @@ func (d *Delivery) updateImage(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucImage.ImageUpdate(ctx, userID, input); err != nil {
+	if err = d.ucImage.ImageUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -225,15 +214,8 @@ func (d *Delivery) deleteImage(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -244,7 +226,7 @@ func (d *Delivery) deleteImage(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucImage.ImageDelete(ctx, userID, organizationID, imageID)
+	err = d.ucImage.ImageDelete(ctx, meta, imageID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

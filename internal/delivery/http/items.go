@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/item"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -33,19 +34,14 @@ func (d *Delivery) getItems(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
+	params := queryparameter.QueryParameter{}
 
-		return
-	}
-
-	results, err := d.ucItem.ItemGetAll(ctx, userID, organizationID)
+	results, err := d.ucItem.ItemGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -80,15 +76,8 @@ func (d *Delivery) getItem(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -99,7 +88,7 @@ func (d *Delivery) getItem(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucItem.ItemGetOne(ctx, userID, organizationID, itemID)
+	list, err := d.ucItem.ItemGetOne(ctx, meta, itemID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -133,7 +122,7 @@ func (d *Delivery) createItem(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -146,7 +135,7 @@ func (d *Delivery) createItem(ginCtx *gin.Context) {
 		return
 	}
 
-	itemID, err := d.ucItem.ItemCreate(ctx, userID, input)
+	itemID, err := d.ucItem.ItemCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -180,7 +169,7 @@ func (d *Delivery) updateItem(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -192,7 +181,7 @@ func (d *Delivery) updateItem(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucItem.ItemUpdate(ctx, userID, input); err != nil {
+	if err = d.ucItem.ItemUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -226,15 +215,8 @@ func (d *Delivery) deleteItem(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if userID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -245,7 +227,7 @@ func (d *Delivery) deleteItem(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucItem.ItemDelete(ctx, userID, organizationID, itemID)
+	err = d.ucItem.ItemDelete(ctx, meta, itemID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

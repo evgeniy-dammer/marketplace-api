@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/order"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -33,19 +34,14 @@ func (d *Delivery) getOrders(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
+	params := queryparameter.QueryParameter{}
 
-		return
-	}
-
-	results, err := d.ucOrder.OrderGetAll(ctx, userID, organizationID)
+	results, err := d.ucOrder.OrderGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -80,15 +76,8 @@ func (d *Delivery) getOrder(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -99,7 +88,7 @@ func (d *Delivery) getOrder(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucOrder.OrderGetOne(ctx, userID, organizationID, orderID)
+	list, err := d.ucOrder.OrderGetOne(ctx, meta, orderID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -133,7 +122,7 @@ func (d *Delivery) createOrder(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -145,7 +134,7 @@ func (d *Delivery) createOrder(ginCtx *gin.Context) {
 		return
 	}
 
-	orderID, err := d.ucOrder.OrderCreate(ctx, userID, input)
+	orderID, err := d.ucOrder.OrderCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -179,7 +168,7 @@ func (d *Delivery) updateOrder(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -191,7 +180,7 @@ func (d *Delivery) updateOrder(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucOrder.OrderUpdate(ctx, userID, input); err != nil {
+	if err = d.ucOrder.OrderUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -225,15 +214,8 @@ func (d *Delivery) deleteOrder(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if userID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -244,7 +226,7 @@ func (d *Delivery) deleteOrder(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucOrder.OrderDelete(ctx, userID, organizationID, orderID)
+	err = d.ucOrder.OrderDelete(ctx, meta, orderID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

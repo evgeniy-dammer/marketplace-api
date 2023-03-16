@@ -6,6 +6,7 @@ import (
 	_ "github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -33,11 +34,14 @@ func (d *Delivery) getAllUsers(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	search := ginCtx.Query("search")
-	roleID := ginCtx.Query("role_id")
-	status := ginCtx.Query("status")
+	meta, err := d.parseMetadata(ginCtx)
+	if err != nil {
+		return
+	}
 
-	results, err := d.ucUser.UserGetAll(ctx, search, status, roleID)
+	params := queryparameter.QueryParameter{}
+
+	results, err := d.ucUser.UserGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -71,6 +75,11 @@ func (d *Delivery) getUser(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
+	meta, err := d.parseMetadata(ginCtx)
+	if err != nil {
+		return
+	}
+
 	userID := ginCtx.Param("id")
 	if userID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
@@ -78,7 +87,7 @@ func (d *Delivery) getUser(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucUser.UserGetOne(ctx, userID)
+	list, err := d.ucUser.UserGetOne(ctx, meta, userID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -111,7 +120,14 @@ func (d *Delivery) getAllRoles(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	results, err := d.ucUser.UserGetAllRoles(ctx)
+	meta, err := d.parseMetadata(ginCtx)
+	if err != nil {
+		return
+	}
+
+	params := queryparameter.QueryParameter{}
+
+	results, err := d.ucUser.UserGetAllRoles(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -145,7 +161,7 @@ func (d *Delivery) createUser(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -157,7 +173,7 @@ func (d *Delivery) createUser(ginCtx *gin.Context) {
 		return
 	}
 
-	insertID, err := d.ucUser.UserCreate(ctx, userID, input)
+	insertID, err := d.ucUser.UserCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -192,7 +208,7 @@ func (d *Delivery) updateUser(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -204,7 +220,7 @@ func (d *Delivery) updateUser(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucUser.UserUpdate(ctx, userID, input); err != nil {
+	if err = d.ucUser.UserUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -237,19 +253,19 @@ func (d *Delivery) deleteUser(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	dUserID := ginCtx.Param("id")
-	if dUserID == "" {
+	userID := ginCtx.Param("id")
+	if userID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	err = d.ucUser.UserDelete(ctx, userID, dUserID)
+	err = d.ucUser.UserDelete(ctx, meta, userID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

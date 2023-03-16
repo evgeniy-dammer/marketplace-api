@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // SpecificationGetAll gets specifications from cache.
-func (r *Repository) SpecificationGetAll(ctxr context.Context, organizationID string) ([]specification.Specification, error) {
+func (r *Repository) SpecificationGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -22,7 +24,7 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, organizationID st
 
 	specifications := &specification.ListSpecification{}
 
-	bytes, err := r.client.Get(ctx, specificationsKey+"o."+organizationID).Bytes()
+	bytes, err := r.client.Get(ctx, specificationsKey+"o."+meta.OrganizationID).Bytes()
 	if err != nil {
 		return *specifications, errors.Wrap(err, "unable to get specifications from cache")
 	}
@@ -35,7 +37,7 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, organizationID st
 }
 
 // SpecificationSetAll sets specifications into cache.
-func (r *Repository) SpecificationSetAll(ctxr context.Context, organizationID string, specifications []specification.Specification) error {
+func (r *Repository) SpecificationSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, specifications []specification.Specification) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -53,7 +55,7 @@ func (r *Repository) SpecificationSetAll(ctxr context.Context, organizationID st
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, specificationsKey+"o."+organizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, specificationsKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
 
 	return err
 }

@@ -7,12 +7,14 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/table"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // TableGetAll selects all tables from database.
-func (r *Repository) TableGetAll(ctxr context.Context, userID string, organizationID string) ([]table.Table, error) {
+func (r *Repository) TableGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -27,13 +29,13 @@ func (r *Repository) TableGetAll(ctxr context.Context, userID string, organizati
 
 	query := fmt.Sprintf("SELECT id, name, organization_id FROM %s WHERE is_deleted = false AND organization_id = $1 ",
 		tableTable)
-	err := r.database.SelectContext(ctx, &tables, query, organizationID)
+	err := r.database.SelectContext(ctx, &tables, query, meta.OrganizationID)
 
 	return tables, errors.Wrap(err, "tables select query error")
 }
 
 // TableGetOne select table by id from database.
-func (r *Repository) TableGetOne(ctxr context.Context, userID string, organizationID string, tableID string) (table.Table, error) {
+func (r *Repository) TableGetOne(ctxr context.Context, meta query.MetaData, tableID string) (table.Table, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -50,13 +52,13 @@ func (r *Repository) TableGetOne(ctxr context.Context, userID string, organizati
 		"SELECT id, name, organization_id FROM %s WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		tableTable,
 	)
-	err := r.database.GetContext(ctx, &tble, query, organizationID, tableID)
+	err := r.database.GetContext(ctx, &tble, query, meta.OrganizationID, tableID)
 
 	return tble, errors.Wrap(err, "table select query error")
 }
 
 // TableCreate insert table into database.
-func (r *Repository) TableCreate(ctxr context.Context, userID string, input table.CreateTableInput) (string, error) {
+func (r *Repository) TableCreate(ctxr context.Context, meta query.MetaData, input table.CreateTableInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -71,14 +73,14 @@ func (r *Repository) TableCreate(ctxr context.Context, userID string, input tabl
 
 	query := fmt.Sprintf("INSERT INTO %s (name, organization_id, user_created) VALUES ($1, $2, $3) RETURNING id",
 		tableTable)
-	row := r.database.QueryRowContext(ctx, query, input.Name, input.OrganizationID, userID)
+	row := r.database.QueryRowContext(ctx, query, input.Name, input.OrganizationID, meta.UserID)
 	err := row.Scan(&tableID)
 
 	return tableID, errors.Wrap(err, "table create query error")
 }
 
 // TableUpdate updates table by id in database.
-func (r *Repository) TableUpdate(ctxr context.Context, userID string, input table.UpdateTableInput) error {
+func (r *Repository) TableUpdate(ctxr context.Context, meta query.MetaData, input table.UpdateTableInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -106,7 +108,7 @@ func (r *Repository) TableUpdate(ctxr context.Context, userID string, input tabl
 	}
 
 	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, userID)
+	args = append(args, meta.UserID)
 	argID++
 
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
@@ -121,7 +123,7 @@ func (r *Repository) TableUpdate(ctxr context.Context, userID string, input tabl
 }
 
 // TableDelete deletes table by id from database.
-func (r *Repository) TableDelete(ctxr context.Context, userID string, organizationID string, tableID string) error {
+func (r *Repository) TableDelete(ctxr context.Context, meta query.MetaData, tableID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -138,7 +140,7 @@ func (r *Repository) TableDelete(ctxr context.Context, userID string, organizati
 		tableTable,
 	)
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, tableID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, tableID, meta.OrganizationID)
 
 	return errors.Wrap(err, "table delete query error")
 }

@@ -7,12 +7,14 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // OrganizationGetAll selects all organizations from database.
-func (r *Repository) OrganizationGetAll(ctxr context.Context, userID string) ([]organization.Organization, error) {
+func (r *Repository) OrganizationGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -28,13 +30,13 @@ func (r *Repository) OrganizationGetAll(ctxr context.Context, userID string) ([]
 	query := fmt.Sprintf("SELECT id, name, user_id, address, phone FROM %s WHERE is_deleted = false AND user_id = $1",
 		organizationTable)
 
-	err := r.database.SelectContext(ctx, &organizations, query, userID)
+	err := r.database.SelectContext(ctx, &organizations, query, meta.UserID)
 
 	return organizations, errors.Wrap(err, "organizations select query error")
 }
 
 // OrganizationGetOne select organization by id from database.
-func (r *Repository) OrganizationGetOne(ctxr context.Context, userID string, organizationID string) (organization.Organization, error) {
+func (r *Repository) OrganizationGetOne(ctxr context.Context, meta query.MetaData, organizationID string) (organization.Organization, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -50,13 +52,13 @@ func (r *Repository) OrganizationGetOne(ctxr context.Context, userID string, org
 	query := fmt.Sprintf(
 		"SELECT id, name, user_id, address, phone FROM %s WHERE is_deleted = false AND user_id = $1 AND id = $2",
 		organizationTable)
-	err := r.database.GetContext(ctx, &org, query, userID, organizationID)
+	err := r.database.GetContext(ctx, &org, query, meta.UserID, organizationID)
 
 	return org, errors.Wrap(err, "organization select query error")
 }
 
 // OrganizationCreate insert organization into database.
-func (r *Repository) OrganizationCreate(ctxr context.Context, userID string, input organization.CreateOrganizationInput) (string, error) {
+func (r *Repository) OrganizationCreate(ctxr context.Context, meta query.MetaData, input organization.CreateOrganizationInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -73,7 +75,7 @@ func (r *Repository) OrganizationCreate(ctxr context.Context, userID string, inp
 		"INSERT INTO %s (name, user_id, address, phone, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		organizationTable)
 
-	row := r.database.QueryRowContext(ctx, createUserQuery, input.Name, userID, input.Address, input.Phone, userID)
+	row := r.database.QueryRowContext(ctx, createUserQuery, input.Name, meta.UserID, input.Address, input.Phone, meta.UserID)
 
 	err := row.Scan(&organizationID)
 
@@ -81,7 +83,7 @@ func (r *Repository) OrganizationCreate(ctxr context.Context, userID string, inp
 }
 
 // OrganizationUpdate updates organization by id in database.
-func (r *Repository) OrganizationUpdate(ctxr context.Context, userID string, input organization.UpdateOrganizationInput) error {
+func (r *Repository) OrganizationUpdate(ctxr context.Context, meta query.MetaData, input organization.UpdateOrganizationInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -115,7 +117,7 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, userID string, inp
 	}
 
 	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, userID)
+	args = append(args, meta.UserID)
 	argID++
 
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
@@ -124,7 +126,7 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, userID string, inp
 	setQuery := strings.Join(setValues, ", ")
 	query := fmt.Sprintf(
 		"UPDATE %s SET %s WHERE is_deleted = false AND id = '%s' AND user_id = '%s'",
-		organizationTable, setQuery, *input.ID, userID)
+		organizationTable, setQuery, *input.ID, meta.UserID)
 
 	_, err := r.database.ExecContext(ctx, query, args...)
 
@@ -132,7 +134,7 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, userID string, inp
 }
 
 // OrganizationDelete deletes organization by id from database.
-func (r *Repository) OrganizationDelete(ctxr context.Context, userID string, organizationID string) error {
+func (r *Repository) OrganizationDelete(ctxr context.Context, meta query.MetaData, organizationID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -148,7 +150,7 @@ func (r *Repository) OrganizationDelete(ctxr context.Context, userID string, org
 		organizationTable,
 	)
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, organizationID)
 
 	return errors.Wrap(err, "organization delete query error")
 }

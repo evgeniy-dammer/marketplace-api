@@ -7,13 +7,15 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/item"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
 // ItemGetAll selects all items from database.
-func (r *Repository) ItemGetAll(ctxr context.Context, userID string, organizationID string) ([]item.Item, error) {
+func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -36,7 +38,7 @@ func (r *Repository) ItemGetAll(ctxr context.Context, userID string, organizatio
 		itemTable,
 	)
 
-	err := r.database.SelectContext(ctx, &items, query, organizationID)
+	err := r.database.SelectContext(ctx, &items, query, meta.OrganizationID)
 
 	for i := 0; i < len(items); i++ {
 		index := i
@@ -61,7 +63,7 @@ func (r *Repository) ItemGetAll(ctxr context.Context, userID string, organizatio
 }
 
 // ItemGetOne select item by id from database.
-func (r *Repository) ItemGetOne(ctxr context.Context, userID string, organizationID string, itemID string) (item.Item, error) {
+func (r *Repository) ItemGetOne(ctxr context.Context, meta query.MetaData, itemID string) (item.Item, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -84,7 +86,7 @@ func (r *Repository) ItemGetOne(ctxr context.Context, userID string, organizatio
 		itemTable,
 	)
 
-	err := r.database.GetContext(ctx, &itm, query, organizationID, itemID)
+	err := r.database.GetContext(ctx, &itm, query, meta.OrganizationID, itemID)
 	if err != nil {
 		return itm, errors.Wrap(err, "item select query error")
 	}
@@ -130,7 +132,7 @@ func (r *Repository) ItemGetOne(ctxr context.Context, userID string, organizatio
 }
 
 // ItemCreate insert item into database.
-func (r *Repository) ItemCreate(ctxr context.Context, userID string, input item.CreateItemInput) (string, error) {
+func (r *Repository) ItemCreate(ctxr context.Context, meta query.MetaData, input item.CreateItemInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -167,7 +169,7 @@ func (r *Repository) ItemCreate(ctxr context.Context, userID string, input item.
 		input.CategoryID,
 		input.OrganizationID,
 		input.BrandID,
-		userID,
+		meta.UserID,
 	)
 
 	err := row.Scan(&itemID)
@@ -176,7 +178,7 @@ func (r *Repository) ItemCreate(ctxr context.Context, userID string, input item.
 }
 
 // ItemUpdate updates item by id in database.
-func (r *Repository) ItemUpdate(ctxr context.Context, userID string, input item.UpdateItemInput) error {
+func (r *Repository) ItemUpdate(ctxr context.Context, meta query.MetaData, input item.UpdateItemInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -270,7 +272,7 @@ func (r *Repository) ItemUpdate(ctxr context.Context, userID string, input item.
 	}
 
 	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, userID)
+	args = append(args, meta.UserID)
 	argID++
 
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
@@ -286,7 +288,7 @@ func (r *Repository) ItemUpdate(ctxr context.Context, userID string, input item.
 }
 
 // ItemDelete deletes item by id from database.
-func (r *Repository) ItemDelete(ctxr context.Context, userID string, organizationID string, itemID string) error {
+func (r *Repository) ItemDelete(ctxr context.Context, meta query.MetaData, itemID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -303,7 +305,7 @@ func (r *Repository) ItemDelete(ctxr context.Context, userID string, organizatio
 		itemTable,
 	)
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, itemID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, itemID, meta.OrganizationID)
 
 	return errors.Wrap(err, "item delete query error")
 }

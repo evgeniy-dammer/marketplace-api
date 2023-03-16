@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/rule"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -32,12 +33,14 @@ func (d *Delivery) getRules(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	results, err := d.ucRule.RuleGetAll(ctx, userID)
+	params := queryparameter.QueryParameter{}
+
+	results, err := d.ucRule.RuleGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -71,7 +74,7 @@ func (d *Delivery) getRule(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -83,7 +86,7 @@ func (d *Delivery) getRule(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucRule.RuleGetOne(ctx, userID, ruleID)
+	list, err := d.ucRule.RuleGetOne(ctx, meta, ruleID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -117,7 +120,7 @@ func (d *Delivery) createRule(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -129,7 +132,7 @@ func (d *Delivery) createRule(ginCtx *gin.Context) {
 		return
 	}
 
-	ruleID, err := d.ucRule.RuleCreate(ctx, userID, input)
+	ruleID, err := d.ucRule.RuleCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -163,7 +166,7 @@ func (d *Delivery) updateRule(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -175,7 +178,7 @@ func (d *Delivery) updateRule(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucRule.RuleUpdate(ctx, userID, input); err != nil {
+	if err = d.ucRule.RuleUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -208,7 +211,7 @@ func (d *Delivery) deleteRule(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -220,7 +223,7 @@ func (d *Delivery) deleteRule(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucRule.RuleDelete(ctx, userID, ruleID)
+	err = d.ucRule.RuleDelete(ctx, meta, ruleID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
