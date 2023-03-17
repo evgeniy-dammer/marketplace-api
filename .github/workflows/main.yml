@@ -27,6 +27,7 @@ jobs:
         
     - name: Lintering
       uses: golangci/golangci-lint-action@v3
+      skip-pkg-cache: false
       with:
         version: v1.29
 
