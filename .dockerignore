@@ -6,5 +6,4 @@ docker-compose.yaml
 Makefile
 README.md
 marketplace-api
-schema
 proto
