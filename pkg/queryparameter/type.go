@@ -1,9 +1,10 @@
 package queryparameter
 
 import (
+	"time"
+
 	"github.com/evgeniy-dammer/marketplace-api/pkg/pagination"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/sort"
-	"time"
 )
 
 type QueryParameter struct {
