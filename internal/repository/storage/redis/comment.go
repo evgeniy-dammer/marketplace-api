@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // CommentGetAll gets comments from cache.
-func (r *Repository) CommentGetAll(ctxr context.Context, organizationID string) ([]comment.Comment, error) {
+func (r *Repository) CommentGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -22,7 +24,7 @@ func (r *Repository) CommentGetAll(ctxr context.Context, organizationID string) 
 
 	comments := &comment.ListComment{}
 
-	bytes, err := r.client.Get(ctx, commentsKey+"o."+organizationID).Bytes()
+	bytes, err := r.client.Get(ctx, commentsKey+"o."+meta.OrganizationID).Bytes()
 	if err != nil {
 		return *comments, errors.Wrap(err, "unable to get comments from cache")
 	}
@@ -35,7 +37,7 @@ func (r *Repository) CommentGetAll(ctxr context.Context, organizationID string) 
 }
 
 // CommentSetAll sets comments into cache.
-func (r *Repository) CommentSetAll(ctxr context.Context, organizationID string, comments []comment.Comment) error {
+func (r *Repository) CommentSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, comments []comment.Comment) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -53,7 +55,7 @@ func (r *Repository) CommentSetAll(ctxr context.Context, organizationID string, 
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, commentsKey+"o."+organizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, commentsKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
 
 	return err
 }

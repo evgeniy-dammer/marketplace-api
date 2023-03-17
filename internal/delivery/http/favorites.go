@@ -33,7 +33,7 @@ func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -45,7 +45,7 @@ func (d *Delivery) createFavorite(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucFavorite.FavoriteCreate(ctx, userID, input)
+	err = d.ucFavorite.FavoriteCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -79,7 +79,7 @@ func (d *Delivery) deleteFavorite(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -91,7 +91,7 @@ func (d *Delivery) deleteFavorite(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucFavorite.FavoriteDelete(ctx, userID, itemID)
+	err = d.ucFavorite.FavoriteDelete(ctx, meta, itemID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

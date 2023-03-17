@@ -4,13 +4,15 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 // OrganizationGetAll returns all organizations from the system.
-func (s *UseCase) OrganizationGetAll(ctx context.Context, userID string) ([]organization.Organization, error) {
+func (s *UseCase) OrganizationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationGetAll")
 		defer span.End()
@@ -19,17 +21,17 @@ func (s *UseCase) OrganizationGetAll(ctx context.Context, userID string) ([]orga
 	}
 
 	if s.isCacheOn {
-		return getAllWithCache(ctx, s, userID)
+		return s.getAllWithCache(ctx, meta, params)
 	}
 
-	organizations, err := s.adapterStorage.OrganizationGetAll(ctx, userID)
+	organizations, err := s.adapterStorage.OrganizationGetAll(ctx, meta, params)
 
 	return organizations, errors.Wrap(err, "organization select error")
 }
 
 // getAllWithCache returns organizations from cache if exists.
-func getAllWithCache(ctx context.Context, s *UseCase, userID string) ([]organization.Organization, error) {
-	organizations, err := s.adapterCache.OrganizationGetAll(ctx)
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) {
+	organizations, err := s.adapterCache.OrganizationGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get organizations from cache", zap.String("error", err.Error()))
 	}
@@ -38,13 +40,13 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string) ([]organiza
 		return organizations, nil
 	}
 
-	organizations, err = s.adapterStorage.OrganizationGetAll(ctx, userID)
+	organizations, err = s.adapterStorage.OrganizationGetAll(ctx, meta, params)
 
 	if err != nil {
 		return organizations, errors.Wrap(err, "organizations select failed")
 	}
 
-	if err = s.adapterCache.OrganizationSetAll(ctx, organizations); err != nil {
+	if err = s.adapterCache.OrganizationSetAll(ctx, meta, params, organizations); err != nil {
 		logger.Logger.Error("unable to add organizations into cache", zap.String("error", err.Error()))
 	}
 
@@ -52,7 +54,7 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string) ([]organiza
 }
 
 // OrganizationGetOne returns organization by id from the system.
-func (s *UseCase) OrganizationGetOne(ctx context.Context, userID string, organizationID string) (organization.Organization, error) {
+func (s *UseCase) OrganizationGetOne(ctx context.Context, meta query.MetaData, organizationID string) (organization.Organization, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationGetOne")
 		defer span.End()
@@ -61,16 +63,16 @@ func (s *UseCase) OrganizationGetOne(ctx context.Context, userID string, organiz
 	}
 
 	if s.isCacheOn {
-		return getOneWithCache(ctx, s, userID, organizationID)
+		return s.getOneWithCache(ctx, meta, organizationID)
 	}
 
-	org, err := s.adapterStorage.OrganizationGetOne(ctx, userID, organizationID)
+	org, err := s.adapterStorage.OrganizationGetOne(ctx, meta, organizationID)
 
 	return org, errors.Wrap(err, "organization select error")
 }
 
 // getOneWithCache returns organization by id from cache if exists.
-func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizationID string) (organization.Organization, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, organizationID string) (organization.Organization, error) {
 	org, err := s.adapterCache.OrganizationGetOne(ctx, organizationID)
 	if err != nil {
 		logger.Logger.Error("unable to get organization from cache", zap.String("error", err.Error()))
@@ -80,7 +82,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 		return org, nil
 	}
 
-	org, err = s.adapterStorage.OrganizationGetOne(ctx, userID, organizationID)
+	org, err = s.adapterStorage.OrganizationGetOne(ctx, meta, organizationID)
 
 	if err != nil {
 		return org, errors.Wrap(err, "organization select failed")
@@ -94,7 +96,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 }
 
 // OrganizationCreate inserts organization into system.
-func (s *UseCase) OrganizationCreate(ctx context.Context, userID string, input organization.CreateOrganizationInput) (string, error) {
+func (s *UseCase) OrganizationCreate(ctx context.Context, meta query.MetaData, input organization.CreateOrganizationInput) (string, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationCreate")
 		defer span.End()
@@ -102,13 +104,13 @@ func (s *UseCase) OrganizationCreate(ctx context.Context, userID string, input o
 		ctx = context.New(ctxt)
 	}
 
-	organizationID, err := s.adapterStorage.OrganizationCreate(ctx, userID, input)
+	organizationID, err := s.adapterStorage.OrganizationCreate(ctx, meta, input)
 	if err != nil {
 		return organizationID, errors.Wrap(err, "organization create error")
 	}
 
 	if s.isCacheOn {
-		org, err := s.adapterStorage.OrganizationGetOne(ctx, userID, organizationID)
+		org, err := s.adapterStorage.OrganizationGetOne(ctx, meta, organizationID)
 		if err != nil {
 			return "", errors.Wrap(err, "organization select from database failed")
 		}
@@ -128,7 +130,7 @@ func (s *UseCase) OrganizationCreate(ctx context.Context, userID string, input o
 }
 
 // OrganizationUpdate updates organization by id in the system.
-func (s *UseCase) OrganizationUpdate(ctx context.Context, userID string, input organization.UpdateOrganizationInput) error {
+func (s *UseCase) OrganizationUpdate(ctx context.Context, meta query.MetaData, input organization.UpdateOrganizationInput) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationUpdate")
 		defer span.End()
@@ -140,13 +142,13 @@ func (s *UseCase) OrganizationUpdate(ctx context.Context, userID string, input o
 		return errors.Wrap(err, "validation error")
 	}
 
-	err := s.adapterStorage.OrganizationUpdate(ctx, userID, input)
+	err := s.adapterStorage.OrganizationUpdate(ctx, meta, input)
 	if err != nil {
 		return errors.Wrap(err, "organization update in database failed")
 	}
 
 	if s.isCacheOn {
-		org, err := s.adapterStorage.OrganizationGetOne(ctx, userID, *input.ID)
+		org, err := s.adapterStorage.OrganizationGetOne(ctx, meta, *input.ID)
 		if err != nil {
 			return errors.Wrap(err, "organization select from database failed")
 		}
@@ -166,7 +168,7 @@ func (s *UseCase) OrganizationUpdate(ctx context.Context, userID string, input o
 }
 
 // OrganizationDelete deletes organization by id from the system.
-func (s *UseCase) OrganizationDelete(ctx context.Context, userID string, organizationID string) error {
+func (s *UseCase) OrganizationDelete(ctx context.Context, meta query.MetaData, organizationID string) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationDelete")
 		defer span.End()
@@ -174,7 +176,7 @@ func (s *UseCase) OrganizationDelete(ctx context.Context, userID string, organiz
 		ctx = context.New(ctxt)
 	}
 
-	err := s.adapterStorage.OrganizationDelete(ctx, userID, organizationID)
+	err := s.adapterStorage.OrganizationDelete(ctx, meta, organizationID)
 	if err != nil {
 		return errors.Wrap(err, "organization delete failed")
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -33,20 +34,14 @@ func (d *Delivery) getComments(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
+	params := queryparameter.QueryParameter{}
 
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
-		return
-	}
-
-	results, err := d.ucComment.CommentGetAll(ctx, userID, organizationID)
+	results, err := d.ucComment.CommentGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -81,27 +76,19 @@ func (d *Delivery) getComment(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
-		return
-	}
-
 	commentID := ginCtx.Param("id")
-
 	if commentID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	list, err := d.ucComment.CommentGetOne(ctx, userID, organizationID, commentID)
+	list, err := d.ucComment.CommentGetOne(ctx, meta, commentID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -135,7 +122,7 @@ func (d *Delivery) createComment(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -147,7 +134,7 @@ func (d *Delivery) createComment(ginCtx *gin.Context) {
 		return
 	}
 
-	commentID, err := d.ucComment.CommentCreate(ctx, userID, input)
+	commentID, err := d.ucComment.CommentCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -181,7 +168,7 @@ func (d *Delivery) updateComment(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -193,7 +180,7 @@ func (d *Delivery) updateComment(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucComment.CommentUpdate(ctx, userID, input); err != nil {
+	if err = d.ucComment.CommentUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -227,27 +214,19 @@ func (d *Delivery) deleteComment(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
-		return
-	}
-
 	commentID := ginCtx.Param("id")
-
 	if commentID == "" {
 		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
 
 		return
 	}
 
-	err = d.ucComment.CommentDelete(ctx, userID, organizationID, commentID)
+	err = d.ucComment.CommentDelete(ctx, meta, commentID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

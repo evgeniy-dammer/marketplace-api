@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/category"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // CategoryGetAll gets categories from cache.
-func (r *Repository) CategoryGetAll(ctxr context.Context, organizationID string) ([]category.Category, error) {
+func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -22,7 +24,7 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, organizationID string)
 
 	categories := &category.ListCategory{}
 
-	bytes, err := r.client.Get(ctx, categoriesKey+"o."+organizationID).Bytes()
+	bytes, err := r.client.Get(ctx, categoriesKey+"o."+meta.OrganizationID).Bytes()
 	if err != nil {
 		return *categories, errors.Wrap(err, "unable to get categories from cache")
 	}
@@ -35,7 +37,7 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, organizationID string)
 }
 
 // CategorySetAll sets categories into cache.
-func (r *Repository) CategorySetAll(ctxr context.Context, organizationID string, categories []category.Category) error {
+func (r *Repository) CategorySetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, categories []category.Category) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -53,7 +55,7 @@ func (r *Repository) CategorySetAll(ctxr context.Context, organizationID string,
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, categoriesKey+"o."+organizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, categoriesKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
 
 	return err
 }

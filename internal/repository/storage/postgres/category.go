@@ -7,12 +7,14 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/category"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // CategoryGetAll selects all categories from database.
-func (r *Repository) CategoryGetAll(ctxr context.Context, userID string, organizationID string) ([]category.Category, error) {
+func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -30,15 +32,13 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, userID string, organiz
 			"WHERE is_deleted = false AND organization_id = $1",
 		categoryTable)
 
-	fmt.Println(organizationID)
-
-	err := r.database.SelectContext(ctx, &categories, query, organizationID)
+	err := r.database.SelectContext(ctx, &categories, query, meta.OrganizationID)
 
 	return categories, errors.Wrap(err, "categories select query error")
 }
 
 // CategoryGetOne select category by id from database.
-func (r *Repository) CategoryGetOne(ctxr context.Context, userID string, organizationID string, categoryID string) (category.Category, error) {
+func (r *Repository) CategoryGetOne(ctxr context.Context, meta query.MetaData, categoryID string) (category.Category, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -57,13 +57,13 @@ func (r *Repository) CategoryGetOne(ctxr context.Context, userID string, organiz
 		categoryTable,
 	)
 
-	err := r.database.GetContext(ctx, &user, query, categoryID, organizationID)
+	err := r.database.GetContext(ctx, &user, query, categoryID, meta.OrganizationID)
 
 	return user, errors.Wrap(err, "category select query error")
 }
 
 // CategoryCreate insert category into database.
-func (r *Repository) CategoryCreate(ctxr context.Context, userID string, input category.CreateCategoryInput) (string, error) {
+func (r *Repository) CategoryCreate(ctxr context.Context, meta query.MetaData, input category.CreateCategoryInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -92,7 +92,7 @@ func (r *Repository) CategoryCreate(ctxr context.Context, userID string, input c
 		input.Parent,
 		input.Level,
 		input.OrganizationID,
-		userID,
+		meta.UserID,
 	)
 
 	err := row.Scan(&categoryID)
@@ -101,7 +101,7 @@ func (r *Repository) CategoryCreate(ctxr context.Context, userID string, input c
 }
 
 // CategoryUpdate updates category by id in database.
-func (r *Repository) CategoryUpdate(ctxr context.Context, userID string, input category.UpdateCategoryInput) error {
+func (r *Repository) CategoryUpdate(ctxr context.Context, meta query.MetaData, input category.UpdateCategoryInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -153,7 +153,7 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, userID string, input c
 	}
 
 	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, userID)
+	args = append(args, meta.UserID)
 	argID++
 
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
@@ -168,7 +168,7 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, userID string, input c
 }
 
 // CategoryDelete deletes category by id from database.
-func (r *Repository) CategoryDelete(ctxr context.Context, userID string, organizationID string, categoryID string) error {
+func (r *Repository) CategoryDelete(ctxr context.Context, meta query.MetaData, categoryID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -184,7 +184,7 @@ func (r *Repository) CategoryDelete(ctxr context.Context, userID string, organiz
 		categoryTable,
 	)
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, categoryID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, categoryID, meta.OrganizationID)
 
 	return errors.Wrap(err, "category delete query error")
 }

@@ -8,12 +8,14 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // UserGetAll selects all users from database.
-func (r *Repository) UserGetAll(ctxr context.Context, search string, status string, roleID string) ([]user.User, error) {
+func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -26,41 +28,13 @@ func (r *Repository) UserGetAll(ctxr context.Context, search string, status stri
 
 	var users []user.User
 
-	if search != "" {
-		search = fmt.Sprint(
-			"WHERE (us.phone LIKE '%",
-			search,
-			"%' OR us.first_name LIKE '%",
-			search,
-			"%' OR us.first_name LIKE '%",
-			search,
-			"%') ",
-		)
-	}
-
-	if roleID != "" {
-		if search == "" {
-			roleID = fmt.Sprint("WHERE ur.role_id = ", roleID, " ")
-		} else {
-			roleID = fmt.Sprint(" AND ur.role_id = ", roleID, " ")
-		}
-	}
-
-	if status != "" {
-		if search == "" && roleID == "" {
-			status = fmt.Sprint("WHERE us.status_id = '", status, "' ")
-		} else {
-			status = fmt.Sprint(" AND us.status_id = '", status, "' ")
-		}
-	}
-
 	query := fmt.Sprintf(
 		"SELECT us.id, us.phone, us.first_name, us.last_name, ro.name AS role, st.name AS status FROM %s us "+
 			"INNER JOIN %s ur ON ur.user_id = us.id "+
 			"INNER JOIN %s ro ON ur.role_id = ro.id "+
 			"INNER JOIN %s st ON st.id = us.status_id "+
-			"%s %s %s AND us.is_deleted = false",
-		userTable, userRoleTable, roleTable, statusTable, search, roleID, status,
+			"WHERE us.is_deleted = false",
+		userTable, userRoleTable, roleTable, statusTable,
 	)
 
 	err := r.database.SelectContext(ctx, &users, query)
@@ -69,7 +43,7 @@ func (r *Repository) UserGetAll(ctxr context.Context, search string, status stri
 }
 
 // UserGetAllRoles selects all user roles from database.
-func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) {
+func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -90,7 +64,7 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) 
 }
 
 // UserGetOne select user by id from database.
-func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User, error) {
+func (r *Repository) UserGetOne(ctxr context.Context, meta query.MetaData, userID string) (user.User, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -115,7 +89,7 @@ func (r *Repository) UserGetOne(ctxr context.Context, userID string) (user.User,
 }
 
 // UserCreate insert user into database.
-func (r *Repository) UserCreate(ctxr context.Context, userID string, input user.CreateUserInput) (string, error) {
+func (r *Repository) UserCreate(ctxr context.Context, meta query.MetaData, input user.CreateUserInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -137,7 +111,7 @@ func (r *Repository) UserCreate(ctxr context.Context, userID string, input user.
 		"INSERT INTO %s (phone, password, first_name, last_name, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		userTable,
 	)
-	row := trx.QueryRowContext(ctx, createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName, userID)
+	row := trx.QueryRowContext(ctx, createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName, meta.UserID)
 
 	if err = row.Scan(&insertID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -161,7 +135,7 @@ func (r *Repository) UserCreate(ctxr context.Context, userID string, input user.
 }
 
 // UserUpdate updates user by id in database.
-func (r *Repository) UserUpdate(ctxr context.Context, userID string, input user.UpdateUserInput) error {
+func (r *Repository) UserUpdate(ctxr context.Context, meta query.MetaData, input user.UpdateUserInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -195,7 +169,7 @@ func (r *Repository) UserUpdate(ctxr context.Context, userID string, input user.
 	}
 
 	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, userID)
+	args = append(args, meta.UserID)
 	argID++
 
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
@@ -209,7 +183,7 @@ func (r *Repository) UserUpdate(ctxr context.Context, userID string, input user.
 }
 
 // UserDelete deletes user by id from database.
-func (r *Repository) UserDelete(ctxr context.Context, userID string, dUserID string) error {
+func (r *Repository) UserDelete(ctxr context.Context, meta query.MetaData, userID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -225,7 +199,7 @@ func (r *Repository) UserDelete(ctxr context.Context, userID string, dUserID str
 		userTable,
 	)
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, dUserID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, userID)
 
 	return errors.Wrap(err, "user delete query error")
 }

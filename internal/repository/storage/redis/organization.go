@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // OrganizationGetAll gets organizations from cache.
-func (r *Repository) OrganizationGetAll(ctxr context.Context) ([]organization.Organization, error) {
+func (r *Repository) OrganizationGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -35,7 +37,7 @@ func (r *Repository) OrganizationGetAll(ctxr context.Context) ([]organization.Or
 }
 
 // OrganizationSetAll sets organizations into cache.
-func (r *Repository) OrganizationSetAll(ctxr context.Context, organizations []organization.Organization) error {
+func (r *Repository) OrganizationSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, organizations []organization.Organization) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 

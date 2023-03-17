@@ -7,12 +7,14 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
 // ImageGetAll selects all images from database.
-func (r *Repository) ImageGetAll(ctxr context.Context, userID string, organizationID string) ([]image.Image, error) {
+func (r *Repository) ImageGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -31,13 +33,13 @@ func (r *Repository) ImageGetAll(ctxr context.Context, userID string, organizati
 		imageTable,
 	)
 
-	err := r.database.SelectContext(ctx, &images, query, organizationID)
+	err := r.database.SelectContext(ctx, &images, query, meta.OrganizationID)
 
 	return images, errors.Wrap(err, "images select query error")
 }
 
 // ImageGetOne select image by id from database.
-func (r *Repository) ImageGetOne(ctxr context.Context, userID string, organizationID string, imageID string) (image.Image, error) {
+func (r *Repository) ImageGetOne(ctxr context.Context, meta query.MetaData, imageID string) (image.Image, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,13 +57,13 @@ func (r *Repository) ImageGetOne(ctxr context.Context, userID string, organizati
 			"WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
 		imageTable,
 	)
-	err := r.database.GetContext(ctx, &img, query, organizationID, imageID)
+	err := r.database.GetContext(ctx, &img, query, meta.OrganizationID, imageID)
 
 	return img, errors.Wrap(err, "image select query error")
 }
 
 // ImageCreate insert image into database.
-func (r *Repository) ImageCreate(ctxr context.Context, userID string, input image.CreateImageInput) (string, error) {
+func (r *Repository) ImageCreate(ctxr context.Context, meta query.MetaData, input image.CreateImageInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -90,7 +92,7 @@ func (r *Repository) ImageCreate(ctxr context.Context, userID string, input imag
 		input.Small,
 		input.OrganizationID,
 		input.IsMain,
-		userID,
+		meta.UserID,
 	)
 
 	err := row.Scan(&imageID)
@@ -99,7 +101,7 @@ func (r *Repository) ImageCreate(ctxr context.Context, userID string, input imag
 }
 
 // ImageUpdate updates image by id in database.
-func (r *Repository) ImageUpdate(ctxr context.Context, userID string, input image.UpdateImageInput) error {
+func (r *Repository) ImageUpdate(ctxr context.Context, meta query.MetaData, input image.UpdateImageInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -157,7 +159,7 @@ func (r *Repository) ImageUpdate(ctxr context.Context, userID string, input imag
 	}
 
 	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, userID)
+	args = append(args, meta.UserID)
 	argID++
 
 	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
@@ -173,7 +175,7 @@ func (r *Repository) ImageUpdate(ctxr context.Context, userID string, input imag
 }
 
 // ImageDelete deletes image by id from database.
-func (r *Repository) ImageDelete(ctxr context.Context, userID string, organizationID string, imageID string) error {
+func (r *Repository) ImageDelete(ctxr context.Context, meta query.MetaData, imageID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -190,7 +192,7 @@ func (r *Repository) ImageDelete(ctxr context.Context, userID string, organizati
 		imageTable,
 	)
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), userID, imageID, organizationID)
+	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, imageID, meta.OrganizationID)
 
 	return errors.Wrap(err, "image delete query error")
 }

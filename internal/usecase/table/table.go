@@ -4,13 +4,15 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/table"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 // TableGetAll returns all tables from the system.
-func (s *UseCase) TableGetAll(ctx context.Context, userID string, organizationID string) ([]table.Table, error) {
+func (s *UseCase) TableGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.TableGetAll")
 		defer span.End()
@@ -19,17 +21,17 @@ func (s *UseCase) TableGetAll(ctx context.Context, userID string, organizationID
 	}
 
 	if s.isCacheOn {
-		return getAllWithCache(ctx, s, userID, organizationID)
+		return s.getAllWithCache(ctx, meta, params)
 	}
 
-	tables, err := s.adapterStorage.TableGetAll(ctx, userID, organizationID)
+	tables, err := s.adapterStorage.TableGetAll(ctx, meta, params)
 
 	return tables, errors.Wrap(err, "tables select error")
 }
 
 // getAllWithCache returns tables from cache if exists.
-func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizationID string) ([]table.Table, error) {
-	tables, err := s.adapterCache.TableGetAll(ctx, organizationID)
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) {
+	tables, err := s.adapterCache.TableGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get tables from cache", zap.String("error", err.Error()))
 	}
@@ -38,12 +40,12 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 		return tables, nil
 	}
 
-	tables, err = s.adapterStorage.TableGetAll(ctx, userID, organizationID)
+	tables, err = s.adapterStorage.TableGetAll(ctx, meta, params)
 	if err != nil {
 		return tables, errors.Wrap(err, "tables select failed")
 	}
 
-	if err = s.adapterCache.TableSetAll(ctx, organizationID, tables); err != nil {
+	if err = s.adapterCache.TableSetAll(ctx, meta, params, tables); err != nil {
 		logger.Logger.Error("unable to add tables into cache", zap.String("error", err.Error()))
 	}
 
@@ -51,7 +53,7 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 }
 
 // TableGetOne returns table by id from the system.
-func (s *UseCase) TableGetOne(ctx context.Context, userID string, organizationID string, tableID string) (table.Table, error) {
+func (s *UseCase) TableGetOne(ctx context.Context, meta query.MetaData, tableID string) (table.Table, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.TableGetOne")
 		defer span.End()
@@ -60,16 +62,16 @@ func (s *UseCase) TableGetOne(ctx context.Context, userID string, organizationID
 	}
 
 	if s.isCacheOn {
-		return getOneWithCache(ctx, s, userID, organizationID, tableID)
+		return s.getOneWithCache(ctx, meta, tableID)
 	}
 
-	tbl, err := s.adapterStorage.TableGetOne(ctx, userID, organizationID, tableID)
+	tbl, err := s.adapterStorage.TableGetOne(ctx, meta, tableID)
 
 	return tbl, errors.Wrap(err, "table select error")
 }
 
 // getOneWithCache returns table by id from cache if exists.
-func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizationID string, tableID string) (table.Table, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, tableID string) (table.Table, error) {
 	tble, err := s.adapterCache.TableGetOne(ctx, tableID)
 	if err != nil {
 		logger.Logger.Error("unable to get table from cache", zap.String("error", err.Error()))
@@ -79,7 +81,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 		return tble, nil
 	}
 
-	tble, err = s.adapterStorage.TableGetOne(ctx, userID, organizationID, tableID)
+	tble, err = s.adapterStorage.TableGetOne(ctx, meta, tableID)
 	if err != nil {
 		return tble, errors.Wrap(err, "table select failed")
 	}
@@ -92,7 +94,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 }
 
 // TableCreate inserts table into system.
-func (s *UseCase) TableCreate(ctx context.Context, userID string, input table.CreateTableInput) (string, error) {
+func (s *UseCase) TableCreate(ctx context.Context, meta query.MetaData, input table.CreateTableInput) (string, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.TableCreate")
 		defer span.End()
@@ -100,13 +102,13 @@ func (s *UseCase) TableCreate(ctx context.Context, userID string, input table.Cr
 		ctx = context.New(ctxt)
 	}
 
-	tableID, err := s.adapterStorage.TableCreate(ctx, userID, input)
+	tableID, err := s.adapterStorage.TableCreate(ctx, meta, input)
 	if err != nil {
 		return tableID, errors.Wrap(err, "table create error")
 	}
 
 	if s.isCacheOn {
-		tble, err := s.adapterStorage.TableGetOne(ctx, userID, input.OrganizationID, tableID)
+		tble, err := s.adapterStorage.TableGetOne(ctx, meta, tableID)
 		if err != nil {
 			return "", errors.Wrap(err, "table select from database failed")
 		}
@@ -126,7 +128,7 @@ func (s *UseCase) TableCreate(ctx context.Context, userID string, input table.Cr
 }
 
 // TableUpdate updates table by id in the system.
-func (s *UseCase) TableUpdate(ctx context.Context, userID string, input table.UpdateTableInput) error {
+func (s *UseCase) TableUpdate(ctx context.Context, meta query.MetaData, input table.UpdateTableInput) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.TableUpdate")
 		defer span.End()
@@ -138,13 +140,13 @@ func (s *UseCase) TableUpdate(ctx context.Context, userID string, input table.Up
 		return errors.Wrap(err, "validation error")
 	}
 
-	err := s.adapterStorage.TableUpdate(ctx, userID, input)
+	err := s.adapterStorage.TableUpdate(ctx, meta, input)
 	if err != nil {
 		return errors.Wrap(err, "table update in database failed")
 	}
 
 	if s.isCacheOn {
-		tble, err := s.adapterStorage.TableGetOne(ctx, userID, *input.OrganizationID, *input.ID)
+		tble, err := s.adapterStorage.TableGetOne(ctx, meta, *input.ID)
 		if err != nil {
 			return errors.Wrap(err, "table select from database failed")
 		}
@@ -164,7 +166,7 @@ func (s *UseCase) TableUpdate(ctx context.Context, userID string, input table.Up
 }
 
 // TableDelete deletes table by id from the system.
-func (s *UseCase) TableDelete(ctx context.Context, userID string, organizationID string, tableID string) error {
+func (s *UseCase) TableDelete(ctx context.Context, meta query.MetaData, tableID string) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.TableDelete")
 		defer span.End()
@@ -172,7 +174,7 @@ func (s *UseCase) TableDelete(ctx context.Context, userID string, organizationID
 		ctx = context.New(ctxt)
 	}
 
-	err := s.adapterStorage.TableDelete(ctx, userID, organizationID, tableID)
+	err := s.adapterStorage.TableDelete(ctx, meta, tableID)
 	if err != nil {
 		return errors.Wrap(err, "table delete failed")
 	}

@@ -3,13 +3,15 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/rule"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // RuleGetAll gets rules from cache.
-func (r *Repository) RuleGetAll(ctxr context.Context) ([]rule.Rule, error) {
+func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -35,7 +37,7 @@ func (r *Repository) RuleGetAll(ctxr context.Context) ([]rule.Rule, error) {
 }
 
 // RuleSetAll sets rules into cache.
-func (r *Repository) RuleSetAll(ctxr context.Context, rules []rule.Rule) error {
+func (r *Repository) RuleSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, rules []rule.Rule) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 

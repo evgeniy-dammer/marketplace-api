@@ -4,13 +4,15 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/category"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/logger"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 // CategoryGetAll returns all categories from the system.
-func (s *UseCase) CategoryGetAll(ctx context.Context, userID string, organizationID string) ([]category.Category, error) {
+func (s *UseCase) CategoryGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryGetAll")
 		defer span.End()
@@ -19,17 +21,17 @@ func (s *UseCase) CategoryGetAll(ctx context.Context, userID string, organizatio
 	}
 
 	if s.isCacheOn {
-		return getAllWithCache(ctx, s, userID, organizationID)
+		return s.getAllWithCache(ctx, meta, params)
 	}
 
-	categories, err := s.adapterStorage.CategoryGetAll(ctx, userID, organizationID)
+	categories, err := s.adapterStorage.CategoryGetAll(ctx, meta, params)
 
 	return categories, errors.Wrap(err, "categories select error")
 }
 
 // getAllWithCache returns categories from cache if exists.
-func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizationID string) ([]category.Category, error) {
-	categories, err := s.adapterCache.CategoryGetAll(ctx, organizationID)
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
+	categories, err := s.adapterCache.CategoryGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get categories from cache", zap.String("error", err.Error()))
 	}
@@ -38,12 +40,12 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 		return categories, nil
 	}
 
-	categories, err = s.adapterStorage.CategoryGetAll(ctx, userID, organizationID)
+	categories, err = s.adapterStorage.CategoryGetAll(ctx, meta, params)
 	if err != nil {
 		return categories, errors.Wrap(err, "categories select failed")
 	}
 
-	if err = s.adapterCache.CategorySetAll(ctx, organizationID, categories); err != nil {
+	if err = s.adapterCache.CategorySetAll(ctx, meta, params, categories); err != nil {
 		logger.Logger.Error("unable to add categories into cache", zap.String("error", err.Error()))
 	}
 
@@ -51,7 +53,7 @@ func getAllWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 }
 
 // CategoryGetOne returns category by id from the system.
-func (s *UseCase) CategoryGetOne(ctx context.Context, userID string, organizationID string, categoryID string) (category.Category, error) {
+func (s *UseCase) CategoryGetOne(ctx context.Context, meta query.MetaData, categoryID string) (category.Category, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryGetOne")
 		defer span.End()
@@ -60,16 +62,16 @@ func (s *UseCase) CategoryGetOne(ctx context.Context, userID string, organizatio
 	}
 
 	if s.isCacheOn {
-		return getOneWithCache(ctx, s, userID, organizationID, categoryID)
+		return s.getOneWithCache(ctx, meta, categoryID)
 	}
 
-	ctgry, err := s.adapterStorage.CategoryGetOne(ctx, userID, organizationID, categoryID)
+	ctgry, err := s.adapterStorage.CategoryGetOne(ctx, meta, categoryID)
 
 	return ctgry, errors.Wrap(err, "category select error")
 }
 
 // getOneWithCache returns category by id from cache if exists.
-func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizationID string, categoryID string) (category.Category, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, categoryID string) (category.Category, error) {
 	ctgry, err := s.adapterCache.CategoryGetOne(ctx, categoryID)
 	if err != nil {
 		logger.Logger.Error("unable to get category from cache", zap.String("error", err.Error()))
@@ -79,7 +81,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 		return ctgry, nil
 	}
 
-	ctgry, err = s.adapterStorage.CategoryGetOne(ctx, userID, organizationID, categoryID)
+	ctgry, err = s.adapterStorage.CategoryGetOne(ctx, meta, categoryID)
 	if err != nil {
 		return ctgry, errors.Wrap(err, "category select failed")
 	}
@@ -92,7 +94,7 @@ func getOneWithCache(ctx context.Context, s *UseCase, userID string, organizatio
 }
 
 // CategoryCreate inserts category into system.
-func (s *UseCase) CategoryCreate(ctx context.Context, userID string, input category.CreateCategoryInput) (string, error) {
+func (s *UseCase) CategoryCreate(ctx context.Context, meta query.MetaData, input category.CreateCategoryInput) (string, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryCreate")
 		defer span.End()
@@ -100,13 +102,13 @@ func (s *UseCase) CategoryCreate(ctx context.Context, userID string, input categ
 		ctx = context.New(ctxt)
 	}
 
-	categoryID, err := s.adapterStorage.CategoryCreate(ctx, userID, input)
+	categoryID, err := s.adapterStorage.CategoryCreate(ctx, meta, input)
 	if err != nil {
 		return categoryID, errors.Wrap(err, "category create error")
 	}
 
 	if s.isCacheOn {
-		ctgry, err := s.adapterStorage.CategoryGetOne(ctx, userID, input.OrganizationID, categoryID)
+		ctgry, err := s.adapterStorage.CategoryGetOne(ctx, meta, categoryID)
 		if err != nil {
 			return "", errors.Wrap(err, "category select from database failed")
 		}
@@ -126,7 +128,7 @@ func (s *UseCase) CategoryCreate(ctx context.Context, userID string, input categ
 }
 
 // CategoryUpdate updates category by id in the system.
-func (s *UseCase) CategoryUpdate(ctx context.Context, userID string, input category.UpdateCategoryInput) error { //nolint:lll
+func (s *UseCase) CategoryUpdate(ctx context.Context, meta query.MetaData, input category.UpdateCategoryInput) error { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryUpdate")
 		defer span.End()
@@ -138,13 +140,13 @@ func (s *UseCase) CategoryUpdate(ctx context.Context, userID string, input categ
 		return errors.Wrap(err, "validation error")
 	}
 
-	err := s.adapterStorage.CategoryUpdate(ctx, userID, input)
+	err := s.adapterStorage.CategoryUpdate(ctx, meta, input)
 	if err != nil {
 		return errors.Wrap(err, "category update in database failed")
 	}
 
 	if s.isCacheOn {
-		ctgry, err := s.adapterStorage.CategoryGetOne(ctx, userID, *input.OrganizationID, *input.ID)
+		ctgry, err := s.adapterStorage.CategoryGetOne(ctx, meta, *input.ID)
 		if err != nil {
 			return errors.Wrap(err, "category select from database failed")
 		}
@@ -164,7 +166,7 @@ func (s *UseCase) CategoryUpdate(ctx context.Context, userID string, input categ
 }
 
 // CategoryDelete deletes category by id from the system.
-func (s *UseCase) CategoryDelete(ctx context.Context, userID string, organizationID string, categoryID string) error {
+func (s *UseCase) CategoryDelete(ctx context.Context, meta query.MetaData, categoryID string) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryDelete")
 		defer span.End()
@@ -172,7 +174,7 @@ func (s *UseCase) CategoryDelete(ctx context.Context, userID string, organizatio
 		ctx = context.New(ctxt)
 	}
 
-	err := s.adapterStorage.CategoryDelete(ctx, userID, organizationID, categoryID)
+	err := s.adapterStorage.CategoryDelete(ctx, meta, categoryID)
 	if err != nil {
 		return errors.Wrap(err, "category delete failed")
 	}

@@ -8,4 +8,7 @@ var (
 	ErrInvalidPassword      = errors.New("invalid password")
 	ErrInvalidSigningMethod = errors.New("invalid signing method")
 	ErrInvalidTokenClaims   = errors.New("token claims are not of type *tokenClaims")
+	ErrUserNotFound         = errors.New("user not found")
+	ErrUsersNotFound        = errors.New("users not found")
+	ErrRolesNotFound        = errors.New("roles not found")
 )

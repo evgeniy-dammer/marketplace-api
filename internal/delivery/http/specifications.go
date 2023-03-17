@@ -5,6 +5,7 @@ import (
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 )
@@ -33,19 +34,14 @@ func (d *Delivery) getSpecifications(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
 
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
+	params := queryparameter.QueryParameter{}
 
-		return
-	}
-
-	results, err := d.ucSpecification.SpecificationGetAll(ctx, userID, organizationID)
+	results, err := d.ucSpecification.SpecificationGetAll(ctx, meta, params)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -80,15 +76,8 @@ func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -99,7 +88,7 @@ func (d *Delivery) getSpecification(ginCtx *gin.Context) {
 		return
 	}
 
-	list, err := d.ucSpecification.SpecificationGetOne(ctx, userID, organizationID, specificationID)
+	list, err := d.ucSpecification.SpecificationGetOne(ctx, meta, specificationID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -133,7 +122,7 @@ func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -145,7 +134,7 @@ func (d *Delivery) createSpecification(ginCtx *gin.Context) {
 		return
 	}
 
-	specificationID, err := d.ucSpecification.SpecificationCreate(ctx, userID, input)
+	specificationID, err := d.ucSpecification.SpecificationCreate(ctx, meta, input)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
@@ -179,7 +168,7 @@ func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
 		return
 	}
@@ -191,7 +180,7 @@ func (d *Delivery) updateSpecification(ginCtx *gin.Context) {
 		return
 	}
 
-	if err = d.ucSpecification.SpecificationUpdate(ctx, userID, input); err != nil {
+	if err = d.ucSpecification.SpecificationUpdate(ctx, meta, input); err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
@@ -225,15 +214,8 @@ func (d *Delivery) deleteSpecification(ginCtx *gin.Context) {
 		ctx = context.New(ctxt)
 	}
 
-	userID, err := d.getUserID(ginCtx)
+	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
-		return
-	}
-
-	organizationID := ginCtx.Param("org_id")
-	if organizationID == "" {
-		NewErrorResponse(ginCtx, http.StatusBadRequest, ErrEmptyIDParam)
-
 		return
 	}
 
@@ -244,7 +226,7 @@ func (d *Delivery) deleteSpecification(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucSpecification.SpecificationDelete(ctx, userID, organizationID, specificationID)
+	err = d.ucSpecification.SpecificationDelete(ctx, meta, specificationID)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 

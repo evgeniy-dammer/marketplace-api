@@ -4,13 +4,15 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/queryparameter"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 )
 
 // UserGetAll gets users from cache.
-func (r *Repository) UserGetAll(ctxr context.Context, search string, status string, roleID string) ([]user.User, error) {
+func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -23,7 +25,7 @@ func (r *Repository) UserGetAll(ctxr context.Context, search string, status stri
 
 	users := &user.ListUser{}
 
-	bytes, err := r.client.Get(ctx, usersKey+"s."+search+".t."+status+".r."+roleID).Bytes()
+	bytes, err := r.client.Get(ctx, usersKey).Bytes()
 	if err != nil {
 		return *users, errors.Wrap(err, "unable to get users from cache")
 	}
@@ -36,7 +38,7 @@ func (r *Repository) UserGetAll(ctxr context.Context, search string, status stri
 }
 
 // UserSetAll sets users into cache.
-func (r *Repository) UserSetAll(ctxr context.Context, users []user.User, search string, status string, roleID string) error {
+func (r *Repository) UserSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, users []user.User) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -54,7 +56,7 @@ func (r *Repository) UserSetAll(ctxr context.Context, users []user.User, search 
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, usersKey+"s."+search+".t."+status+".r."+roleID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, usersKey, bytes, r.options.Ttl).Err()
 
 	return err
 }
@@ -170,7 +172,7 @@ func (r *Repository) UserInvalidate(ctxr context.Context) error {
 }
 
 // UserGetAllRoles gets all roles from cache.
-func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) {
+func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -196,7 +198,7 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context) ([]role.Role, error) 
 }
 
 // UserSetAllRoles sets all roles in cache.
-func (r *Repository) UserSetAllRoles(ctxr context.Context, roles []role.Role) error {
+func (r *Repository) UserSetAllRoles(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, roles []role.Role) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 

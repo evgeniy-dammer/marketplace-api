@@ -9,6 +9,7 @@ import (
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
+	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/gin-gonic/gin"
 	cors "github.com/itsjamie/gin-cors"
@@ -157,4 +158,16 @@ func enforce(sub string, obj string, act string, adapter persist.Adapter) (bool,
 	}
 
 	return ok, nil
+}
+
+func (d *Delivery) parseMetadata(ginCtx *gin.Context) (query.MetaData, error) {
+	metaUserID, err := d.getUserID(ginCtx)
+	if err != nil {
+		return query.MetaData{}, err
+	}
+
+	return query.MetaData{
+		UserID:         metaUserID,
+		OrganizationID: ginCtx.Query(organizationQueryKey),
+	}, nil
 }
