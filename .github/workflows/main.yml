@@ -23,10 +23,7 @@ jobs:
     - name: Downloading dependencies
       run: |
         go mod download
-        go mod tidy
-        
-    - name: Runing go vet
-      run: go vet ./...     
+        go mod tidy 
         
     - name: Lintering
       uses: golangci/golangci-lint-action@v3
