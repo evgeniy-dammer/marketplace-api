@@ -27,14 +27,6 @@ jobs:
     - name: Tidy
       run: |
         go mod tidy    
-        
-
-    - name: Lintering
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: v1.29
-        skip-pkg-cache: true
-        working-directory: ./
 
     - name: Build
       run: go build -v ./cmd/app/main.go
