@@ -1,0 +1,37 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: CI
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.20
+    
+    - name: Downloading dependencies
+      run: |
+        go mod download
+        go mod tidy
+        
+    - name: Runing go vet
+      run: go vet ./...     
+        
+    - name: Lintering
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: v1.29
+
+    - name: Build
+      run: go build -v ./cmd/app/main.go
