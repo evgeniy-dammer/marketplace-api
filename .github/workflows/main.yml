@@ -34,6 +34,7 @@ jobs:
       with:
         version: v1.29
         skip-pkg-cache: true
+        working-directory: marketplace-api
 
     - name: Build
       run: go build -v ./cmd/app/main.go
