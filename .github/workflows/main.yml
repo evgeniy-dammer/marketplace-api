@@ -22,7 +22,7 @@ jobs:
     
     - name: Downloading dependencies
       run: |
-        go mod download
+        go get -v -t -d ./...
 
     - name: Tidy
       run: |
