@@ -6,7 +6,7 @@ services:
     image: redis:alpine
     network_mode: host
     hostname: cache
-    restart: always
+    restart: on-failure
     env_file:
       - .env
     environment:
@@ -21,7 +21,7 @@ services:
     container_name: marketplace-db
     image: postgres:alpine
     network_mode: host
-    restart: always
+    restart: on-failure
     env_file:
       - .env
     environment:
@@ -35,29 +35,21 @@ services:
     container_name: marketplace-api
     build: .
     network_mode: host
-    restart: always
+    restart: on-failure
     env_file:
       - .env
     depends_on:
       - marketplace-db
       - marketplace-cache
 
-  marketplace-migrate:
-    container_name: marketplace-migrate
-    image: migrate/migrate:4
-    network_mode: host
-    env_file:
-      - .env
-    volumes:
-      - ./schema:/schema
-    command: [ "-path", "./schema", "-database",  'storage://marketplace:${DB_PASSWORD}@0.0.0.0:5432/marketplace?sslmode=disable', "up" ]
-    depends_on:
-      - marketplace-db
-
   marketplace-tracing:
     container_name: marketplace-tracing
     image: jaegertracing/all-in-one:latest
     network_mode: host
+    restart: on-failure
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
     depends_on:
       - marketplace-api
 

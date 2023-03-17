@@ -1,13 +1,5 @@
-BEGIN;
-
-SET statement_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = ON;
-SET check_function_bodies = FALSE;
-SET client_min_messages = WARNING;
-SET search_path = public, extensions;
-SET default_tablespace = '';
-Set default_with_oids = FALSE;
+-- +goose Up
+-- +goose StatementBegin
 
 -- EXTENSIONS --
 
@@ -15,13 +7,13 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- TABLES --
 
-CREATE TABLE users_statuses
+CREATE TABLE IF NOT EXISTS users_statuses
 (
     id SMALLSERIAL PRIMARY KEY,
     name CHARACTER VARYING (50) NOT NULL UNIQUE
 );
 
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phone CHARACTER VARYING (255) NOT NULL UNIQUE,
@@ -38,20 +30,20 @@ CREATE TABLE users
     deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE roles
+CREATE TABLE IF NOT EXISTS roles
 (
     id SMALLSERIAL PRIMARY KEY NOT NULL,
     name CHARACTER VARYING (50) NOT NULL UNIQUE
 );
 
-CREATE TABLE users_roles
+CREATE TABLE IF NOT EXISTS users_roles
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     role_id SMALLINT REFERENCES roles(id) ON DELETE CASCADE NOT NULL
 );
 
-CREATE TABLE organizations
+CREATE TABLE IF NOT EXISTS organizations
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
@@ -67,13 +59,13 @@ CREATE TABLE organizations
     deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE images_types
+CREATE TABLE IF NOT EXISTS images_types
 (
     id SMALLSERIAL PRIMARY KEY,
     name CHARACTER VARYING (50) NOT NULL UNIQUE
 );
 
-CREATE TABLE images
+CREATE TABLE IF NOT EXISTS images
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     object_id UUID NOT NULL,
@@ -92,7 +84,7 @@ CREATE TABLE images
     deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE categories
+CREATE TABLE IF NOT EXISTS categories
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name_tm CHARACTER VARYING (255) NOT NULL,
@@ -111,13 +103,13 @@ CREATE TABLE categories
     deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE brands
+CREATE TABLE IF NOT EXISTS brands
 (
     id SERIAL PRIMARY KEY,
     name CHARACTER VARYING (500) NOT NULL
 );
 
-CREATE TABLE items
+CREATE TABLE IF NOT EXISTS items
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name_tm TEXT NOT NULL,
@@ -144,7 +136,7 @@ CREATE TABLE items
     deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE specification
+CREATE TABLE IF NOT EXISTS specification
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_id UUID REFERENCES items(id) NOT NULL,
@@ -160,14 +152,14 @@ CREATE TABLE specification
     value TEXT
 );
 
-CREATE TABLE categories_items
+CREATE TABLE IF NOT EXISTS categories_items
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category_id UUID REFERENCES categories(id) ON DELETE CASCADE NOT NULL,
     items_id UUID REFERENCES items(id) ON DELETE CASCADE NOT NULL
 );
 
-CREATE TABLE tables
+CREATE TABLE IF NOT EXISTS tables
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
@@ -181,13 +173,13 @@ CREATE TABLE tables
     deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE orders_statuses
+CREATE TABLE IF NOT EXISTS orders_statuses
 (
     id SMALLSERIAL PRIMARY KEY,
     name CHARACTER VARYING (50) NOT NULL UNIQUE
 );
 
-CREATE TABLE orders
+CREATE TABLE IF NOT EXISTS orders
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id),
@@ -206,7 +198,7 @@ CREATE TABLE orders
     CONSTRAINT valid_totalsum CHECK ( totalsum >= 0 )
 );
 
-CREATE TABLE orders_items
+CREATE TABLE IF NOT EXISTS orders_items
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id UUID REFERENCES orders(id) NOT NULL,
@@ -220,13 +212,13 @@ CREATE TABLE orders_items
     CONSTRAINT valid_totalprice CHECK ( totalprice >= 0 )
 );
 
-CREATE TABLE comments_statuses
+CREATE TABLE IF NOT EXISTS comments_statuses
 (
     id SMALLSERIAL PRIMARY KEY,
     name CHARACTER VARYING (50) NOT NULL UNIQUE
 );
 
-CREATE TABLE comments
+CREATE TABLE IF NOT EXISTS comments
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_id UUID REFERENCES items(id) NOT NULL,
@@ -243,16 +235,16 @@ CREATE TABLE comments
     deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE users_favorites
+CREATE TABLE IF NOT EXISTS users_favorites
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     item_id UUID REFERENCES items(id) ON DELETE CASCADE NOT NULL
 );
 
-CREATE TABLE casbin_rule
+CREATE TABLE IF NOT EXISTS casbin_rule
 (
-    id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ptype TEXT DEFAULT 'p',
     v0 TEXT DEFAULT '',
     v1 TEXT DEFAULT '',
@@ -551,7 +543,7 @@ VALUES
    ('admin', 'rule', 'post', 'allow'),
    ('admin', 'rule', 'patch', 'allow'),
    ('admin', 'rule', 'delete', 'allow'),
-    ('admin', 'metrics', 'get', 'allow');
+   ('admin', 'metrics', 'get', 'allow');
 
 -- FUNCTIONS --
 
@@ -609,4 +601,33 @@ CREATE OR REPLACE TRIGGER item_rating_comments_dec_t AFTER UPDATE OF is_deleted 
 
 CREATE OR REPLACE TRIGGER item_rating_update_t AFTER UPDATE OF rating ON comments FOR EACH ROW EXECUTE PROCEDURE item_rating_update();
 
-COMMIT;
+-- +goose StatementEnd
+
+
+-- +goose Down
+-- +goose StatementBegin
+
+-- TABLES --
+
+DROP TABLE IF EXISTS categories_items;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS users_roles;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS users_favorites;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS comments_statuses;
+DROP TABLE IF EXISTS orders_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS orders_statuses;
+DROP TABLE IF EXISTS specification;
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS tables;
+DROP TABLE IF EXISTS images;
+DROP TABLE IF EXISTS images_types;
+DROP TABLE IF EXISTS organizations;
+DROP TABLE IF EXISTS brands;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users_statuses;
+DROP TABLE IF EXISTS casbin_rule;
+
+-- +goose StatementEnd

@@ -5,9 +5,12 @@ import (
 	"net"
 
 	"github.com/casbin/casbin-pg-adapter"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
+
+	"github.com/pressly/goose"
 )
 
 // DBConfig is a database config.
@@ -33,6 +36,11 @@ func NewPostgresDB(cfg DBConfig) (*sqlx.DB, *pgadapter.Adapter, error) {
 		return nil, nil, errors.Wrap(err, "unable to open connection to database")
 	}
 
+	err = migrationsUp(database)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "unable to up migrations")
+	}
+
 	adapter, err := pgadapter.NewAdapter(
 		fmt.Sprintf(
 			"postgresql://%s:%s@%s/%s?sslmode=%s",
@@ -45,10 +53,18 @@ func NewPostgresDB(cfg DBConfig) (*sqlx.DB, *pgadapter.Adapter, error) {
 	}
 
 	err = database.Ping()
-
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "unable to ping connection to database")
 	}
 
 	return database, adapter, nil
+}
+
+// migrationsUp up database migrations
+func migrationsUp(database *sqlx.DB) error {
+	if err := goose.Run("up", database.DB, "./schema"); err != nil {
+		return errors.Wrap(err, "error occurred while running goose up command")
+	}
+
+	return nil
 }

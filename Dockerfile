@@ -10,6 +10,8 @@ RUN addgroup -S user && adduser -S user -G user
 COPY --from=builder /app/marketplace-api /app/marketplace-api
 COPY .env  /app/
 COPY configs/config.yml  /app/configs/config.yml
+COPY configs/rbac_model.conf  /app/configs/rbac_model.conf
+COPY schema/000001_init.sql  /app/schema/000001_init.sql
 
 RUN chown -R user:user /app
 USER user

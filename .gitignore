@@ -8,6 +8,3 @@
 *.out
 .idea
 marketplace-api
-
-.idea/modules.xml
-.idea/vcs.xml
