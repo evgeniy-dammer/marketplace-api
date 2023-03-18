@@ -23,7 +23,7 @@ lint:
 	gofumpt -w . && gci write --skip-generated -s standard,default . && golangci-lint run
 
 fields:
-	fieldalignment -fix ./internal/delivery/http
+	fieldalignment -fix ./internal/usecase/user
 
 swagger:
 	swag init --parseDependency --generalInfo ./internal/delivery/http/delivery.go --output ./docs/

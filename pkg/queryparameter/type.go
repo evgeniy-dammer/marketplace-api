@@ -8,9 +8,9 @@ import (
 )
 
 type QueryParameter struct {
+	StartDate  time.Time
+	EndDate    time.Time
 	Search     string
 	Sorts      sort.Sorts
 	Pagination pagination.Pagination
-	StartDate  time.Time
-	EndDate    time.Time
 }
