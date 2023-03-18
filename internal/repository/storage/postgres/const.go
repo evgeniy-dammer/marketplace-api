@@ -1,6 +1,7 @@
 package postgres
 
 const (
+	DefaultLimit       = 25
 	userTable          = "users"
 	roleTable          = "roles"
 	statusTable        = "users_statuses"
@@ -16,5 +17,5 @@ const (
 	specificationTable = "specification"
 	favoriteTable      = "users_favorites"
 	ruleTable          = "casbin_rule"
-	// categoryItemTable = "categories_items"
+	// categoryItemTable = "categories_items".
 )

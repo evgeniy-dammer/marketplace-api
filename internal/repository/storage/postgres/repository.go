@@ -3,12 +3,14 @@ package postgres
 import (
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 )
 
 type Repository struct {
-	options     Options
+	genSQL      squirrel.StatementBuilderType
 	database    *sqlx.DB
+	options     Options
 	isTracingOn bool
 }
 
@@ -17,18 +19,10 @@ type Options struct {
 }
 
 func New(database *sqlx.DB, options Options, isTracingOn bool) *Repository {
-	repository := &Repository{
+	return &Repository{
+		genSQL:      squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 		database:    database,
+		options:     options,
 		isTracingOn: isTracingOn,
-	}
-
-	repository.SetOptions(options)
-
-	return repository
-}
-
-func (r *Repository) SetOptions(options Options) {
-	if r.options != options {
-		r.options = options
 	}
 }

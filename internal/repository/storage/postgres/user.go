@@ -1,10 +1,9 @@
 package postgres
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
@@ -15,7 +14,7 @@ import (
 )
 
 // UserGetAll selects all users from database.
-func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
+func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -28,22 +27,66 @@ func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, param
 
 	var users []user.User
 
-	query := fmt.Sprintf(
-		"SELECT us.id, us.phone, us.first_name, us.last_name, ro.name AS role, st.name AS status FROM %s us "+
-			"INNER JOIN %s ur ON ur.user_id = us.id "+
-			"INNER JOIN %s ro ON ur.role_id = ro.id "+
-			"INNER JOIN %s st ON st.id = us.status_id "+
-			"WHERE us.is_deleted = false",
-		userTable, userRoleTable, roleTable, statusTable,
-	)
+	qry, args, err := r.userGetAllQuery(meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := r.database.SelectContext(ctx, &users, query)
+	err = r.database.SelectContext(ctx, &users, qry, args...)
 
 	return users, errors.Wrap(err, "users select query error")
 }
 
+// userGetAllQuery creates sql query.
+func (r *Repository) userGetAllQuery(meta query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+	builder := r.genSQL.Select(
+		"us.id", "us.phone", "us.first_name", "us.last_name", "ro.name AS role", "st.name AS status",
+	).From(userTable + " us").
+		InnerJoin(userRoleTable + " ur ON ur.user_id = us.id").
+		InnerJoin(roleTable + " ro ON ur.role_id = ro.id").
+		InnerJoin(statusTable + " st ON st.id = us.status_id")
+
+	if params.Search != "" {
+		search := "%" + params.Search + "%"
+
+		builder = builder.Where(squirrel.And{
+			squirrel.Eq{"us.is_deleted": false},
+			squirrel.Or{
+				squirrel.Like{"us.phone": search},
+				squirrel.Like{"us.first_name": search},
+				squirrel.Like{"us.last_name": search},
+				squirrel.Like{"ro.name": search},
+				squirrel.Like{"st.name": search},
+			},
+		})
+	} else {
+		builder = builder.Where(squirrel.Eq{"us.is_deleted": false})
+	}
+
+	if len(params.Sorts) > 0 {
+		builder = builder.OrderBy(params.Sorts.Parsing(mappingSortUser)...)
+	} else {
+		builder = builder.OrderBy("us.created_at DESC")
+	}
+
+	if params.Pagination.Limit > 0 {
+		builder = builder.Limit(params.Pagination.Limit)
+	}
+
+	if params.Pagination.Offset > 0 {
+		builder = builder.Offset(params.Pagination.Offset)
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", nil, errors.Wrap(err, "unable to build a query string")
+	}
+
+	return qry, args, nil
+}
+
 // UserGetAllRoles selects all user roles from database.
-func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
+func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -56,11 +99,44 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, 
 
 	var roles []role.Role
 
-	query := fmt.Sprintf("SELECT id, name FROM %s ", roleTable)
+	qry, args, err := r.userGetAllRolesQuery(meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := r.database.SelectContext(ctx, &roles, query)
+	err = r.database.SelectContext(ctx, &roles, qry, args...)
 
 	return roles, errors.Wrap(err, "roles select query error")
+}
+
+// userGetAllRolesQuery creates sql query.
+func (r *Repository) userGetAllRolesQuery(meta query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+	builder := r.genSQL.Select("id", "name").From(roleTable)
+
+	if params.Search != "" {
+		builder = builder.Where(squirrel.Like{"name": "%" + params.Search + "%"})
+	}
+
+	if len(params.Sorts) > 0 {
+		builder = builder.OrderBy(params.Sorts.Parsing(mappingSortRole)...)
+	} else {
+		builder = builder.OrderBy("id ASC")
+	}
+
+	if params.Pagination.Limit > 0 {
+		builder = builder.Limit(params.Pagination.Limit)
+	}
+
+	if params.Pagination.Offset > 0 {
+		builder = builder.Offset(params.Pagination.Offset)
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", nil, errors.Wrap(err, "unable to build a query string")
+	}
+
+	return qry, args, nil
 }
 
 // UserGetOne select user by id from database.
@@ -77,13 +153,20 @@ func (r *Repository) UserGetOne(ctxr context.Context, meta query.MetaData, userI
 
 	var usr user.User
 
-	query := fmt.Sprintf(
-		"SELECT us.id, us.phone, us.first_name, us.last_name, ro.name AS role, st.name AS status FROM %s us "+
-			"INNER JOIN %s ur ON ur.user_id = us.id "+
-			"INNER JOIN %s ro ON ur.role_id = ro.id "+
-			"INNER JOIN %s st ON st.id = us.status_id "+
-			"WHERE is_deleted = false AND us.id = $1", userTable, userRoleTable, roleTable, statusTable)
-	err := r.database.GetContext(ctx, &usr, query, userID)
+	builder := r.genSQL.Select(
+		"us.id", "us.phone", "us.first_name", "us.last_name", "ro.name AS role", "st.name AS status",
+	).From(userTable + " us").
+		InnerJoin(userRoleTable + " ur ON ur.user_id = us.id").
+		InnerJoin(roleTable + " ro ON ur.role_id = ro.id").
+		InnerJoin(statusTable + " st ON st.id = us.status_id").
+		Where(squirrel.Eq{"us.is_deleted": false, "us.id": userID})
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return usr, errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.GetContext(ctx, &usr, qry, args...)
 
 	return usr, errors.Wrap(err, "user select query error")
 }
@@ -107,11 +190,17 @@ func (r *Repository) UserCreate(ctxr context.Context, meta query.MetaData, input
 		return "", errors.Wrap(err, "transaction begin error")
 	}
 
-	createUserQuery := fmt.Sprintf(
-		"INSERT INTO %s (phone, password, first_name, last_name, user_created) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		userTable,
-	)
-	row := trx.QueryRowContext(ctx, createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName, meta.UserID)
+	builder := r.genSQL.Insert(userTable).
+		Columns("phone", "password", "first_name", "last_name", "user_created").
+		Values(input.Phone, input.Password, input.FirstName, input.LastName, meta.UserID).
+		Suffix("RETURNING \"id\"")
+
+	createUserQuery, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
+
+	row := trx.QueryRowContext(ctx, createUserQuery, args...)
 
 	if err = row.Scan(&insertID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -121,9 +210,16 @@ func (r *Repository) UserCreate(ctxr context.Context, meta query.MetaData, input
 		return "", errors.Wrap(err, "user id scan error")
 	}
 
-	createUsersRoleQuery := fmt.Sprintf("INSERT INTO %s (user_id, role_id) VALUES ($1, $2)", userRoleTable)
+	builderUsersRoleQuery := r.genSQL.Insert(userRoleTable).
+		Columns("user_id", "role_id").
+		Values(insertID, input.RoleID)
 
-	if _, err = trx.ExecContext(ctx, createUsersRoleQuery, insertID, input.RoleID); err != nil {
+	createUsersRoleQuery, args, err := builderUsersRoleQuery.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
+
+	if _, err = trx.ExecContext(ctx, createUsersRoleQuery, args...); err != nil {
 		if err = trx.Rollback(); err != nil {
 			return "", errors.Wrap(err, "role rollback error")
 		}
@@ -146,38 +242,30 @@ func (r *Repository) UserUpdate(ctxr context.Context, meta query.MetaData, input
 		ctx = context.New(ctxt)
 	}
 
-	setValues := make([]string, 0, 4)
-	args := make([]interface{}, 0, 4)
-	argID := 1
+	builder := r.genSQL.Update(userTable)
 
 	if input.FirstName != nil {
-		setValues = append(setValues, fmt.Sprintf("first_name=$%d", argID))
-		args = append(args, *input.FirstName)
-		argID++
+		builder = builder.Set("first_name", *input.FirstName)
 	}
 
 	if input.LastName != nil {
-		setValues = append(setValues, fmt.Sprintf("last_name=$%d", argID))
-		args = append(args, *input.LastName)
-		argID++
+		builder = builder.Set("last_name", *input.LastName)
 	}
 
 	if input.Password != nil {
-		setValues = append(setValues, fmt.Sprintf("password=$%d", argID))
-		args = append(args, *input.Password)
-		argID++
+		builder = builder.Set("password", *input.Password)
 	}
 
-	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, meta.UserID)
-	argID++
+	builder = builder.Set("user_updated", meta.UserID).
+		Set("updated_at", time.Now().UTC()).
+		Where(squirrel.Eq{"id": *input.ID})
 
-	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
-	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
 
-	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND id = '%s'", userTable, setQuery, *input.ID)
-	_, err := r.database.ExecContext(ctx, query, args...)
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "user update query error")
 }
@@ -194,12 +282,18 @@ func (r *Repository) UserDelete(ctxr context.Context, meta query.MetaData, userI
 		ctx = context.New(ctxt)
 	}
 
-	query := fmt.Sprintf(
-		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 WHERE is_deleted = false AND id = $3",
-		userTable,
-	)
+	builder := r.genSQL.Update(userTable).
+		Set("is_deleted", true).
+		Set("user_deleted", meta.UserID).
+		Set("deleted_at", time.Now().UTC()).
+		Where(squirrel.Eq{"id": userID, "is_deleted": false})
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, userID)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "user delete query error")
 }

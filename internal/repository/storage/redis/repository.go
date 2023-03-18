@@ -7,8 +7,8 @@ import (
 )
 
 type Repository struct {
-	options     Options
 	client      *redis.Client
+	options     Options
 	isTracingOn bool
 }
 
