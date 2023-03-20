@@ -254,6 +254,22 @@ CREATE TABLE IF NOT EXISTS casbin_rule
     v5 TEXT DEFAULT ''
 );
 
+CREATE TABLE IF NOT EXISTS client_types
+(
+    id SMALLSERIAL PRIMARY KEY,
+    name CHARACTER VARYING (50) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE IF NOT EXISTS token_whitelist
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    token TEXT NOT NULL,
+    client_type SMALLINT REFERENCES client_types(id) ON DELETE CASCADE NOT NULL DEFAULT 1,
+    expired BOOLEAN NOT NULL DEFAULT false
+);
+
 -- DATA --
 
 INSERT INTO users_statuses (name) VALUES ('active'), ('inactive'), ('blocked');
@@ -545,6 +561,8 @@ VALUES
    ('admin', 'rule', 'delete', 'allow'),
    ('admin', 'metrics', 'get', 'allow');
 
+INSERT INTO client_types (name) VALUES ('mobile'), ('web');
+
 -- FUNCTIONS --
 
 CREATE OR REPLACE FUNCTION item_rating_comments_inc() RETURNS TRIGGER AS $$
@@ -626,8 +644,10 @@ DROP TABLE IF EXISTS images;
 DROP TABLE IF EXISTS images_types;
 DROP TABLE IF EXISTS organizations;
 DROP TABLE IF EXISTS brands;
+DROP TABLE IF EXISTS token_whitelist;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS users_statuses;
+DROP TABLE IF EXISTS client_types;
 DROP TABLE IF EXISTS casbin_rule;
 
 -- +goose StatementEnd

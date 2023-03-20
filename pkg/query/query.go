@@ -1,9 +1,11 @@
 package query
 
-// MetaData
+// MetaData.
 type MetaData struct {
 	// Request User ID
 	UserID string
 	// Request Organization ID
 	OrganizationID string
+	// Users role name
+	RoleName string
 }

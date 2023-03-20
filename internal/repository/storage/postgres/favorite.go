@@ -1,8 +1,7 @@
 package postgres
 
 import (
-	"fmt"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/favorite"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
@@ -24,10 +23,18 @@ func (r *Repository) FavoriteCreate(ctxr context.Context, meta query.MetaData, f
 
 	var favoriteID string
 
-	query := fmt.Sprintf("INSERT INTO %s (user_id, item_id) VALUES ($1, $2) RETURNING id", favoriteTable)
+	builder := r.genSQL.Insert(favoriteTable).
+		Columns("user_id", "item_id").
+		Values(meta.UserID, favorite.ItemID).
+		Suffix("RETURNING \"id\"")
 
-	row := r.database.QueryRowContext(ctx, query, meta.UserID, favorite.ItemID)
-	err := row.Scan(&favoriteID)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	row := r.database.QueryRowContext(ctx, qry, args...)
+	err = row.Scan(&favoriteID)
 
 	return errors.Wrap(err, "favorite create query error")
 }
@@ -44,9 +51,18 @@ func (r *Repository) FavoriteDelete(ctxr context.Context, meta query.MetaData, i
 		ctx = context.New(ctxt)
 	}
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE user_id = $1 AND item_id = $2", favoriteTable)
+	builder := r.genSQL.Delete(favoriteTable).Where(squirrel.Eq{"user_id": meta.UserID, "item_id": itemID})
 
-	_, err := r.database.ExecContext(ctx, query, meta.UserID, itemID)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "favorite delete query error")
 }

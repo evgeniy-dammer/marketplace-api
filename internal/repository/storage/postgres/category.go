@@ -1,10 +1,9 @@
 package postgres
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/category"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
@@ -14,7 +13,7 @@ import (
 )
 
 // CategoryGetAll selects all categories from database.
-func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
+func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -27,14 +26,80 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, p
 
 	var categories []category.Category
 
-	query := fmt.Sprintf(
-		"SELECT id, name_tm, name_ru, name_tr, name_en, parent_id, level, organization_id FROM %s "+
-			"WHERE is_deleted = false AND organization_id = $1",
-		categoryTable)
+	qry, args, err := r.categoryGetAllQuery(meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := r.database.SelectContext(ctx, &categories, query, meta.OrganizationID)
+	err = r.database.SelectContext(ctx, &categories, qry, args...)
 
 	return categories, errors.Wrap(err, "categories select query error")
+}
+
+// categoryGetAllQuery creates sql query.
+func (r *Repository) categoryGetAllQuery(meta query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+	builder := r.genSQL.Select(
+		"id", "name_tm", "name_ru", "name_tr", "name_en", "parent_id", "level", "organization_id").
+		From(categoryTable)
+
+	if params.Search != "" {
+		search := "%" + params.Search + "%"
+
+		builder = builder.Where(squirrel.And{
+			squirrel.Eq{"is_deleted": false},
+			squirrel.Or{
+				squirrel.Like{"name_tm": search},
+				squirrel.Like{"name_ru": search},
+				squirrel.Like{"name_tr": search},
+				squirrel.Like{"name_en": search},
+			},
+		})
+	} else {
+		builder = builder.Where(squirrel.Eq{"is_deleted": false})
+	}
+
+	switch {
+	case !params.StartDate.IsZero() && params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"created_at": params.StartDate.Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"created_at": time.Now().Format("2006-01-02 15:04:05")},
+		})
+	case params.StartDate.IsZero() && !params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"created_at": time.Now().Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"created_at": params.EndDate.Format("2006-01-02 15:04:05")},
+		})
+	case !params.StartDate.IsZero() && !params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"created_at": params.StartDate.Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"created_at": params.EndDate.Format("2006-01-02 15:04:05")},
+		})
+	}
+
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	if len(params.Sorts) > 0 {
+		builder = builder.OrderBy(params.Sorts.Parsing(mappingSortCategory)...)
+	} else {
+		builder = builder.OrderBy("created_at DESC")
+	}
+
+	if params.Pagination.Limit > 0 {
+		builder = builder.Limit(params.Pagination.Limit)
+	}
+
+	if params.Pagination.Offset > 0 {
+		builder = builder.Offset(params.Pagination.Offset)
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", nil, errors.Wrap(err, "unable to build a query string")
+	}
+
+	return qry, args, nil
 }
 
 // CategoryGetOne select category by id from database.
@@ -49,21 +114,29 @@ func (r *Repository) CategoryGetOne(ctxr context.Context, meta query.MetaData, c
 		ctx = context.New(ctxt)
 	}
 
-	var user category.Category
+	var ctgry category.Category
 
-	query := fmt.Sprintf(
-		"SELECT id, name_tm, name_ru, name_tr, name_en, parent_id, level, organization_id FROM %s "+
-			"WHERE is_deleted = false AND id = $1 AND organization_id = $2",
-		categoryTable,
-	)
+	builder := r.genSQL.Select(
+		"id", "name_tm", "name_ru", "name_tr", "name_en", "parent_id", "level", "organization_id").
+		From(categoryTable).
+		Where(squirrel.Eq{"is_deleted": false, "id": categoryID})
 
-	err := r.database.GetContext(ctx, &user, query, categoryID, meta.OrganizationID)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
 
-	return user, errors.Wrap(err, "category select query error")
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return ctgry, errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.GetContext(ctx, &ctgry, qry, args...)
+
+	return ctgry, errors.Wrap(err, "category select query error")
 }
 
 // CategoryCreate insert category into database.
-func (r *Repository) CategoryCreate(ctxr context.Context, meta query.MetaData, input category.CreateCategoryInput) (string, error) {
+func (r *Repository) CategoryCreate(ctxr context.Context, meta query.MetaData, input category.CreateCategoryInput) (string, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -76,32 +149,28 @@ func (r *Repository) CategoryCreate(ctxr context.Context, meta query.MetaData, i
 
 	var categoryID string
 
-	query := fmt.Sprintf(
-		"INSERT INTO %s (name_tm, name_ru, name_tr, name_en, parent_id, level, organization_id, user_created) "+
-			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
-		categoryTable,
-	)
+	builder := r.genSQL.Insert(categoryTable).
+		Columns(
+			"name_tm", "name_ru", "name_tr", "name_en", "parent_id", "level", "organization_id", "user_created").
+		Values(
+			input.NameTm, input.NameRu, input.NameTr, input.NameEn, input.Parent, input.Level,
+			input.OrganizationID, meta.UserID).
+		Suffix("RETURNING \"id\"")
 
-	row := r.database.QueryRowContext(
-		ctx,
-		query,
-		input.NameTm,
-		input.NameRu,
-		input.NameTr,
-		input.NameEn,
-		input.Parent,
-		input.Level,
-		input.OrganizationID,
-		meta.UserID,
-	)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := row.Scan(&categoryID)
+	row := r.database.QueryRowContext(ctx, qry, args...)
+
+	err = row.Scan(&categoryID)
 
 	return categoryID, errors.Wrap(err, "category create query error")
 }
 
 // CategoryUpdate updates category by id in database.
-func (r *Repository) CategoryUpdate(ctxr context.Context, meta query.MetaData, input category.UpdateCategoryInput) error {
+func (r *Repository) CategoryUpdate(ctxr context.Context, meta query.MetaData, input category.UpdateCategoryInput) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -112,57 +181,46 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, meta query.MetaData, i
 		ctx = context.New(ctxt)
 	}
 
-	setValues := make([]string, 0, 8)
-	args := make([]interface{}, 0, 8)
-	argID := 1
+	builder := r.genSQL.Update(categoryTable)
 
 	if input.NameTm != nil {
-		setValues = append(setValues, fmt.Sprintf("name_tm=$%d", argID))
-		args = append(args, *input.NameTm)
-		argID++
+		builder = builder.Set("name_tm", *input.NameTm)
 	}
 
 	if input.NameRu != nil {
-		setValues = append(setValues, fmt.Sprintf("name_ru=$%d", argID))
-		args = append(args, *input.NameRu)
-		argID++
+		builder = builder.Set("name_ru", *input.NameRu)
 	}
 
 	if input.NameTr != nil {
-		setValues = append(setValues, fmt.Sprintf("name_tr=$%d", argID))
-		args = append(args, *input.NameTr)
-		argID++
+		builder = builder.Set("name_tr", *input.NameTr)
 	}
 
 	if input.NameEn != nil {
-		setValues = append(setValues, fmt.Sprintf("name_en=$%d", argID))
-		args = append(args, *input.NameEn)
-		argID++
+		builder = builder.Set("name_en", *input.NameEn)
 	}
 
 	if input.Parent != nil {
-		setValues = append(setValues, fmt.Sprintf("parent_id=$%d", argID))
-		args = append(args, *input.Parent)
-		argID++
+		builder = builder.Set("parent_id", *input.Parent)
 	}
 
 	if input.Level != nil {
-		setValues = append(setValues, fmt.Sprintf("level=$%d", argID))
-		args = append(args, *input.Level)
-		argID++
+		builder = builder.Set("level", *input.Level)
 	}
 
-	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, meta.UserID)
-	argID++
+	builder = builder.Set("user_updated", meta.UserID).
+		Set("updated_at", time.Now().UTC()).
+		Where(squirrel.Eq{"is_deleted": false, "id": *input.ID})
 
-	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
-	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
 
-	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND id = '%s' AND organization_id = '%s'",
-		categoryTable, setQuery, *input.ID, *input.OrganizationID)
-	_, err := r.database.ExecContext(ctx, query, args...)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "category update query error")
 }
@@ -179,12 +237,22 @@ func (r *Repository) CategoryDelete(ctxr context.Context, meta query.MetaData, c
 		ctx = context.New(ctxt)
 	}
 
-	query := fmt.Sprintf(
-		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 WHERE is_deleted = false AND id = $3 AND organization_id = $4",
-		categoryTable,
-	)
+	builder := r.genSQL.Update(categoryTable).
+		Set("is_deleted", true).
+		Set("user_deleted", meta.UserID).
+		Set("deleted_at", time.Now().UTC()).
+		Where(squirrel.Eq{"is_deleted": false, "id": categoryID})
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, categoryID, meta.OrganizationID)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "category delete query error")
 }

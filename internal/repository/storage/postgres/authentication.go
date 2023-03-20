@@ -1,8 +1,7 @@
 package postgres
 
 import (
-	"fmt"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/user"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
@@ -23,24 +22,26 @@ func (r *Repository) AuthenticationGetUser(ctxr context.Context, userID string, 
 
 	var usr user.User
 
-	var where string
+	builder := r.genSQL.Select(
+		"us.id", "us.phone", "us.password", "us.first_name", "us.last_name", "ro.name AS role", "st.name AS status").
+		From(userTable + " us").
+		InnerJoin(userRoleTable + " ur ON ur.user_id = us.id").
+		InnerJoin(roleTable + " ro ON ur.role_id = ro.id").
+		InnerJoin(statusTable + " st ON st.id = us.status_id").
+		Where(squirrel.Eq{"us.is_deleted": false})
 
 	if userID != "" {
-		where = fmt.Sprint("WHERE us.id = '", userID, "' ")
+		builder = builder.Where(squirrel.Eq{"us.id": userID})
 	} else {
-		where = fmt.Sprint("WHERE us.phone = '", username, "' ")
+		builder = builder.Where(squirrel.Eq{"us.phone": username})
 	}
 
-	query := fmt.Sprintf(
-		"SELECT us.id, us.phone, us.password, us.first_name, us.last_name, ro.name AS role, st.name AS status FROM %s us "+
-			"INNER JOIN %s ur ON ur.user_id = us.id "+
-			"INNER JOIN %s ro ON ur.role_id = ro.id "+
-			"INNER JOIN %s st ON st.id = us.status_id "+
-			" %s AND us.is_deleted = false",
-		userTable, userRoleTable, roleTable, statusTable, where,
-	)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return usr, errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := r.database.GetContext(ctx, &usr, query)
+	err = r.database.GetContext(ctx, &usr, qry, args...)
 
 	return usr, errors.Wrap(err, "user select error")
 }
@@ -64,12 +65,17 @@ func (r *Repository) AuthenticationCreateUser(ctxr context.Context, input user.C
 		return "", errors.Wrap(err, "transaction begin error")
 	}
 
-	createUserQuery := fmt.Sprintf(
-		"INSERT INTO %s (phone, password, first_name, last_name) VALUES ($1, $2, $3, $4) RETURNING id",
-		userTable,
-	)
+	builder := r.genSQL.Insert(userTable).
+		Columns("phone", "password", "first_name", "last_name").
+		Values(input.Phone, input.Password, input.FirstName, input.LastName).
+		Suffix("RETURNING \"id\"")
 
-	row := trx.QueryRowContext(ctx, createUserQuery, input.Phone, input.Password, input.FirstName, input.LastName)
+	createUserQuery, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
+
+	row := trx.QueryRowContext(ctx, createUserQuery, args...)
 
 	if err = row.Scan(&userID); err != nil {
 		if err = trx.Rollback(); err != nil {
@@ -79,9 +85,16 @@ func (r *Repository) AuthenticationCreateUser(ctxr context.Context, input user.C
 		return "", errors.Wrap(err, "user id scan error")
 	}
 
-	createUsersRoleQuery := fmt.Sprintf("INSERT INTO %s (user_id, role_id) VALUES ($1, $2)", userRoleTable)
+	builderUsersRoleQuery := r.genSQL.Insert(userRoleTable).
+		Columns("user_id", "role_id").
+		Values(userID, input.RoleID)
 
-	if _, err = trx.ExecContext(ctx, createUsersRoleQuery, userID, input.RoleID); err != nil {
+	createUsersRoleQuery, args, err := builderUsersRoleQuery.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
+
+	if _, err = trx.ExecContext(ctx, createUsersRoleQuery, args...); err != nil {
 		if err = trx.Rollback(); err != nil {
 			return "", errors.Wrap(err, "role table rollback error")
 		}

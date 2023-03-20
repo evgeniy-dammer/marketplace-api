@@ -1,10 +1,9 @@
 package postgres
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/item"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
@@ -15,7 +14,7 @@ import (
 )
 
 // ItemGetAll selects all items from database.
-func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) {
+func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -30,36 +29,118 @@ func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, param
 
 	egroup := &errgroup.Group{}
 
-	query := fmt.Sprintf(
-		"SELECT "+
-			"id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, description_tr, description_en, "+
-			"internal_id, price, rating, comments_qty, category_id, organization_id, brand_id, created_at "+
-			"FROM %s WHERE is_deleted = false AND organization_id = $1 ",
-		itemTable,
-	)
+	qry, args, err := r.itemGetAllQuery(meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := r.database.SelectContext(ctx, &items, query, meta.OrganizationID)
+	err = r.database.SelectContext(ctx, &items, qry, args...)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build a query string")
+	}
 
 	for i := 0; i < len(items); i++ {
 		index := i
 
 		egroup.Go(func() error {
-			queryImages := fmt.Sprintf(
-				"SELECT id, object_id, type, origin, middle, small, organization_id, is_main FROM %s "+
-					"WHERE is_main = true AND object_id = $1 ",
-				imageTable,
-			)
+			builder := r.genSQL.Select(
+				"id", "object_id", "type", "origin", "middle", "small", "organization_id", "is_main").
+				From(imageTable).
+				Where(squirrel.Eq{"is_main": true, "object_id": items[index].ID})
 
-			err = r.database.SelectContext(ctx, &items[index].Images, queryImages, items[index].ID)
+			qryImages, argsImages, err := builder.ToSql()
+			if err != nil {
+				return errors.Wrap(err, "unable to build a query string")
+			}
+
+			err = r.database.SelectContext(ctx, &items[index].Images, qryImages, argsImages...)
 
 			return errors.Wrap(err, "images select query error")
 		})
-
 	}
 
 	err = egroup.Wait()
 
 	return items, errors.Wrap(err, "items select query error")
+}
+
+// itemGetAllQuery creates sql query.
+func (r *Repository) itemGetAllQuery(meta query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+	builder := r.genSQL.Select("id", "name_tm", "name_ru", "name_tr", "name_en", "description_tm",
+		"description_ru", "description_tr", "description_en", "internal_id", "price", "rating", "comments_qty",
+		"category_id", "organization_id", "brand_id", "created_at").
+		From(itemTable)
+
+	if params.Search != "" {
+		search := "%" + params.Search + "%"
+
+		builder = builder.Where(squirrel.And{
+			squirrel.Eq{"is_deleted": false},
+			squirrel.Or{
+				squirrel.Like{"name_tm": search},
+				squirrel.Like{"name_ru": search},
+				squirrel.Like{"name_tr": search},
+				squirrel.Like{"name_en": search},
+				squirrel.Like{"description_tm": search},
+				squirrel.Like{"description_ru": search},
+				squirrel.Like{"description_tr": search},
+				squirrel.Like{"description_en": search},
+				squirrel.Like{"internal_id": search},
+				squirrel.Like{"price": search},
+				squirrel.Like{"rating": search},
+				squirrel.Like{"comments_qty": search},
+				squirrel.Like{"category_id": search},
+				squirrel.Like{"organization_id": search},
+				squirrel.Like{"brand_id": search},
+				squirrel.Like{"created_at": search},
+			},
+		})
+	} else {
+		builder = builder.Where(squirrel.Eq{"is_deleted": false})
+	}
+
+	switch {
+	case !params.StartDate.IsZero() && params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"created_at": params.StartDate.Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"created_at": time.Now().Format("2006-01-02 15:04:05")},
+		})
+	case params.StartDate.IsZero() && !params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"created_at": time.Now().Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"created_at": params.EndDate.Format("2006-01-02 15:04:05")},
+		})
+	case !params.StartDate.IsZero() && !params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"created_at": params.StartDate.Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"created_at": params.EndDate.Format("2006-01-02 15:04:05")},
+		})
+	}
+
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	if len(params.Sorts) > 0 {
+		builder = builder.OrderBy(params.Sorts.Parsing(mappingSortItem)...)
+	} else {
+		builder = builder.OrderBy("created_at DESC")
+	}
+
+	if params.Pagination.Limit > 0 {
+		builder = builder.Limit(params.Pagination.Limit)
+	}
+
+	if params.Pagination.Offset > 0 {
+		builder = builder.Offset(params.Pagination.Offset)
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", nil, errors.Wrap(err, "unable to build a query string")
+	}
+
+	return qry, args, nil
 }
 
 // ItemGetOne select item by id from database.
@@ -78,50 +159,71 @@ func (r *Repository) ItemGetOne(ctxr context.Context, meta query.MetaData, itemI
 
 	egroup := &errgroup.Group{}
 
-	query := fmt.Sprintf(
-		"SELECT "+
-			"id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, description_tr, description_en, "+
-			"internal_id, price, rating, comments_qty, category_id, organization_id, brand_id, created_at "+
-			"FROM %s WHERE is_deleted = false AND organization_id = $1 AND id = $2 ",
-		itemTable,
-	)
+	builder := r.genSQL.Select("id", "name_tm", "name_ru", "name_tr", "name_en", "description_tm",
+		"description_ru", "description_tr", "description_en", "internal_id", "price", "rating", "comments_qty",
+		"category_id", "organization_id", "brand_id", "created_at").
+		From(itemTable).
+		Where(squirrel.Eq{"is_deleted": false, "id": itemID})
 
-	err := r.database.GetContext(ctx, &itm, query, meta.OrganizationID, itemID)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return itm, errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.GetContext(ctx, &itm, qry, args...)
 	if err != nil {
 		return itm, errors.Wrap(err, "item select query error")
 	}
 
 	egroup.Go(func() error {
-		queryImages := fmt.Sprintf(
-			"SELECT id, object_id, type, origin, middle, small, organization_id, is_main FROM %s WHERE object_id = $1 ",
-			imageTable,
-		)
+		builderImages := r.genSQL.Select(
+			"id", "object_id", "type", "origin", "middle", "small", "organization_id", "is_main").
+			From(imageTable).
+			Where(squirrel.Eq{"object_id": itm.ID})
 
-		err = r.database.SelectContext(ctx, &itm.Images, queryImages, itm.ID)
+		qryImages, argsImages, err := builderImages.ToSql()
+		if err != nil {
+			return errors.Wrap(err, "unable to build a query string")
+		}
+
+		err = r.database.SelectContext(ctx, &itm.Images, qryImages, argsImages...)
 
 		return errors.Wrap(err, "images select query error")
 	})
 
 	egroup.Go(func() error {
-		querySpecifications := fmt.Sprintf(
-			"SELECT id, item_id, organization_id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, "+
-				"description_tr, description_en, value FROM %s WHERE item_id = $1 ",
-			specificationTable,
-		)
+		builderSpecifications := r.genSQL.Select(
+			"id", "item_id", "organization_id", "name_tm", "name_ru", "name_tr", "name_en",
+			"description_tm", "description_ru", "description_tr", "description_en", "value").
+			From(specificationTable).
+			Where(squirrel.Eq{"item_id": itm.ID})
 
-		err = r.database.SelectContext(ctx, &itm.Specification, querySpecifications, itm.ID)
+		qrySpecifications, argsSpecifications, err := builderSpecifications.ToSql()
+		if err != nil {
+			return errors.Wrap(err, "unable to build a query string")
+		}
+
+		err = r.database.SelectContext(ctx, &itm.Specification, qrySpecifications, argsSpecifications...)
 
 		return errors.Wrap(err, "specification select query error")
 	})
 
 	egroup.Go(func() error {
-		queryComments := fmt.Sprintf(
-			"SELECT id, item_id, organization_id, content, status_id, rating, user_created, created_at FROM %s "+
-				"WHERE is_deleted = false AND item_id = $1 ",
-			commentTable,
-		)
+		builderComments := r.genSQL.Select(
+			"id", "item_id", "organization_id", "content", "status_id", "rating", "user_created", "created_at").
+			From(specificationTable).
+			Where(squirrel.Eq{"is_deleted": false, "item_id": itm.ID})
 
-		err = r.database.SelectContext(ctx, &itm.Comments, queryComments, itm.ID)
+		qryComments, argsComments, err := builderComments.ToSql()
+		if err != nil {
+			return errors.Wrap(err, "unable to build a query string")
+		}
+
+		err = r.database.SelectContext(ctx, &itm.Comments, qryComments, argsComments...)
 
 		return errors.Wrap(err, "comments select query error")
 	})
@@ -145,34 +247,24 @@ func (r *Repository) ItemCreate(ctxr context.Context, meta query.MetaData, input
 
 	var itemID string
 
-	query := fmt.Sprintf(
-		"INSERT INTO %s "+
-			"(name_tm, name_ru, name_tr, name_en,  description_tm, description_ru, description_tr, description_en, "+
-			"internal_id, price, category_id, organization_id, brand_id, user_created) "+
-			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id",
-		itemTable,
-	)
+	builder := r.genSQL.Insert(itemTable).
+		Columns(
+			"name_tm", "name_ru", "name_tr", "name_en", "description_tm", "description_ru", "description_tr",
+			"description_en", "internal_id", "price", "category_id", "organization_id", "brand_id", "created_at").
+		Values(
+			input.NameTm, input.NameRu, input.NameTr, input.NameEn, input.DescriptionTm, input.DescriptionRu,
+			input.DescriptionTr, input.DescriptionEn, input.InternalID, input.Price, input.CategoryID,
+			input.OrganizationID, input.BrandID, meta.UserID).
+		Suffix("RETURNING \"id\"")
 
-	row := r.database.QueryRowContext(
-		ctx,
-		query,
-		input.NameTm,
-		input.NameRu,
-		input.NameTr,
-		input.NameEn,
-		input.DescriptionTm,
-		input.DescriptionRu,
-		input.DescriptionTr,
-		input.DescriptionEn,
-		input.InternalID,
-		input.Price,
-		input.CategoryID,
-		input.OrganizationID,
-		input.BrandID,
-		meta.UserID,
-	)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := row.Scan(&itemID)
+	row := r.database.QueryRowContext(ctx, qry, args...)
+
+	err = row.Scan(&itemID)
 
 	return itemID, errors.Wrap(err, "item create query error")
 }
@@ -189,100 +281,74 @@ func (r *Repository) ItemUpdate(ctxr context.Context, meta query.MetaData, input
 		ctx = context.New(ctxt)
 	}
 
-	setValues := make([]string, 0, 14)
-	args := make([]interface{}, 0, 14)
-	argID := 1
+	builder := r.genSQL.Update(itemTable)
 
 	if input.NameTm != nil {
-		setValues = append(setValues, fmt.Sprintf("name_tm=$%d", argID))
-		args = append(args, *input.NameTm)
-		argID++
+		builder = builder.Set("name_tm", *input.NameTm)
 	}
 
 	if input.NameRu != nil {
-		setValues = append(setValues, fmt.Sprintf("name_ru=$%d", argID))
-		args = append(args, *input.NameRu)
-		argID++
+		builder = builder.Set("name_ru", *input.NameRu)
 	}
 
 	if input.NameTr != nil {
-		setValues = append(setValues, fmt.Sprintf("name_tr=$%d", argID))
-		args = append(args, *input.NameTr)
-		argID++
+		builder = builder.Set("name_tr", *input.NameTr)
 	}
 
 	if input.NameEn != nil {
-		setValues = append(setValues, fmt.Sprintf("name_en=$%d", argID))
-		args = append(args, *input.NameEn)
-		argID++
+		builder = builder.Set("name_en", *input.NameEn)
 	}
 
 	if input.DescriptionTm != nil {
-		setValues = append(setValues, fmt.Sprintf("description_tm=$%d", argID))
-		args = append(args, *input.DescriptionTm)
-		argID++
+		builder = builder.Set("description_tm", *input.DescriptionTm)
 	}
 
 	if input.DescriptionRu != nil {
-		setValues = append(setValues, fmt.Sprintf("description_ru=$%d", argID))
-		args = append(args, *input.DescriptionRu)
-		argID++
+		builder = builder.Set("description_ru", *input.DescriptionRu)
 	}
 
 	if input.DescriptionTr != nil {
-		setValues = append(setValues, fmt.Sprintf("description_tr=$%d", argID))
-		args = append(args, *input.DescriptionTr)
-		argID++
+		builder = builder.Set("description_tr", *input.DescriptionTr)
 	}
 
 	if input.DescriptionEn != nil {
-		setValues = append(setValues, fmt.Sprintf("description_en=$%d", argID))
-		args = append(args, *input.DescriptionEn)
-		argID++
+		builder = builder.Set("description_en", *input.DescriptionEn)
 	}
 
 	if input.InternalID != nil {
-		setValues = append(setValues, fmt.Sprintf("internal_id=$%d", argID))
-		args = append(args, *input.InternalID)
-		argID++
+		builder = builder.Set("internal_id", *input.InternalID)
 	}
 
 	if input.Price != nil {
-		setValues = append(setValues, fmt.Sprintf("price=$%d", argID))
-		args = append(args, *input.Price)
-		argID++
+		builder = builder.Set("price", *input.Price)
 	}
 
 	if input.CategoryID != nil {
-		setValues = append(setValues, fmt.Sprintf("category_id=$%d", argID))
-		args = append(args, *input.CategoryID)
-		argID++
+		builder = builder.Set("category_id", *input.CategoryID)
 	}
 
 	if input.OrganizationID != nil {
-		setValues = append(setValues, fmt.Sprintf("organization_id=$%d", argID))
-		args = append(args, *input.OrganizationID)
-		argID++
+		builder = builder.Set("organization_id", *input.OrganizationID)
 	}
 
 	if input.BrandID != nil {
-		setValues = append(setValues, fmt.Sprintf("brand_id=$%d", argID))
-		args = append(args, *input.BrandID)
-		argID++
+		builder = builder.Set("brand_id", *input.BrandID)
 	}
 
-	setValues = append(setValues, fmt.Sprintf("user_updated=$%d", argID))
-	args = append(args, meta.UserID)
-	argID++
+	builder = builder.Set("user_updated", meta.UserID).
+		Set("updated_at", time.Now().UTC()).
+		Where(squirrel.Eq{"is_deleted": false, "id": *input.ID})
 
-	setValues = append(setValues, fmt.Sprintf("updated_at=$%d", argID))
-	args = append(args, time.Now().Format("2006-01-02 15:04:05"))
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
 
-	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE is_deleted = false AND organization_id = '%s' AND id = '%s'",
-		itemTable, setQuery, *input.OrganizationID, *input.ID)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
 
-	_, err := r.database.ExecContext(ctx, query, args...)
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "item update query error")
 }
@@ -299,13 +365,22 @@ func (r *Repository) ItemDelete(ctxr context.Context, meta query.MetaData, itemI
 		ctx = context.New(ctxt)
 	}
 
-	query := fmt.Sprintf(
-		"UPDATE %s SET is_deleted = true, deleted_at = $1, user_deleted = $2 "+
-			"WHERE is_deleted = false AND id = $3 AND organization_id = $4",
-		itemTable,
-	)
+	builder := r.genSQL.Update(itemTable).
+		Set("is_deleted", true).
+		Set("user_deleted", meta.UserID).
+		Set("deleted_at", time.Now().UTC()).
+		Where(squirrel.Eq{"is_deleted": false, "id": itemID})
 
-	_, err := r.database.ExecContext(ctx, query, time.Now().Format("2006-01-02 15:04:05"), meta.UserID, itemID, meta.OrganizationID)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "item delete query error")
 }
