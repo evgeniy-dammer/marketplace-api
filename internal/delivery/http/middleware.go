@@ -47,7 +47,15 @@ func (d *Delivery) userIdentity(ginCtx *gin.Context) {
 		return
 	}
 
+	role, err := d.ucAuthorization.AuthorizationGetUserRole(ctx, userID)
+	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrRoleIsNotFound)
+
+		return
+	}
+
 	ginCtx.Set(userCtx, userID)
+	ginCtx.Set(roleCtx, role)
 }
 
 // getUserID returns user id from authorization context.
@@ -71,37 +79,21 @@ func (d *Delivery) getUserID(ginCtx *gin.Context) (string, error) {
 
 // getUserRole returns users role from authorization context.
 func (d *Delivery) getUserRole(ginCtx *gin.Context) (string, error) {
-	ctx := context.New(ginCtx)
-
-	if d.isTracingOn {
-		ctxt, span := tracing.Tracer.Start(ginCtx.Request.Context(), "Delivery.getUserRole")
-		defer span.End()
-
-		ctx = context.New(ctxt)
-	}
-
-	userID, exists := ginCtx.Get(userCtx)
+	role, exists := ginCtx.Get(roleCtx)
 	if !exists {
-		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrUserIsNotFound)
-
-		return "", ErrUserIsNotFound
-	}
-
-	idString, exists := userID.(string)
-	if !exists {
-		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrInvalidUserID)
-
-		return "", ErrUserIsNotFound
-	}
-
-	role, err := d.ucAuthorization.AuthorizationGetUserRole(ctx, idString)
-	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrRoleIsNotFound)
 
-		return "", ErrUserIsNotFound
+		return "", ErrRoleIsNotFound
 	}
 
-	return role, nil
+	roleString, exists := role.(string)
+	if !exists {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, ErrRoleIsNotFound)
+
+		return "", ErrRoleIsNotFound
+	}
+
+	return roleString, nil
 }
 
 // corsMiddleware middleware.
@@ -166,8 +158,14 @@ func (d *Delivery) parseMetadata(ginCtx *gin.Context) (query.MetaData, error) {
 		return query.MetaData{}, err
 	}
 
+	userRole, err := d.getUserRole(ginCtx)
+	if err != nil {
+		return query.MetaData{}, err
+	}
+
 	return query.MetaData{
 		UserID:         metaUserID,
 		OrganizationID: ginCtx.Query(organizationQueryKey),
+		RoleName:       userRole,
 	}, nil
 }
