@@ -104,3 +104,94 @@ func (r *Repository) AuthenticationCreateUser(ctxr context.Context, input user.C
 
 	return userID, errors.Wrap(trx.Commit(), "transaction commit error")
 }
+
+// AuthenticationCreateToken inserts token into database.
+func (r *Repository) AuthenticationCreateToken(ctxr context.Context, userID string, token string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	if r.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationCreateToken")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
+	var tokenID string
+
+	builder := r.genSQL.Insert(tokenTable).Columns("user_id", "token").Values(userID, token).Suffix("RETURNING \"id\"")
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	row := r.database.QueryRowContext(ctx, qry, args...)
+
+	err = row.Scan(&tokenID)
+	if err != nil {
+		return errors.Wrap(err, "unable to scan token id")
+	}
+
+	return nil
+}
+
+// AuthenticationGetToken returns token from database.
+func (r *Repository) AuthenticationGetToken(ctxr context.Context, userID string, token string) (string, error) {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	if r.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationGetToken")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
+	var tokenID string
+
+	builder := r.genSQL.Select("id").From(tokenTable).
+		Where(squirrel.Eq{"user_id": userID, "token": token, "expired": false})
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.GetContext(ctx, &tokenID, qry, args...)
+	if err != nil {
+		return "", errors.Wrap(err, "unable to create select token id")
+	}
+
+	return tokenID, nil
+}
+
+// AuthenticationUpdateToken updates token in database
+func (r *Repository) AuthenticationUpdateToken(ctxr context.Context, tokenID string, token string) error {
+	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
+	if r.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationGetToken")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
+	builder := r.genSQL.Update(tokenTable).
+		Set("token", token).
+		Set("expired", false).
+		Where(squirrel.Eq{"id": tokenID})
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
+	if err != nil {
+		return errors.Wrap(err, "unable to update token")
+	}
+
+	return nil
+}

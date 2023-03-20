@@ -21,9 +21,12 @@ import (
 
 // Authentication interface.
 type Authentication interface {
-	AuthenticationGenerateToken(ctx context.Context, id string, username string, password string) (user.User, token.Tokens, error)
+	AuthenticationGenerateToken(ctx context.Context, id string, username string, password string) (user.User, token.Tokens, error) //nolint:lll
 	AuthenticationParseToken(ctx context.Context, token string) (string, error)
 	AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error)
+	AuthenticationCreateToken(ctx context.Context, userID string, token string) error
+	AuthenticationGetToken(ctx context.Context, userID string, token string) (string, error)
+	AuthenticationUpdateToken(ctx context.Context, tokenID string, token string) error
 }
 
 // Authorization interface.
@@ -44,16 +47,16 @@ type User interface {
 
 // Organization interface.
 type Organization interface {
-	OrganizationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error)
+	OrganizationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) //nolint:lll
 	OrganizationGetOne(ctx context.Context, meta query.MetaData, organizationID string) (organization.Organization, error)
-	OrganizationCreate(ctx context.Context, meta query.MetaData, input organization.CreateOrganizationInput) (string, error)
+	OrganizationCreate(ctx context.Context, meta query.MetaData, input organization.CreateOrganizationInput) (string, error) //nolint:lll
 	OrganizationUpdate(ctx context.Context, meta query.MetaData, input organization.UpdateOrganizationInput) error
 	OrganizationDelete(ctx context.Context, meta query.MetaData, organizationID string) error
 }
 
 // Category interface.
 type Category interface {
-	CategoryGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error)
+	CategoryGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) //nolint:lll
 	CategoryGetOne(ctx context.Context, meta query.MetaData, categoryID string) (category.Category, error)
 	CategoryCreate(ctx context.Context, meta query.MetaData, input category.CreateCategoryInput) (string, error)
 	CategoryUpdate(ctx context.Context, meta query.MetaData, input category.UpdateCategoryInput) error
@@ -98,7 +101,7 @@ type Image interface {
 
 // Comment interface.
 type Comment interface {
-	CommentGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error)
+	CommentGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) //nolint:lll
 	CommentGetOne(ctx context.Context, meta query.MetaData, commentID string) (comment.Comment, error)
 	CommentCreate(ctx context.Context, meta query.MetaData, input comment.CreateCommentInput) (string, error)
 	CommentUpdate(ctx context.Context, meta query.MetaData, input comment.UpdateCommentInput) error
@@ -107,9 +110,9 @@ type Comment interface {
 
 // Specification interface.
 type Specification interface {
-	SpecificationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error)
-	SpecificationGetOne(ctx context.Context, meta query.MetaData, specificationID string) (specification.Specification, error)
-	SpecificationCreate(ctx context.Context, meta query.MetaData, input specification.CreateSpecificationInput) (string, error)
+	SpecificationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) //nolint:lll
+	SpecificationGetOne(ctx context.Context, meta query.MetaData, specificationID string) (specification.Specification, error)                 //nolint:lll
+	SpecificationCreate(ctx context.Context, meta query.MetaData, input specification.CreateSpecificationInput) (string, error)                //nolint:lll
 	SpecificationUpdate(ctx context.Context, meta query.MetaData, input specification.UpdateSpecificationInput) error
 	SpecificationDelete(ctx context.Context, meta query.MetaData, specificationID string) error
 }

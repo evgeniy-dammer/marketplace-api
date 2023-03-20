@@ -52,6 +52,13 @@ func (d *Delivery) signIn(ginCtx *gin.Context) {
 		return
 	}
 
+	err = d.ucAuthentication.AuthenticationCreateToken(ctx, usr.ID, tokens.RefreshToken)
+	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
+
+		return
+	}
+
 	ginCtx.JSON(http.StatusOK, AuthResponse{User: usr, Tokens: tokens})
 }
 
@@ -142,7 +149,21 @@ func (d *Delivery) refresh(ginCtx *gin.Context) {
 		return
 	}
 
+	tokenID, err := d.ucAuthentication.AuthenticationGetToken(ctx, userID, headerParts[1])
+	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusUnauthorized, err)
+
+		return
+	}
+
 	usr, tokens, err = d.ucAuthentication.AuthenticationGenerateToken(ctx, userID, "", "")
+	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
+
+		return
+	}
+
+	err = d.ucAuthentication.AuthenticationUpdateToken(ctx, tokenID, tokens.RefreshToken)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
