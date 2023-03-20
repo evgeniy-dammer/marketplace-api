@@ -17,6 +17,7 @@ const (
 	specificationTable = "specification"
 	favoriteTable      = "users_favorites"
 	ruleTable          = "casbin_rule"
+	tokenTable         = "token_whitelist"
 	// categoryItemTable = "categories_items".
 
 	vendorRole = "vendor"

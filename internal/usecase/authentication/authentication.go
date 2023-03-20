@@ -13,7 +13,7 @@ import (
 )
 
 // AuthenticationGenerateToken generates authorization token.
-func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string, username string, password string) (user.User, token.Tokens, error) {
+func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string, username string, password string) (user.User, token.Tokens, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.AuthenticationGenerateToken")
 		defer span.End()
@@ -28,7 +28,6 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 	var err error
 
 	usr, err = s.adapterStorage.AuthenticationGetUser(ctx, userID, username)
-
 	if err != nil {
 		return usr, tokens, errors.Wrap(err, "can not get user")
 	}
@@ -63,7 +62,6 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 	tokens.AccessTokenExpires = expiresAt
 	tokens.TokenType = "Bearer"
 
-	// create refresh token
 	refreshToken := usecase.CreateNewToken(userID, refreshExpiresAt, issuedAt)
 	tokens.RefreshToken, err = refreshToken.SignedString([]byte(usecase.SigningKey))
 
@@ -122,4 +120,25 @@ func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.Creat
 	userID, err := s.adapterStorage.AuthenticationCreateUser(ctx, input)
 
 	return userID, errors.Wrap(err, "can not create user")
+}
+
+// AuthenticationCreateToken creates token in database
+func (s *UseCase) AuthenticationCreateToken(ctx context.Context, userID string, token string) error {
+	err := s.adapterStorage.AuthenticationCreateToken(ctx, userID, token)
+
+	return errors.Wrap(err, "token create failed")
+}
+
+// AuthenticationGetToken returns token id from database
+func (s *UseCase) AuthenticationGetToken(ctx context.Context, userID string, token string) (string, error) {
+	tokenID, err := s.adapterStorage.AuthenticationGetToken(ctx, userID, token)
+
+	return tokenID, errors.Wrap(err, "token id select error")
+}
+
+// AuthenticationUpdateToken updates token in database.
+func (s *UseCase) AuthenticationUpdateToken(ctx context.Context, tokenID string, token string) error {
+	err := s.adapterStorage.AuthenticationUpdateToken(ctx, tokenID, token)
+
+	return errors.Wrap(err, "token update failed")
 }
