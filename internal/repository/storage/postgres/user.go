@@ -38,7 +38,7 @@ func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, param
 }
 
 // userGetAllQuery creates sql query.
-func (r *Repository) userGetAllQuery(meta query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+func (r *Repository) userGetAllQuery(_ query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
 	builder := r.genSQL.Select(
 		"us.id", "us.phone", "us.first_name", "us.last_name", "ro.name AS role", "st.name AS status",
 	).From(userTable + " us").
@@ -61,6 +61,24 @@ func (r *Repository) userGetAllQuery(meta query.MetaData, params queryparameter.
 		})
 	} else {
 		builder = builder.Where(squirrel.Eq{"us.is_deleted": false})
+	}
+
+	switch {
+	case !params.StartDate.IsZero() && params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"us.created_at": params.StartDate.Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"us.created_at": time.Now().Format("2006-01-02 15:04:05")},
+		})
+	case params.StartDate.IsZero() && !params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"us.created_at": time.Now().Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"us.created_at": params.EndDate.Format("2006-01-02 15:04:05")},
+		})
+	case !params.StartDate.IsZero() && !params.EndDate.IsZero():
+		builder = builder.Where(squirrel.And{
+			squirrel.GtOrEq{"us.created_at": params.StartDate.Format("2006-01-02 15:04:05")},
+			squirrel.LtOrEq{"us.created_at": params.EndDate.Format("2006-01-02 15:04:05")},
+		})
 	}
 
 	if len(params.Sorts) > 0 {
@@ -110,7 +128,7 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, 
 }
 
 // userGetAllRolesQuery creates sql query.
-func (r *Repository) userGetAllRolesQuery(meta query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+func (r *Repository) userGetAllRolesQuery(_ query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
 	builder := r.genSQL.Select("id", "name").From(roleTable)
 
 	if params.Search != "" {
@@ -140,7 +158,7 @@ func (r *Repository) userGetAllRolesQuery(meta query.MetaData, params queryparam
 }
 
 // UserGetOne select user by id from database.
-func (r *Repository) UserGetOne(ctxr context.Context, meta query.MetaData, userID string) (user.User, error) {
+func (r *Repository) UserGetOne(ctxr context.Context, _ query.MetaData, userID string) (user.User, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -258,7 +276,7 @@ func (r *Repository) UserUpdate(ctxr context.Context, meta query.MetaData, input
 
 	builder = builder.Set("user_updated", meta.UserID).
 		Set("updated_at", time.Now().UTC()).
-		Where(squirrel.Eq{"id": *input.ID})
+		Where(squirrel.Eq{"is_deleted": false, "id": *input.ID})
 
 	qry, args, err := builder.ToSql()
 	if err != nil {

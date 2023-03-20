@@ -18,4 +18,6 @@ const (
 	favoriteTable      = "users_favorites"
 	ruleTable          = "casbin_rule"
 	// categoryItemTable = "categories_items".
+
+	vendorRole = "vendor"
 )

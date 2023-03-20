@@ -1,9 +1,7 @@
 package postgres
 
 import (
-	"fmt"
-	"strings"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/specification"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
@@ -13,7 +11,7 @@ import (
 )
 
 // SpecificationGetAll selects all specifications from database.
-func (r *Repository) SpecificationGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) {
+func (r *Repository) SpecificationGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -26,19 +24,67 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, meta query.MetaDa
 
 	var specifications []specification.Specification
 
-	query := fmt.Sprintf(
-		"SELECT id, item_id, organization_id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, "+
-			"description_tr, description_en, value FROM %s WHERE organization_id = $1 ",
-		specificationTable,
-	)
+	qry, args, err := r.specificationGetAllQuery(meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := r.database.SelectContext(ctx, &specifications, query, meta.OrganizationID)
+	err = r.database.SelectContext(ctx, &specifications, qry, args...)
 
 	return specifications, errors.Wrap(err, "specifications select query error")
 }
 
+// specificationGetAllQuery creates sql query.
+func (r *Repository) specificationGetAllQuery(meta query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+	builder := r.genSQL.Select(
+		"id", "item_id", "organization_id", "name_tm", "name_ru", "name_tr", "name_en",
+		"description_tm", "description_ru", "description_tr", "description_en", "value").
+		From(specificationTable)
+
+	if params.Search != "" {
+		search := "%" + params.Search + "%"
+
+		builder = builder.Where(squirrel.Or{
+			squirrel.Like{"name_tm": search},
+			squirrel.Like{"name_ru": search},
+			squirrel.Like{"name_tr": search},
+			squirrel.Like{"name_en": search},
+			squirrel.Like{"description_tm": search},
+			squirrel.Like{"description_ru": search},
+			squirrel.Like{"description_tr": search},
+			squirrel.Like{"description_en": search},
+			squirrel.Like{"value": search},
+		})
+	}
+
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	if len(params.Sorts) > 0 {
+		builder = builder.OrderBy(params.Sorts.Parsing(mappingSortSpecification)...)
+	} else {
+		builder = builder.OrderBy("name_tm ASC")
+	}
+
+	if params.Pagination.Limit > 0 {
+		builder = builder.Limit(params.Pagination.Limit)
+	}
+
+	if params.Pagination.Offset > 0 {
+		builder = builder.Offset(params.Pagination.Offset)
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", nil, errors.Wrap(err, "unable to build a query string")
+	}
+
+	return qry, args, nil
+}
+
 // SpecificationGetOne select specification by id from database.
-func (r *Repository) SpecificationGetOne(ctxr context.Context, meta query.MetaData, specificationID string) (specification.Specification, error) {
+func (r *Repository) SpecificationGetOne(ctxr context.Context, meta query.MetaData, specificationID string) (specification.Specification, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -51,19 +97,27 @@ func (r *Repository) SpecificationGetOne(ctxr context.Context, meta query.MetaDa
 
 	var spec specification.Specification
 
-	query := fmt.Sprintf(
-		"SELECT id, item_id, organization_id, name_tm, name_ru, name_tr, name_en, description_tm, description_ru, "+
-			"description_tr, description_en, value FROM %s WHERE organization_id = $1 AND id = $2 ",
-		specificationTable,
-	)
+	builder := r.genSQL.Select("id", "item_id", "organization_id", "name_tm", "name_ru", "name_tr", "name_en",
+		"description_tm", "description_ru", "description_tr", "description_en", "value").
+		From(specificationTable).
+		Where(squirrel.Eq{"id": specificationID})
 
-	err := r.database.GetContext(ctx, &spec, query, meta.OrganizationID, specificationID)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return spec, errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.GetContext(ctx, &spec, qry, args...)
 
 	return spec, errors.Wrap(err, "specification select query error")
 }
 
 // SpecificationCreate insert specification into database.
-func (r *Repository) SpecificationCreate(ctxr context.Context, meta query.MetaData, input specification.CreateSpecificationInput) (string, error) {
+func (r *Repository) SpecificationCreate(ctxr context.Context, _ query.MetaData, input specification.CreateSpecificationInput) (string, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -76,29 +130,22 @@ func (r *Repository) SpecificationCreate(ctxr context.Context, meta query.MetaDa
 
 	var specificationID string
 
-	query := fmt.Sprintf(
-		"INSERT INTO %s (item_id, organization_id, name_tm, name_ru, name_tr, name_en,  description_tm, description_ru, "+
-			"description_tr, description_en, value) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id",
-		specificationTable,
-	)
+	builder := r.genSQL.Insert(specificationTable).
+		Columns(
+			"item_id", "organization_id", "name_tm", "name_ru", "name_tr", "name_en", "description_tm",
+			"description_ru", "description_tr", "description_en", "value").
+		Values(input.ItemID, input.OrganizationID, input.NameTm, input.NameRu, input.NameTr, input.NameEn,
+			input.DescriptionTm, input.DescriptionRu, input.DescriptionTr, input.DescriptionEn, input.Value).
+		Suffix("RETURNING \"id\"")
 
-	row := r.database.QueryRowContext(
-		ctx,
-		query,
-		input.ItemID,
-		input.OrganizationID,
-		input.NameTm,
-		input.NameRu,
-		input.NameTr,
-		input.NameEn,
-		input.DescriptionTm,
-		input.DescriptionRu,
-		input.DescriptionTr,
-		input.DescriptionEn,
-		input.Value,
-	)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
 
-	err := row.Scan(&specificationID)
+	row := r.database.QueryRowContext(ctx, qry, args...)
+
+	err = row.Scan(&specificationID)
 
 	return specificationID, errors.Wrap(err, "specification create query error")
 }
@@ -115,80 +162,64 @@ func (r *Repository) SpecificationUpdate(ctxr context.Context, meta query.MetaDa
 		ctx = context.New(ctxt)
 	}
 
-	setValues := make([]string, 0, 12)
-	args := make([]interface{}, 0, 12)
-	argID := 1
+	builder := r.genSQL.Update(specificationTable)
 
 	if input.ItemID != nil {
-		setValues = append(setValues, fmt.Sprintf("item_id=$%d", argID))
-		args = append(args, *input.ItemID)
-		argID++
+		builder = builder.Set("item_id", *input.ItemID)
 	}
 
 	if input.OrganizationID != nil {
-		setValues = append(setValues, fmt.Sprintf("organization_id=$%d", argID))
-		args = append(args, *input.OrganizationID)
-		argID++
+		builder = builder.Set("organization_id", *input.OrganizationID)
 	}
 
 	if input.NameTm != nil {
-		setValues = append(setValues, fmt.Sprintf("name_tm=$%d", argID))
-		args = append(args, *input.NameTm)
-		argID++
+		builder = builder.Set("name_tm", *input.NameTm)
 	}
 
 	if input.NameRu != nil {
-		setValues = append(setValues, fmt.Sprintf("name_ru=$%d", argID))
-		args = append(args, *input.NameRu)
-		argID++
+		builder = builder.Set("name_ru", *input.NameRu)
 	}
 
 	if input.NameTr != nil {
-		setValues = append(setValues, fmt.Sprintf("name_tr=$%d", argID))
-		args = append(args, *input.NameTr)
-		argID++
+		builder = builder.Set("name_tr", *input.NameTr)
 	}
 
 	if input.NameEn != nil {
-		setValues = append(setValues, fmt.Sprintf("name_en=$%d", argID))
-		args = append(args, *input.NameEn)
-		argID++
+		builder = builder.Set("name_en", *input.NameEn)
 	}
 
 	if input.DescriptionTm != nil {
-		setValues = append(setValues, fmt.Sprintf("description_tm=$%d", argID))
-		args = append(args, *input.DescriptionTm)
-		argID++
+		builder = builder.Set("description_tm", *input.DescriptionTm)
 	}
 
 	if input.DescriptionRu != nil {
-		setValues = append(setValues, fmt.Sprintf("description_ru=$%d", argID))
-		args = append(args, *input.DescriptionRu)
-		argID++
+		builder = builder.Set("description_ru", *input.DescriptionRu)
 	}
 
 	if input.DescriptionTr != nil {
-		setValues = append(setValues, fmt.Sprintf("description_tr=$%d", argID))
-		args = append(args, *input.DescriptionTr)
-		argID++
+		builder = builder.Set("description_tr", *input.DescriptionTr)
 	}
 
 	if input.DescriptionEn != nil {
-		setValues = append(setValues, fmt.Sprintf("description_en=$%d", argID))
-		args = append(args, *input.DescriptionEn)
-		argID++
+		builder = builder.Set("description_en", *input.DescriptionEn)
 	}
 
 	if input.Value != nil {
-		setValues = append(setValues, fmt.Sprintf("value=$%d", argID))
-		args = append(args, *input.Value)
+		builder = builder.Set("value", *input.Value)
 	}
 
-	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE organization_id = '%s' AND id = '%s'",
-		specificationTable, setQuery, *input.OrganizationID, *input.ID)
+	builder = builder.Where(squirrel.Eq{"id": *input.ID})
 
-	_, err := r.database.ExecContext(ctx, query, args...)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "specification update query error")
 }
@@ -205,9 +236,18 @@ func (r *Repository) SpecificationDelete(ctxr context.Context, meta query.MetaDa
 		ctx = context.New(ctxt)
 	}
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND organization_id = $2", specificationTable)
+	builder := r.genSQL.Delete(specificationTable).Where(squirrel.Eq{"id": specificationID})
 
-	_, err := r.database.ExecContext(ctx, query, specificationID, meta.OrganizationID)
+	if meta.OrganizationID != "" {
+		builder = builder.Where(squirrel.Eq{"organization_id": meta.OrganizationID})
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "specification delete query error")
 }

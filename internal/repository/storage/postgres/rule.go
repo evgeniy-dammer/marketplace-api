@@ -1,9 +1,7 @@
 package postgres
 
 import (
-	"fmt"
-	"strings"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/rule"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/query"
@@ -13,7 +11,7 @@ import (
 )
 
 // RuleGetAll selects all rules from database.
-func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) {
+func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -26,14 +24,58 @@ func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, param
 
 	var rules []rule.Rule
 
-	query := fmt.Sprintf("SELECT id, ptype, v0, v1, v2, v3, v4, v5 FROM %s ", ruleTable)
-	err := r.database.SelectContext(ctx, &rules, query)
+	qry, args, err := r.ruleGetAllQuery(meta, params)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.SelectContext(ctx, &rules, qry, args...)
 
 	return rules, errors.Wrap(err, "rules select query error")
 }
 
+// ruleGetAllQuery creates sql query.
+func (r *Repository) ruleGetAllQuery(_ query.MetaData, params queryparameter.QueryParameter) (string, []interface{}, error) { //nolint:lll
+	builder := r.genSQL.Select("id", "ptype", "v0", "v1", "v2", "v3", "v4", "v5").From(ruleTable)
+
+	if params.Search != "" {
+		search := "%" + params.Search + "%"
+
+		builder = builder.Where(squirrel.Or{
+			squirrel.Like{"ptype": search},
+			squirrel.Like{"v0": search},
+			squirrel.Like{"v1": search},
+			squirrel.Like{"v2": search},
+			squirrel.Like{"v3": search},
+			squirrel.Like{"v4": search},
+			squirrel.Like{"v5": search},
+		})
+	}
+
+	if len(params.Sorts) > 0 {
+		builder = builder.OrderBy(params.Sorts.Parsing(mappingSortRule)...)
+	} else {
+		builder = builder.OrderBy("id ASC")
+	}
+
+	if params.Pagination.Limit > 0 {
+		builder = builder.Limit(params.Pagination.Limit)
+	}
+
+	if params.Pagination.Offset > 0 {
+		builder = builder.Offset(params.Pagination.Offset)
+	}
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", nil, errors.Wrap(err, "unable to build a query string")
+	}
+
+	return qry, args, nil
+}
+
 // RuleGetOne select rule by id from database.
-func (r *Repository) RuleGetOne(ctxr context.Context, meta query.MetaData, ruleID string) (rule.Rule, error) {
+func (r *Repository) RuleGetOne(ctxr context.Context, _ query.MetaData, ruleID string) (rule.Rule, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -46,14 +88,21 @@ func (r *Repository) RuleGetOne(ctxr context.Context, meta query.MetaData, ruleI
 
 	var rle rule.Rule
 
-	query := fmt.Sprintf("SELECT id, ptype, v0, v1, v2, v3, v4, v5 FROM %s WHERE id = $1 ", ruleTable)
-	err := r.database.GetContext(ctx, &rle, query, ruleID)
+	builder := r.genSQL.Select("id", "ptype", "v0", "v1", "v2", "v3", "v4", "v5").From(ruleTable).
+		Where(squirrel.Eq{"id": ruleID})
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return rle, errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.GetContext(ctx, &rle, qry, args...)
 
 	return rle, errors.Wrap(err, "rule select query error")
 }
 
 // RuleCreate insert rule into database.
-func (r *Repository) RuleCreate(ctxr context.Context, meta query.MetaData, input rule.CreateRuleInput) (string, error) {
+func (r *Repository) RuleCreate(ctxr context.Context, _ query.MetaData, input rule.CreateRuleInput) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -66,17 +115,24 @@ func (r *Repository) RuleCreate(ctxr context.Context, meta query.MetaData, input
 
 	var ruleID string
 
-	query := fmt.Sprintf("INSERT INTO %s (ptype, v0, v1, v2, v3, v4, v5) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
-		ruleTable)
+	builder := r.genSQL.Insert(ruleTable).
+		Columns("ptype", "v0", "v1", "v2", "v3", "v4", "v5").
+		Values(input.Ptype, input.V0, input.V1, input.V2, input.V3, input.V4, input.V5).
+		Suffix("RETURNING \"id\"")
 
-	row := r.database.QueryRowContext(ctx, query, input.Ptype, input.V0, input.V1, input.V2, input.V3, input.V4, input.V5)
-	err := row.Scan(&ruleID)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
+
+	row := r.database.QueryRowContext(ctx, qry, args...)
+	err = row.Scan(&ruleID)
 
 	return ruleID, errors.Wrap(err, "rule create query error")
 }
 
 // RuleUpdate updates rule by id in database.
-func (r *Repository) RuleUpdate(ctxr context.Context, meta query.MetaData, input rule.UpdateRuleInput) error {
+func (r *Repository) RuleUpdate(ctxr context.Context, _ query.MetaData, input rule.UpdateRuleInput) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -87,60 +143,50 @@ func (r *Repository) RuleUpdate(ctxr context.Context, meta query.MetaData, input
 		ctx = context.New(ctxt)
 	}
 
-	setValues := make([]string, 0, 8)
-	args := make([]interface{}, 0, 8)
-	argID := 1
+	builder := r.genSQL.Update(tableTable)
 
 	if input.Ptype != nil {
-		setValues = append(setValues, fmt.Sprintf("ptype=$%d", argID))
-		args = append(args, *input.Ptype)
-		argID++
+		builder = builder.Set("ptype", *input.Ptype)
 	}
 
 	if input.V0 != nil {
-		setValues = append(setValues, fmt.Sprintf("v0=$%d", argID))
-		args = append(args, *input.V0)
-		argID++
+		builder = builder.Set("v0", *input.V0)
 	}
 
 	if input.V1 != nil {
-		setValues = append(setValues, fmt.Sprintf("v1=$%d", argID))
-		args = append(args, *input.V1)
-		argID++
+		builder = builder.Set("v1", *input.V1)
 	}
 
 	if input.V2 != nil {
-		setValues = append(setValues, fmt.Sprintf("v2=$%d", argID))
-		args = append(args, *input.V2)
-		argID++
+		builder = builder.Set("v2", *input.V2)
 	}
 
 	if input.V3 != nil {
-		setValues = append(setValues, fmt.Sprintf("v3=$%d", argID))
-		args = append(args, *input.V3)
-		argID++
+		builder = builder.Set("v3", *input.V3)
 	}
 
 	if input.V4 != nil {
-		setValues = append(setValues, fmt.Sprintf("v4=$%d", argID))
-		args = append(args, *input.V4)
-		argID++
+		builder = builder.Set("v4", *input.V4)
 	}
 
 	if input.V5 != nil {
-		setValues = append(setValues, fmt.Sprintf("v5=$%d", argID))
-		args = append(args, *input.V5)
+		builder = builder.Set("v5", *input.V5)
 	}
 
-	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = '%s'", ruleTable, setQuery, *input.ID)
-	_, err := r.database.ExecContext(ctx, query, args...)
+	builder = builder.Where(squirrel.Eq{"id": *input.ID})
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "rule update query error")
 }
 
 // RuleDelete deletes rule by id from database.
-func (r *Repository) RuleDelete(ctxr context.Context, meta query.MetaData, ruleID string) error {
+func (r *Repository) RuleDelete(ctxr context.Context, _ query.MetaData, ruleID string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -151,8 +197,14 @@ func (r *Repository) RuleDelete(ctxr context.Context, meta query.MetaData, ruleI
 		ctx = context.New(ctxt)
 	}
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", ruleTable)
-	_, err := r.database.ExecContext(ctx, query, ruleID)
+	builder := r.genSQL.Delete(ruleTable).Where(squirrel.Eq{"id": ruleID})
+
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return errors.Wrap(err, "unable to build a query string")
+	}
+
+	_, err = r.database.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "rule delete query error")
 }

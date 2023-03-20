@@ -1,14 +1,13 @@
 package postgres
 
 import (
-	"fmt"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/pkg/errors"
 )
 
-// AuthorizationGetUserRole returns users role name
+// AuthorizationGetUserRole returns users role name.
 func (r *Repository) AuthorizationGetUserRole(ctxr context.Context, userID string) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
@@ -22,14 +21,18 @@ func (r *Repository) AuthorizationGetUserRole(ctxr context.Context, userID strin
 
 	var name string
 
-	query := fmt.Sprintf("SELECT ro.name AS role FROM %s ro "+
-		"INNER JOIN %s ur ON ur.role_id = ro.id "+
-		"INNER JOIN %s us ON us.id = ur.user_id "+
-		"WHERE us.id = '%s'",
-		roleTable, userRoleTable, userTable, userID,
-	)
+	builder := r.genSQL.Select("ro.name AS role").
+		From(roleTable + " ro").
+		InnerJoin(userRoleTable + " ur ON ur.role_id = ro.id").
+		InnerJoin(userTable + " us ON us.id = ur.user_id").
+		Where(squirrel.Eq{"us.id": userID})
 
-	err := r.database.GetContext(ctx, &name, query)
+	qry, args, err := builder.ToSql()
+	if err != nil {
+		return "", errors.Wrap(err, "unable to build a query string")
+	}
+
+	err = r.database.GetContext(ctx, &name, qry, args...)
 
 	return name, errors.Wrap(err, "role name select error")
 }
