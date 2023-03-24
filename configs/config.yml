@@ -27,8 +27,15 @@ cache:
   timeout: 30
   ttl: 20
 
+vault:
+  address: "http://127.0.0.1:8200"
+
 tracing:
   url: "http://localhost:14268/api/traces"
+
+authentication:
+  access_token_ttl: 20
+  refresh_token_ttl: 720
 
 migrations:
   directory: "./migrations"

@@ -29,6 +29,7 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/pkg/server"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/store/postgres"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
+	vault "github.com/hashicorp/vault/api"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -52,6 +53,28 @@ func main() {
 		logger.Logger.Fatal("logger initialization failed", zap.String("error", err.Error()))
 	}
 
+	vaultConfig := vault.DefaultConfig()
+	vaultConfig.Address = viper.GetString("vault.address")
+
+	client, err := vault.NewClient(vaultConfig)
+	if err != nil {
+		logger.Logger.Fatal("unable to connect to vault", zap.String("error", err.Error()))
+	}
+
+	client.SetToken(os.Getenv("VAULT_TOKEN"))
+
+	marketplace, err := client.Logical().Read("cubbyhole/marketplace")
+	if err != nil {
+		logger.Logger.Fatal("unable to read data from vault", zap.String("error", err.Error()))
+	}
+
+	viper.Set("JWT_KEY", marketplace.Data["JWT_KEY"])
+
+	dbPassword, ok := marketplace.Data["DB_PASSWORD"].(string)
+	if !ok {
+		logger.Logger.Fatal("unable to get database password")
+	}
+
 	// service settings
 	isCacheOn := viper.GetBool("service.cache")
 	isTracingOn := viper.GetBool("service.tracing")
@@ -62,7 +85,7 @@ func main() {
 		Host:     viper.GetString("database.host"),
 		Port:     viper.GetString("database.port"),
 		Username: viper.GetString("database.username"),
-		Password: os.Getenv("DB_PASSWORD"),
+		Password: dbPassword,
 		DBName:   viper.GetString("database.dbname"),
 		SSLMode:  viper.GetString("database.sslmode"),
 	})
@@ -82,7 +105,7 @@ func main() {
 	if isCacheOn {
 		redisClient = redis.NewClient(&redis.Options{
 			Addr:     net.JoinHostPort(viper.GetString("cache.host"), viper.GetString("cache.port")),
-			Password: "", // os.Getenv("REDIS_PASSWORD"),
+			Password: "", // marketplace.Data["REDIS_PASSWORD"].(string)
 			DB:       viper.GetInt("cache.database"),
 		})
 

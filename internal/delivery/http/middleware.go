@@ -40,7 +40,7 @@ func (d *Delivery) userIdentity(ginCtx *gin.Context) {
 		return
 	}
 
-	userID, err := d.ucAuthentication.AuthenticationParseToken(ctx, headerParts[1])
+	userID, _, err := d.ucAuthentication.AuthenticationParseToken(ctx, headerParts[1])
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusUnauthorized, err)
 

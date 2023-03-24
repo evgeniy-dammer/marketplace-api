@@ -9,7 +9,9 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 // AuthenticationGenerateToken generates authorization token.
@@ -48,12 +50,16 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 	usr.Password = ""
 	usr.RoleID = 0
 
-	issuedAt := time.Now().Unix()
-	expiresAt := time.Now().Add(usecase.TokenTTL).Unix()
-	refreshExpiresAt := time.Now().Add(usecase.RefreshTokenTTL).Unix()
+	// TODO: replace with time.Minute
+	accessTokenTTL := time.Duration(viper.GetInt("authentication.access_token_ttl")) * time.Hour
+	refreshTokenTTL := time.Duration(viper.GetInt("authentication.refresh_token_ttl")) * time.Hour
 
-	tkn := usecase.CreateNewToken(userID, expiresAt, issuedAt)
-	tokens.AccessToken, err = tkn.SignedString([]byte(usecase.SigningKey))
+	issuedAt := time.Now().Unix()
+	expiresAt := time.Now().Add(accessTokenTTL).Unix()
+	refreshExpiresAt := time.Now().Add(refreshTokenTTL).Unix()
+
+	tkn := usecase.CreateNewToken(userID, expiresAt, issuedAt, "")
+	tokens.AccessToken, err = tkn.SignedString([]byte(viper.GetString("JWT_KEY")))
 
 	if err != nil {
 		return usr, tokens, errors.Wrap(err, "can not get access token")
@@ -62,8 +68,14 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 	tokens.AccessTokenExpires = expiresAt
 	tokens.TokenType = "Bearer"
 
-	refreshToken := usecase.CreateNewToken(userID, refreshExpiresAt, issuedAt)
-	tokens.RefreshToken, err = refreshToken.SignedString([]byte(usecase.SigningKey))
+	hash, err := uuid.NewUUID()
+	if err != nil {
+		return usr, tokens, errors.Wrap(err, "can not create new hash")
+	}
+
+	refreshToken := usecase.CreateNewToken(userID, refreshExpiresAt, issuedAt, hash.String())
+	tokens.RefreshTokenHash = hash.String()
+	tokens.RefreshToken, err = refreshToken.SignedString([]byte(viper.GetString("JWT_KEY")))
 
 	if err != nil {
 		return usr, tokens, errors.Wrap(err, "can not get refresh token")
@@ -73,7 +85,7 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 }
 
 // AuthenticationParseToken checks access token and returns user id.
-func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken string) (string, error) {
+func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken string) (string, string, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.AuthenticationParseToken")
 		defer span.End()
@@ -86,19 +98,19 @@ func (s *UseCase) AuthenticationParseToken(ctx context.Context, accessToken stri
 			return nil, usecase.ErrInvalidSigningMethod
 		}
 
-		return []byte(usecase.SigningKey), nil
+		return []byte(viper.GetString("JWT_KEY")), nil
 	})
 	if err != nil {
-		return "", errors.Wrap(err, "can not parse token")
+		return "", "", errors.Wrap(err, "can not parse token")
 	}
 
 	claims, ok := tkn.Claims.(*token.Claims)
 
 	if !ok {
-		return "", usecase.ErrInvalidTokenClaims
+		return "", "", usecase.ErrInvalidTokenClaims
 	}
 
-	return claims.UserID, nil
+	return claims.UserID, claims.Hash, nil
 }
 
 // AuthenticationCreateUser hashes the password and insert User into system.
@@ -112,7 +124,7 @@ func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.Creat
 
 	pass, err := usecase.GeneratePasswordHash(input.Password, usecase.Params)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "can not generate password hash")
 	}
 
 	input.Password = pass
@@ -122,23 +134,44 @@ func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.Creat
 	return userID, errors.Wrap(err, "can not create user")
 }
 
-// AuthenticationCreateToken creates token in database
-func (s *UseCase) AuthenticationCreateToken(ctx context.Context, userID string, token string) error {
-	err := s.adapterStorage.AuthenticationCreateToken(ctx, userID, token)
+// AuthenticationCreateTokenHash creates token hash in database
+func (s *UseCase) AuthenticationCreateTokenHash(ctx context.Context, userID string, hash string) error {
+	if s.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.AuthenticationCreateTokenHash")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
+	err := s.adapterStorage.AuthenticationCreateTokenHash(ctx, userID, hash)
 
 	return errors.Wrap(err, "token create failed")
 }
 
-// AuthenticationGetToken returns token id from database
-func (s *UseCase) AuthenticationGetToken(ctx context.Context, userID string, token string) (string, error) {
-	tokenID, err := s.adapterStorage.AuthenticationGetToken(ctx, userID, token)
+// AuthenticationGetTokenHash returns token hash id from database
+func (s *UseCase) AuthenticationGetTokenHash(ctx context.Context, userID string, hash string) (string, error) {
+	if s.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.AuthenticationGetTokenHash")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
+	tokenID, err := s.adapterStorage.AuthenticationGetTokenHash(ctx, userID, hash)
 
 	return tokenID, errors.Wrap(err, "token id select error")
 }
 
-// AuthenticationUpdateToken updates token in database.
-func (s *UseCase) AuthenticationUpdateToken(ctx context.Context, tokenID string, token string) error {
-	err := s.adapterStorage.AuthenticationUpdateToken(ctx, tokenID, token)
+// AuthenticationUpdateTokenHash updates token hash in database.
+func (s *UseCase) AuthenticationUpdateTokenHash(ctx context.Context, tokenID string, hash string) error {
+	if s.isTracingOn {
+		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.AuthenticationUpdateTokenHash")
+		defer span.End()
+
+		ctx = context.New(ctxt)
+	}
+
+	err := s.adapterStorage.AuthenticationUpdateTokenHash(ctx, tokenID, hash)
 
 	return errors.Wrap(err, "token update failed")
 }

@@ -12,7 +12,7 @@ import (
 )
 
 // TableGetAll returns all tables from the system.
-func (s *UseCase) TableGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) {
+func (s *UseCase) TableGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.TableGetAll")
 		defer span.End()
@@ -30,7 +30,7 @@ func (s *UseCase) TableGetAll(ctx context.Context, meta query.MetaData, params q
 }
 
 // getAllWithCache returns tables from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) { //nolint:lll
 	tables, err := s.adapterCache.TableGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get tables from cache", zap.String("error", err.Error()))
