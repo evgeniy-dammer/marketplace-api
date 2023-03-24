@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/token"
 	"github.com/golang-jwt/jwt"
@@ -15,10 +14,7 @@ import (
 )
 
 const (
-	SigningKey      = "n?2BXpZV?K6/L*:2n$yZPHpt(m+6j6DQL[ud2:K+_*phduQ7*/?{a3fqdHcyuctTu{zrLf"
-	TokenTTL        = 30 * time.Hour // replace with time.Minute
-	RefreshTokenTTL = 12 * time.Hour
-	ValuesNum       = 6
+	ValuesNum = 6
 )
 
 // HashParams is a password hash params.
@@ -126,12 +122,13 @@ func DecodeHash(encodedHash string) (*HashParams, []byte, []byte, error) {
 }
 
 // CreateNewToken creates new token with claims.
-func CreateNewToken(userID string, expiresAt int64, issuedAt int64) *jwt.Token {
+func CreateNewToken(userID string, expiresAt int64, issuedAt int64, hash string) *jwt.Token {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, &token.Claims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiresAt,
 			IssuedAt:  issuedAt,
 		},
 		UserID: userID,
+		Hash:   hash,
 	})
 }

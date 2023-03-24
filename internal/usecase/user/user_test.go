@@ -19,6 +19,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+const errorString = "error"
+
 var (
 	storageRepo       = new(mockStorage.User)
 	cacheRepo         = new(mockCache.User)
@@ -36,7 +38,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	id := "49c9b955-8511-4b53-81ef-82e3d0259fed"
+	userID := "49c9b955-8511-4b53-81ef-82e3d0259fed"
 	idWrong := "49c9b955-8511-4b53-81ef-82e32d059fed"
 	firstName := "FirstName1"
 	lastName := "LastName1"
@@ -59,7 +61,7 @@ func TestMain(m *testing.M) {
 	}
 
 	updateUser := user.UpdateUserInput{
-		ID:        &id,
+		ID:        &userID,
 		FirstName: &firstName,
 		LastName:  &lastName,
 		Password:  &password,
@@ -84,7 +86,7 @@ func TestMain(m *testing.M) {
 	}
 
 	rle := role.Role{
-		ID:   id,
+		ID:   userID,
 		Name: firstName,
 	}
 
@@ -118,15 +120,16 @@ func initTestUseCaseUser(t *testing.T) {
 		mock.Anything,
 		mock.Anything).
 		Return(func(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) []user.User {
-			if params.Search == "error" {
+			if params.Search == errorString {
 				return nil
 			}
 
 			return users
 		}, func(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) error {
-			if params.Search == "error" {
+			if params.Search == errorString {
 				return usecase.ErrUsersNotFound
 			}
+
 			return nil
 		})
 
@@ -135,15 +138,16 @@ func initTestUseCaseUser(t *testing.T) {
 		mock.Anything,
 		mock.Anything).
 		Return(func(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) []user.User {
-			if params.Search == "error" {
+			if params.Search == errorString {
 				return nil
 			}
 
 			return users
 		}, func(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) error {
-			if params.Search == "error" {
+			if params.Search == errorString {
 				return usecase.ErrUsersNotFound
 			}
+
 			return nil
 		})
 
@@ -152,15 +156,16 @@ func initTestUseCaseUser(t *testing.T) {
 		mock.Anything,
 		mock.Anything).
 		Return(func(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) []user.User {
-			if params.Search == "error" {
+			if params.Search == errorString {
 				return nil
 			}
 
 			return users
 		}, func(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) error {
-			if params.Search == "error" {
+			if params.Search == errorString {
 				return usecase.ErrUsersNotFound
 			}
+
 			return nil
 		})
 
@@ -170,7 +175,7 @@ func initTestUseCaseUser(t *testing.T) {
 		mock.Anything,
 		mock.Anything).
 		Return(func(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, users []user.User) error {
-			if params.Search == "error" {
+			if params.Search == errorString {
 				return usecase.ErrUsersNotFound
 			}
 
@@ -441,7 +446,7 @@ func TestUser(t *testing.T) {
 		ctx := context.Empty()
 
 		var nilSlice []user.User
-		params.Search = "error"
+		params.Search = errorString
 
 		result, err := ucDialog.UserGetAll(ctx, meta, params)
 		assertion.Error(err)
@@ -470,7 +475,7 @@ func TestUser(t *testing.T) {
 		ctx := context.Empty()
 
 		var nilSlice []user.User
-		params.Search = "error"
+		params.Search = errorString
 
 		result, err := ucDialog.getAllWithCache(ctx, meta, params)
 		assertion.Error(err)
@@ -592,7 +597,7 @@ func TestUser(t *testing.T) {
 	t.Run("UserSetAllWithError", func(t *testing.T) {
 		ctx := context.Empty()
 
-		params.Search = "error"
+		params.Search = errorString
 
 		err := ucDialogWithCache.adapterCache.UserSetAll(ctx, meta, params, users)
 		assertion.Error(err)

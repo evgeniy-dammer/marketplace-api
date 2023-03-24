@@ -105,13 +105,13 @@ func (r *Repository) AuthenticationCreateUser(ctxr context.Context, input user.C
 	return userID, errors.Wrap(trx.Commit(), "transaction commit error")
 }
 
-// AuthenticationCreateToken inserts token into database.
-func (r *Repository) AuthenticationCreateToken(ctxr context.Context, userID string, token string) error {
+// AuthenticationCreateTokenHash inserts token hash into database.
+func (r *Repository) AuthenticationCreateTokenHash(ctxr context.Context, userID string, hash string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationCreateToken")
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationCreateTokenHash")
 		defer span.End()
 
 		ctx = context.New(ctxt)
@@ -119,7 +119,7 @@ func (r *Repository) AuthenticationCreateToken(ctxr context.Context, userID stri
 
 	var tokenID string
 
-	builder := r.genSQL.Insert(tokenTable).Columns("user_id", "token").Values(userID, token).Suffix("RETURNING \"id\"")
+	builder := r.genSQL.Insert(tokenTable).Columns("user_id", "hash").Values(userID, hash).Suffix("RETURNING \"id\"")
 
 	qry, args, err := builder.ToSql()
 	if err != nil {
@@ -136,13 +136,13 @@ func (r *Repository) AuthenticationCreateToken(ctxr context.Context, userID stri
 	return nil
 }
 
-// AuthenticationGetToken returns token from database.
-func (r *Repository) AuthenticationGetToken(ctxr context.Context, userID string, token string) (string, error) {
+// AuthenticationGetTokenHash returns token hash from database.
+func (r *Repository) AuthenticationGetTokenHash(ctxr context.Context, userID string, hash string) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationGetToken")
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationGetTokenHash")
 		defer span.End()
 
 		ctx = context.New(ctxt)
@@ -151,7 +151,7 @@ func (r *Repository) AuthenticationGetToken(ctxr context.Context, userID string,
 	var tokenID string
 
 	builder := r.genSQL.Select("id").From(tokenTable).
-		Where(squirrel.Eq{"user_id": userID, "token": token, "expired": false})
+		Where(squirrel.Eq{"user_id": userID, "hash": hash, "expired": false})
 
 	qry, args, err := builder.ToSql()
 	if err != nil {
@@ -166,20 +166,20 @@ func (r *Repository) AuthenticationGetToken(ctxr context.Context, userID string,
 	return tokenID, nil
 }
 
-// AuthenticationUpdateToken updates token in database
-func (r *Repository) AuthenticationUpdateToken(ctxr context.Context, tokenID string, token string) error {
+// AuthenticationUpdateTokenHash updates token hash in database.
+func (r *Repository) AuthenticationUpdateTokenHash(ctxr context.Context, tokenID string, hash string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
 	if r.isTracingOn {
-		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationGetToken")
+		ctxt, span := tracing.Tracer.Start(ctxr, "Database.AuthenticationGetTokenHash")
 		defer span.End()
 
 		ctx = context.New(ctxt)
 	}
 
 	builder := r.genSQL.Update(tokenTable).
-		Set("token", token).
+		Set("hash", hash).
 		Set("expired", false).
 		Where(squirrel.Eq{"id": tokenID})
 

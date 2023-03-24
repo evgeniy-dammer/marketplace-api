@@ -39,9 +39,9 @@ type Storage struct {
 type Authentication interface {
 	AuthenticationGetUser(ctx context.Context, id string, username string) (user.User, error)
 	AuthenticationCreateUser(ctx context.Context, input user.CreateUserInput) (string, error)
-	AuthenticationCreateToken(ctx context.Context, userID string, token string) error
-	AuthenticationGetToken(ctx context.Context, userID string, token string) (string, error)
-	AuthenticationUpdateToken(ctx context.Context, tokenID string, token string) error
+	AuthenticationCreateTokenHash(ctx context.Context, userID string, hash string) error
+	AuthenticationGetTokenHash(ctx context.Context, userID string, hash string) (string, error)
+	AuthenticationUpdateTokenHash(ctx context.Context, tokenID string, hash string) error
 }
 
 // Authorization interface.

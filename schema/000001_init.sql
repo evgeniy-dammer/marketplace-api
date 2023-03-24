@@ -260,12 +260,11 @@ CREATE TABLE IF NOT EXISTS client_types
     name CHARACTER VARYING (50) NOT NULL UNIQUE
 );
 
-
 CREATE TABLE IF NOT EXISTS token_whitelist
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    token TEXT NOT NULL,
+    hash UUID NOT NULL,
     client_type SMALLINT REFERENCES client_types(id) ON DELETE CASCADE NOT NULL DEFAULT 1,
     expired BOOLEAN NOT NULL DEFAULT false
 );

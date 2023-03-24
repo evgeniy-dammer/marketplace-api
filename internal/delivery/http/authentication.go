@@ -52,12 +52,14 @@ func (d *Delivery) signIn(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucAuthentication.AuthenticationCreateToken(ctx, usr.ID, tokens.RefreshToken)
+	err = d.ucAuthentication.AuthenticationCreateTokenHash(ctx, usr.ID, tokens.RefreshTokenHash)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
+
+	tokens.RefreshTokenHash = ""
 
 	ginCtx.JSON(http.StatusOK, AuthResponse{User: usr, Tokens: tokens})
 }
@@ -142,14 +144,14 @@ func (d *Delivery) refresh(ginCtx *gin.Context) {
 		return
 	}
 
-	userID, err := d.ucAuthentication.AuthenticationParseToken(ctx, headerParts[1])
+	userID, hash, err := d.ucAuthentication.AuthenticationParseToken(ctx, headerParts[1])
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusUnauthorized, err)
 
 		return
 	}
 
-	tokenID, err := d.ucAuthentication.AuthenticationGetToken(ctx, userID, headerParts[1])
+	tokenID, err := d.ucAuthentication.AuthenticationGetTokenHash(ctx, userID, hash)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusUnauthorized, err)
 
@@ -163,12 +165,14 @@ func (d *Delivery) refresh(ginCtx *gin.Context) {
 		return
 	}
 
-	err = d.ucAuthentication.AuthenticationUpdateToken(ctx, tokenID, tokens.RefreshToken)
+	err = d.ucAuthentication.AuthenticationUpdateTokenHash(ctx, tokenID, tokens.RefreshTokenHash)
 	if err != nil {
 		NewErrorResponse(ginCtx, http.StatusInternalServerError, err)
 
 		return
 	}
+
+	tokens.RefreshTokenHash = ""
 
 	ginCtx.JSON(http.StatusOK, AuthResponse{User: usr, Tokens: tokens})
 }

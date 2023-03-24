@@ -10,6 +10,8 @@ type Tokens struct {
 	AccessToken string `json:"accessToken"`
 	// Refresh Token
 	RefreshToken string `json:"refreshToken"`
+	// Refresh Token Hash
+	RefreshTokenHash string `json:"refreshTokenHash,omitempty"`
 	// Access Token Expires datetime
 	AccessTokenExpires int64 `json:"accessTokenExpires"`
 }
@@ -24,4 +26,5 @@ type RefreshToken struct {
 type Claims struct {
 	jwt.StandardClaims
 	UserID string `json:"userId"`
+	Hash   string `json:"hash"`
 }
