@@ -36,6 +36,8 @@ func (d *Delivery) getOrders(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -78,6 +80,8 @@ func (d *Delivery) getOrder(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -124,6 +128,8 @@ func (d *Delivery) createOrder(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -170,6 +176,8 @@ func (d *Delivery) updateOrder(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -216,6 +224,8 @@ func (d *Delivery) deleteOrder(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 

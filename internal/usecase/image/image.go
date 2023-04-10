@@ -12,7 +12,7 @@ import (
 )
 
 // ImageGetAll returns all images from the system.
-func (s *UseCase) ImageGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) {
+func (s *UseCase) ImageGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.ImageGetAll")
 		defer span.End()
@@ -30,7 +30,7 @@ func (s *UseCase) ImageGetAll(ctx context.Context, meta query.MetaData, params q
 }
 
 // getAllWithCache returns images from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) { //nolint:lll
 	images, err := s.adapterCache.ImageGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get images from cache", zap.String("error", err.Error()))

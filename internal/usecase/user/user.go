@@ -14,7 +14,7 @@ import (
 )
 
 // UserGetAll returns all users from the system.
-func (s *UseCase) UserGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
+func (s *UseCase) UserGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserGetAll")
 		defer span.End()
@@ -35,7 +35,7 @@ func (s *UseCase) UserGetAll(ctx context.Context, meta query.MetaData, params qu
 }
 
 // getAllWithCache returns users from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) { //nolint:lll
 	users, err := s.adapterCache.UserGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get users from cache", zap.String("error", err.Error()))
@@ -58,7 +58,7 @@ func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, para
 }
 
 // UserGetAllRoles returns all user roles from the system.
-func (s *UseCase) UserGetAllRoles(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
+func (s *UseCase) UserGetAllRoles(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.UserGetAllRoles")
 		defer span.End()
@@ -79,7 +79,7 @@ func (s *UseCase) UserGetAllRoles(ctx context.Context, meta query.MetaData, para
 }
 
 // getAllRolesWithCache returns all user roles from cache if exists.
-func (s *UseCase) getAllRolesWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
+func (s *UseCase) getAllRolesWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) { //nolint:lll
 	roles, err := s.adapterCache.UserGetAllRoles(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get roles from cache", zap.String("error", err.Error()))
@@ -156,18 +156,18 @@ func (s *UseCase) UserCreate(ctx context.Context, meta query.MetaData, input use
 
 	pass, err := usecase.GeneratePasswordHash(input.Password, usecase.Params)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "comparing")
 	}
 
 	input.Password = pass
 
-	ID, err := s.adapterStorage.UserCreate(ctx, meta, input)
+	userID, err := s.adapterStorage.UserCreate(ctx, meta, input)
 	if err != nil {
 		return "", errors.Wrap(err, "user create in database failed")
 	}
 
 	if s.isCacheOn {
-		usr, err := s.adapterStorage.UserGetOne(ctx, meta, ID)
+		usr, err := s.adapterStorage.UserGetOne(ctx, meta, userID)
 		if err != nil {
 			return "", errors.Wrap(err, "user select from database failed")
 		}
@@ -183,7 +183,7 @@ func (s *UseCase) UserCreate(ctx context.Context, meta query.MetaData, input use
 		}
 	}
 
-	return ID, nil
+	return userID, nil
 }
 
 // UserUpdate updates user by id in the system.
@@ -202,7 +202,7 @@ func (s *UseCase) UserUpdate(ctx context.Context, meta query.MetaData, input use
 	if input.Password != nil {
 		pass, err := usecase.GeneratePasswordHash(*input.Password, usecase.Params)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "generating password hash")
 		}
 
 		input.Password = &pass

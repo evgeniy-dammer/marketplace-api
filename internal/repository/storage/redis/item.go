@@ -11,7 +11,7 @@ import (
 )
 
 // ItemGetAll gets items from cache.
-func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) {
+func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter) ([]item.Item, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, param
 }
 
 // ItemSetAll sets items into cache.
-func (r *Repository) ItemSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, items []item.Item) error {
+func (r *Repository) ItemSetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter, items []item.Item) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,9 +55,9 @@ func (r *Repository) ItemSetAll(ctxr context.Context, meta query.MetaData, param
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, itemsKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, itemsKey+"o."+meta.OrganizationID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // ItemGetOne gets item by id from cache.
@@ -103,9 +103,9 @@ func (r *Repository) ItemCreate(ctxr context.Context, usr item.Item) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, itemKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, itemKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // ItemUpdate updates item by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) ItemUpdate(ctxr context.Context, usr item.Item) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, itemKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, itemKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) ItemDelete(ctxr context.Context, itemID string) error {
 
 	err := r.client.Del(ctx, itemKey+itemID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // ItemInvalidate invalidate items cache.
@@ -163,9 +163,9 @@ func (r *Repository) ItemInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

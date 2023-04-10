@@ -11,7 +11,7 @@ import (
 )
 
 // RuleGetAll gets rules from cache.
-func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) {
+func (r *Repository) RuleGetAll(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter) ([]rule.Rule, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, param
 }
 
 // RuleSetAll sets rules into cache.
-func (r *Repository) RuleSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, rules []rule.Rule) error {
+func (r *Repository) RuleSetAll(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter, rules []rule.Rule) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,9 +55,9 @@ func (r *Repository) RuleSetAll(ctxr context.Context, meta query.MetaData, param
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, rulesKey, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, rulesKey, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // RuleGetOne gets rule by id from cache.
@@ -103,9 +103,9 @@ func (r *Repository) RuleCreate(ctxr context.Context, usr rule.Rule) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, ruleKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, ruleKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // RuleUpdate updates rule by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) RuleUpdate(ctxr context.Context, usr rule.Rule) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, ruleKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, ruleKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) RuleDelete(ctxr context.Context, ruleID string) error {
 
 	err := r.client.Del(ctx, ruleKey+ruleID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // RuleInvalidate invalidate rules cache.
@@ -163,9 +163,9 @@ func (r *Repository) RuleInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

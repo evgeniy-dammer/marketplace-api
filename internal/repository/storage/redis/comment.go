@@ -11,7 +11,7 @@ import (
 )
 
 // CommentGetAll gets comments from cache.
-func (r *Repository) CommentGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) {
+func (r *Repository) CommentGetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter) ([]comment.Comment, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) CommentGetAll(ctxr context.Context, meta query.MetaData, pa
 }
 
 // CommentSetAll sets comments into cache.
-func (r *Repository) CommentSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, comments []comment.Comment) error {
+func (r *Repository) CommentSetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter, comments []comment.Comment) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,9 +55,9 @@ func (r *Repository) CommentSetAll(ctxr context.Context, meta query.MetaData, pa
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, commentsKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, commentsKey+"o."+meta.OrganizationID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // CommentGetOne gets comment by id from cache.
@@ -103,9 +103,9 @@ func (r *Repository) CommentCreate(ctxr context.Context, usr comment.Comment) er
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, commentKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, commentKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // CommentUpdate updates comment by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) CommentUpdate(ctxr context.Context, usr comment.Comment) er
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, commentKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, commentKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) CommentDelete(ctxr context.Context, commentID string) error
 
 	err := r.client.Del(ctx, commentKey+commentID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // CommentInvalidate invalidate comments cache.
@@ -163,7 +163,7 @@ func (r *Repository) CommentInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
@@ -171,7 +171,7 @@ func (r *Repository) CommentInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
@@ -179,9 +179,9 @@ func (r *Repository) CommentInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

@@ -13,12 +13,21 @@ server:
   max_header_bytes: 1048576
 
 database:
-  host: "localhost"
-  port: "5432"
-  username: "marketplace"
-  dbname: "marketplace"
-  sslmode: "disable"
-  timeout: 30
+  master:
+    host: "localhost"
+    port: "5432"
+    username: "marketplace"
+    dbname: "marketplace"
+    sslmode: "disable"
+    timeout: 30
+
+  slave:
+    host: "localhost"
+    port: "5432"
+    username: "marketplace"
+    dbname: "marketplace"
+    sslmode: "disable"
+    timeout: 30
 
 cache:
   host: "localhost"

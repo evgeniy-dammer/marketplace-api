@@ -41,7 +41,7 @@ func (r *Repository) AuthenticationGetUser(ctxr context.Context, userID string, 
 		return usr, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &usr, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &usr, qry, args...)
 
 	return usr, errors.Wrap(err, "user select error")
 }
@@ -60,7 +60,7 @@ func (r *Repository) AuthenticationCreateUser(ctxr context.Context, input user.C
 
 	var userID string
 
-	trx, err := r.database.Begin()
+	trx, err := r.databaseMaster.Begin()
 	if err != nil {
 		return "", errors.Wrap(err, "transaction begin error")
 	}
@@ -126,7 +126,7 @@ func (r *Repository) AuthenticationCreateTokenHash(ctxr context.Context, userID 
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 
 	err = row.Scan(&tokenID)
 	if err != nil {
@@ -158,7 +158,7 @@ func (r *Repository) AuthenticationGetTokenHash(ctxr context.Context, userID str
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &tokenID, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &tokenID, qry, args...)
 	if err != nil {
 		return "", errors.Wrap(err, "unable to create select token id")
 	}
@@ -188,7 +188,7 @@ func (r *Repository) AuthenticationUpdateTokenHash(ctxr context.Context, tokenID
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 	if err != nil {
 		return errors.Wrap(err, "unable to update token")
 	}

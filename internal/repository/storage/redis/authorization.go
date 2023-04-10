@@ -3,9 +3,10 @@ package redis
 import (
 	"github.com/evgeniy-dammer/marketplace-api/pkg/context"
 	"github.com/evgeniy-dammer/marketplace-api/pkg/tracing"
+	"github.com/pkg/errors"
 )
 
-// AuthorizationGetUserRole gets users role name from cache
+// AuthorizationGetUserRole gets users role name from cache.
 func (r *Repository) AuthorizationGetUserRole(ctxr context.Context, userID string) (string, error) {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
@@ -19,13 +20,13 @@ func (r *Repository) AuthorizationGetUserRole(ctxr context.Context, userID strin
 
 	rle, err := r.client.Get(ctx, roleKey+userID).Result()
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "getting key")
 	}
 
 	return rle, nil
 }
 
-// AuthorizationSetUserRole sets user role into cache
+// AuthorizationSetUserRole sets user role into cache.
 func (r *Repository) AuthorizationSetUserRole(ctxr context.Context, userID string, rle string) error {
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
@@ -37,7 +38,7 @@ func (r *Repository) AuthorizationSetUserRole(ctxr context.Context, userID strin
 		ctx = context.New(ctxt)
 	}
 
-	err := r.client.Set(ctx, roleKey+userID, rle, r.options.Ttl).Err()
+	err := r.client.Set(ctx, roleKey+userID, rle, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }

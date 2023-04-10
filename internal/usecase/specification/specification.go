@@ -12,7 +12,7 @@ import (
 )
 
 // SpecificationGetAll returns all specifications from the system.
-func (s *UseCase) SpecificationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) {
+func (s *UseCase) SpecificationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationGetAll")
 		defer span.End()
@@ -30,7 +30,7 @@ func (s *UseCase) SpecificationGetAll(ctx context.Context, meta query.MetaData, 
 }
 
 // getAllWithCache returns specifications from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error) { //nolint:lll
 	specifications, err := s.adapterCache.SpecificationGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get specifications from cache", zap.String("error", err.Error()))
@@ -53,7 +53,7 @@ func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, para
 }
 
 // SpecificationGetOne returns specification by id from the system.
-func (s *UseCase) SpecificationGetOne(ctx context.Context, meta query.MetaData, specificationID string) (specification.Specification, error) {
+func (s *UseCase) SpecificationGetOne(ctx context.Context, meta query.MetaData, specificationID string) (specification.Specification, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationGetOne")
 		defer span.End()
@@ -71,7 +71,7 @@ func (s *UseCase) SpecificationGetOne(ctx context.Context, meta query.MetaData, 
 }
 
 // getOneWithCache returns specification by id from cache if exists.
-func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, specificationID string) (specification.Specification, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, specificationID string) (specification.Specification, error) { //nolint:lll
 	spec, err := s.adapterCache.SpecificationGetOne(ctx, specificationID)
 	if err != nil {
 		logger.Logger.Error("unable to get specification from cache", zap.String("error", err.Error()))
@@ -94,7 +94,7 @@ func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, spec
 }
 
 // SpecificationCreate inserts specification into system.
-func (s *UseCase) SpecificationCreate(ctx context.Context, meta query.MetaData, input specification.CreateSpecificationInput) (string, error) {
+func (s *UseCase) SpecificationCreate(ctx context.Context, meta query.MetaData, input specification.CreateSpecificationInput) (string, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationCreate")
 		defer span.End()
@@ -128,7 +128,7 @@ func (s *UseCase) SpecificationCreate(ctx context.Context, meta query.MetaData, 
 }
 
 // SpecificationUpdate updates specification by id in the system.
-func (s *UseCase) SpecificationUpdate(ctx context.Context, meta query.MetaData, input specification.UpdateSpecificationInput) error {
+func (s *UseCase) SpecificationUpdate(ctx context.Context, meta query.MetaData, input specification.UpdateSpecificationInput) error { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.SpecificationUpdate")
 		defer span.End()

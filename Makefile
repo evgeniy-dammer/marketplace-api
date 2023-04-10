@@ -29,7 +29,7 @@ swagger:
 	swag init --parseDependency --generalInfo ./internal/delivery/http/delivery.go --output ./docs/
 
 json:
-	easyjson -all ./internal/domain/category/type.go
+	easyjson -all ./internal/domain/message/type.go
 
 imagebuild: imageremove
 	docker build -t marketplace-api .

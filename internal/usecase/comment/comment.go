@@ -12,7 +12,7 @@ import (
 )
 
 // CommentGetAll returns all comments from the system.
-func (s *UseCase) CommentGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) {
+func (s *UseCase) CommentGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CommentGetAll")
 		defer span.End()
@@ -30,7 +30,7 @@ func (s *UseCase) CommentGetAll(ctx context.Context, meta query.MetaData, params
 }
 
 // getAllWithCache returns comments from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error) { //nolint:lll
 	comments, err := s.adapterCache.CommentGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get comments from cache", zap.String("error", err.Error()))
@@ -94,7 +94,7 @@ func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, item
 }
 
 // CommentCreate inserts comment into system.
-func (s *UseCase) CommentCreate(ctx context.Context, meta query.MetaData, input comment.CreateCommentInput) (string, error) {
+func (s *UseCase) CommentCreate(ctx context.Context, meta query.MetaData, input comment.CreateCommentInput) (string, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CommentCreate")
 		defer span.End()

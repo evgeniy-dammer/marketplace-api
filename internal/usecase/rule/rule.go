@@ -12,7 +12,7 @@ import (
 )
 
 // RuleGetAll returns all rules from the system.
-func (s *UseCase) RuleGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) {
+func (s *UseCase) RuleGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.RuleGetAll")
 		defer span.End()
@@ -30,7 +30,7 @@ func (s *UseCase) RuleGetAll(ctx context.Context, meta query.MetaData, params qu
 }
 
 // getAllWithCache returns rules from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]rule.Rule, error) { //nolint:lll
 	rules, err := s.adapterCache.RuleGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get rules from cache", zap.String("error", err.Error()))

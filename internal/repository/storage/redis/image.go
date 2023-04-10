@@ -11,7 +11,7 @@ import (
 )
 
 // ImageGetAll gets images from cache.
-func (r *Repository) ImageGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]image.Image, error) {
+func (r *Repository) ImageGetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter) ([]image.Image, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) ImageGetAll(ctxr context.Context, meta query.MetaData, para
 }
 
 // ImageSetAll sets images into cache.
-func (r *Repository) ImageSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, images []image.Image) error {
+func (r *Repository) ImageSetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter, images []image.Image) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,9 +55,9 @@ func (r *Repository) ImageSetAll(ctxr context.Context, meta query.MetaData, para
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, imagesKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, imagesKey+"o."+meta.OrganizationID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // ImageGetOne gets image by id from cache.
@@ -103,9 +103,9 @@ func (r *Repository) ImageCreate(ctxr context.Context, usr image.Image) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, imageKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, imageKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // ImageUpdate updates image by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) ImageUpdate(ctxr context.Context, usr image.Image) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, imageKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, imageKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) ImageDelete(ctxr context.Context, imageID string) error {
 
 	err := r.client.Del(ctx, imageKey+imageID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // ImageInvalidate invalidate images cache.
@@ -163,7 +163,7 @@ func (r *Repository) ImageInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
@@ -171,7 +171,7 @@ func (r *Repository) ImageInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
@@ -179,9 +179,9 @@ func (r *Repository) ImageInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

@@ -31,7 +31,7 @@ func (r *Repository) OrganizationGetAll(ctxr context.Context, meta query.MetaDat
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &organizations, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &organizations, qry, args...)
 
 	return organizations, errors.Wrap(err, "organizations select query error")
 }
@@ -125,7 +125,7 @@ func (r *Repository) OrganizationGetOne(ctxr context.Context, meta query.MetaDat
 		return org, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &org, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &org, qry, args...)
 
 	return org, errors.Wrap(err, "organization select query error")
 }
@@ -154,7 +154,7 @@ func (r *Repository) OrganizationCreate(ctxr context.Context, meta query.MetaDat
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 
 	err = row.Scan(&organizationID)
 
@@ -200,7 +200,7 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, meta query.MetaDat
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "organization update query error")
 }
@@ -232,7 +232,7 @@ func (r *Repository) OrganizationDelete(ctxr context.Context, meta query.MetaDat
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "organization delete query error")
 }

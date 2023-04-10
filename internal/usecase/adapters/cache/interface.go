@@ -5,6 +5,7 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/comment"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/item"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/message"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/order"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
@@ -54,13 +55,13 @@ type User interface {
 	UserInvalidate(ctx context.Context) error
 
 	UserGetAllRoles(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error)
-	UserSetAllRoles(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, roles []role.Role) error
+	UserSetAllRoles(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, roles []role.Role) error //nolint:lll
 }
 
 // Organization interface.
 type Organization interface {
-	OrganizationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error)
-	OrganizationSetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, organizations []organization.Organization) error
+	OrganizationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error)             //nolint:lll
+	OrganizationSetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, organizations []organization.Organization) error //nolint:lll
 	OrganizationGetOne(ctx context.Context, organizationID string) (organization.Organization, error)
 	OrganizationCreate(ctx context.Context, organization organization.Organization) error
 	OrganizationUpdate(ctx context.Context, organization organization.Organization) error
@@ -70,8 +71,8 @@ type Organization interface {
 
 // Category interface.
 type Category interface {
-	CategoryGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error)
-	CategorySetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, categories []category.Category) error
+	CategoryGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error)          //nolint:lll
+	CategorySetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, categories []category.Category) error //nolint:lll
 	CategoryGetOne(ctx context.Context, categoryID string) (category.Category, error)
 	CategoryCreate(ctx context.Context, category category.Category) error
 	CategoryUpdate(ctx context.Context, category category.Category) error
@@ -125,8 +126,8 @@ type Image interface {
 
 // Comment interface.
 type Comment interface {
-	CommentGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error)
-	CommentSetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, comments []comment.Comment) error
+	CommentGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]comment.Comment, error)        //nolint:lll
+	CommentSetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, comments []comment.Comment) error //nolint:lll
 	CommentGetOne(ctx context.Context, commentID string) (comment.Comment, error)
 	CommentCreate(ctx context.Context, comment comment.Comment) error
 	CommentUpdate(ctx context.Context, comment comment.Comment) error
@@ -136,8 +137,8 @@ type Comment interface {
 
 // Specification interface.
 type Specification interface {
-	SpecificationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error)
-	SpecificationSetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, specifications []specification.Specification) error
+	SpecificationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]specification.Specification, error)              //nolint:lll
+	SpecificationSetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, specifications []specification.Specification) error //nolint:lll
 	SpecificationGetOne(ctx context.Context, specificationID string) (specification.Specification, error)
 	SpecificationCreate(ctx context.Context, specification specification.Specification) error
 	SpecificationUpdate(ctx context.Context, specification specification.Specification) error
@@ -157,4 +158,15 @@ type Rule interface {
 	RuleUpdate(ctx context.Context, rule rule.Rule) error
 	RuleDelete(ctx context.Context, ruleID string) error
 	RuleInvalidate(ctx context.Context) error
+}
+
+// Message interface.
+type Message interface {
+	MessageGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]message.Message, error)        //nolint:lll
+	MessageSetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter, messages []message.Message) error //nolint:lll
+	MessageGetOne(ctx context.Context, messageID string) (message.Message, error)
+	MessageCreate(ctx context.Context, message message.Message) error
+	MessageUpdate(ctx context.Context, message message.Message) error
+	MessageDelete(ctx context.Context, messageID string) error
+	MessageInvalidate(ctx context.Context) error
 }

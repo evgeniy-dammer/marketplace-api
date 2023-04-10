@@ -29,7 +29,7 @@ func (r *Repository) SpecificationGetAll(ctxr context.Context, meta query.MetaDa
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &specifications, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &specifications, qry, args...)
 
 	return specifications, errors.Wrap(err, "specifications select query error")
 }
@@ -111,7 +111,7 @@ func (r *Repository) SpecificationGetOne(ctxr context.Context, meta query.MetaDa
 		return spec, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &spec, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &spec, qry, args...)
 
 	return spec, errors.Wrap(err, "specification select query error")
 }
@@ -143,7 +143,7 @@ func (r *Repository) SpecificationCreate(ctxr context.Context, _ query.MetaData,
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 
 	err = row.Scan(&specificationID)
 
@@ -219,7 +219,7 @@ func (r *Repository) SpecificationUpdate(ctxr context.Context, meta query.MetaDa
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "specification update query error")
 }
@@ -247,7 +247,7 @@ func (r *Repository) SpecificationDelete(ctxr context.Context, meta query.MetaDa
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "specification delete query error")
 }

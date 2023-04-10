@@ -11,7 +11,7 @@ import (
 )
 
 // OrderGetAll gets orders from cache.
-func (r *Repository) OrderGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]order.Order, error) {
+func (r *Repository) OrderGetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter) ([]order.Order, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) OrderGetAll(ctxr context.Context, meta query.MetaData, para
 }
 
 // OrderSetAll sets orders into cache.
-func (r *Repository) OrderSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, orders []order.Order) error {
+func (r *Repository) OrderSetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter, orders []order.Order) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,9 +55,9 @@ func (r *Repository) OrderSetAll(ctxr context.Context, meta query.MetaData, para
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, ordersKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, ordersKey+"o."+meta.OrganizationID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // OrderGetOne gets order by id from cache.
@@ -103,9 +103,9 @@ func (r *Repository) OrderCreate(ctxr context.Context, usr order.Order) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, orderKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, orderKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // OrderUpdate updates order by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) OrderUpdate(ctxr context.Context, usr order.Order) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, orderKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, orderKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) OrderDelete(ctxr context.Context, orderID string) error {
 
 	err := r.client.Del(ctx, orderKey+orderID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // OrderInvalidate invalidate orders cache.
@@ -163,9 +163,9 @@ func (r *Repository) OrderInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

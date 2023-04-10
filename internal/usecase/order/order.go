@@ -14,7 +14,7 @@ import (
 )
 
 // OrderGetAll returns all orders from the system.
-func (s *UseCase) OrderGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]order.Order, error) {
+func (s *UseCase) OrderGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]order.Order, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrderGetAll")
 		defer span.End()
@@ -32,7 +32,7 @@ func (s *UseCase) OrderGetAll(ctx context.Context, meta query.MetaData, params q
 }
 
 // getAllWithCache returns orders from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]order.Order, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]order.Order, error) { //nolint:lll
 	orders, err := s.adapterCache.OrderGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get orders from cache", zap.String("error", err.Error()))

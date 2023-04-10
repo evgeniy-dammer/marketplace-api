@@ -34,7 +34,7 @@ func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, param
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &items, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &items, qry, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
@@ -53,7 +53,7 @@ func (r *Repository) ItemGetAll(ctxr context.Context, meta query.MetaData, param
 				return errors.Wrap(err, "unable to build a query string")
 			}
 
-			err = r.database.SelectContext(ctx, &items[index].Images, qryImages, argsImages...)
+			err = r.databaseSlave.SelectContext(ctx, &items[index].Images, qryImages, argsImages...)
 
 			return errors.Wrap(err, "images select query error")
 		})
@@ -174,7 +174,7 @@ func (r *Repository) ItemGetOne(ctxr context.Context, meta query.MetaData, itemI
 		return itm, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &itm, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &itm, qry, args...)
 	if err != nil {
 		return itm, errors.Wrap(err, "item select query error")
 	}
@@ -190,7 +190,7 @@ func (r *Repository) ItemGetOne(ctxr context.Context, meta query.MetaData, itemI
 			return errors.Wrap(err, "unable to build a query string")
 		}
 
-		err = r.database.SelectContext(ctx, &itm.Images, qryImages, argsImages...)
+		err = r.databaseSlave.SelectContext(ctx, &itm.Images, qryImages, argsImages...)
 
 		return errors.Wrap(err, "images select query error")
 	})
@@ -207,7 +207,7 @@ func (r *Repository) ItemGetOne(ctxr context.Context, meta query.MetaData, itemI
 			return errors.Wrap(err, "unable to build a query string")
 		}
 
-		err = r.database.SelectContext(ctx, &itm.Specification, qrySpecifications, argsSpecifications...)
+		err = r.databaseSlave.SelectContext(ctx, &itm.Specification, qrySpecifications, argsSpecifications...)
 
 		return errors.Wrap(err, "specification select query error")
 	})
@@ -223,7 +223,7 @@ func (r *Repository) ItemGetOne(ctxr context.Context, meta query.MetaData, itemI
 			return errors.Wrap(err, "unable to build a query string")
 		}
 
-		err = r.database.SelectContext(ctx, &itm.Comments, qryComments, argsComments...)
+		err = r.databaseSlave.SelectContext(ctx, &itm.Comments, qryComments, argsComments...)
 
 		return errors.Wrap(err, "comments select query error")
 	})
@@ -262,7 +262,7 @@ func (r *Repository) ItemCreate(ctxr context.Context, meta query.MetaData, input
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 
 	err = row.Scan(&itemID)
 
@@ -348,7 +348,7 @@ func (r *Repository) ItemUpdate(ctxr context.Context, meta query.MetaData, input
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "item update query error")
 }
@@ -380,7 +380,7 @@ func (r *Repository) ItemDelete(ctxr context.Context, meta query.MetaData, itemI
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "item delete query error")
 }

@@ -29,13 +29,13 @@ type HashParams struct {
 var Params = &HashParams{Memory: 4096, Iterations: 3, Parallelism: 1, SaltLength: 16, KeyLength: 32}
 
 // GeneratePasswordHash hashes the password.
-func GeneratePasswordHash(password string, Params *HashParams) (string, error) {
+func GeneratePasswordHash(password string, params *HashParams) (string, error) {
 	salt, err := GenerateRandomBytes(Params.SaltLength)
 	if err != nil {
 		return "", err
 	}
 
-	hash := argon2.IDKey([]byte(password), salt, Params.Iterations, Params.Memory, Params.Parallelism, Params.KeyLength)
+	hash := argon2.IDKey([]byte(password), salt, params.Iterations, params.Memory, params.Parallelism, params.KeyLength)
 
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
@@ -43,9 +43,9 @@ func GeneratePasswordHash(password string, Params *HashParams) (string, error) {
 	encodedHash := fmt.Sprintf(
 		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
 		argon2.Version,
-		Params.Memory,
-		Params.Iterations,
-		Params.Parallelism,
+		params.Memory,
+		params.Iterations,
+		params.Parallelism,
 		b64Salt,
 		b64Hash,
 	)

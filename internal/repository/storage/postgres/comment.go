@@ -31,7 +31,7 @@ func (r *Repository) CommentGetAll(ctxr context.Context, meta query.MetaData, pa
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &comments, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &comments, qry, args...)
 
 	return comments, errors.Wrap(err, "comments select query error")
 }
@@ -125,7 +125,7 @@ func (r *Repository) CommentGetOne(ctxr context.Context, meta query.MetaData, co
 		return commnt, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &commnt, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &commnt, qry, args...)
 
 	return commnt, errors.Wrap(err, "comment select query error")
 }
@@ -154,7 +154,7 @@ func (r *Repository) CommentCreate(ctxr context.Context, meta query.MetaData, in
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 
 	err = row.Scan(&commentID)
 
@@ -208,7 +208,7 @@ func (r *Repository) CommentUpdate(ctxr context.Context, meta query.MetaData, in
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "comment update query error")
 }
@@ -240,7 +240,7 @@ func (r *Repository) CommentDelete(ctxr context.Context, meta query.MetaData, co
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "comment delete query error")
 }

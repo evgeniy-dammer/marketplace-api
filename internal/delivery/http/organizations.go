@@ -35,6 +35,8 @@ func (d *Delivery) getOrganizations(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -76,6 +78,8 @@ func (d *Delivery) getOrganization(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -122,6 +126,8 @@ func (d *Delivery) createOrganization(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -168,6 +174,8 @@ func (d *Delivery) updateOrganization(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 
@@ -219,6 +227,8 @@ func (d *Delivery) deleteOrganization(ginCtx *gin.Context) {
 
 	meta, err := d.parseMetadata(ginCtx)
 	if err != nil {
+		NewErrorResponse(ginCtx, http.StatusBadRequest, err)
+
 		return
 	}
 

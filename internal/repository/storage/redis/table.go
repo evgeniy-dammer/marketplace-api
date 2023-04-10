@@ -11,7 +11,7 @@ import (
 )
 
 // TableGetAll gets tables from cache.
-func (r *Repository) TableGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]table.Table, error) {
+func (r *Repository) TableGetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter) ([]table.Table, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) TableGetAll(ctxr context.Context, meta query.MetaData, para
 }
 
 // TableSetAll sets tables into cache.
-func (r *Repository) TableSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, tables []table.Table) error {
+func (r *Repository) TableSetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter, tables []table.Table) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,9 +55,9 @@ func (r *Repository) TableSetAll(ctxr context.Context, meta query.MetaData, para
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, tablesKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, tablesKey+"o."+meta.OrganizationID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // TableGetOne gets table by id from cache.
@@ -103,9 +103,9 @@ func (r *Repository) TableCreate(ctxr context.Context, usr table.Table) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, tableKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, tableKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // TableUpdate updates table by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) TableUpdate(ctxr context.Context, usr table.Table) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, tableKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, tableKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) TableDelete(ctxr context.Context, tableID string) error {
 
 	err := r.client.Del(ctx, tableKey+tableID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // TableInvalidate invalidate tables cache.
@@ -163,9 +163,9 @@ func (r *Repository) TableInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

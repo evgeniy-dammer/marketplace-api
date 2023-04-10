@@ -12,7 +12,7 @@ import (
 )
 
 // UserGetAll gets users from cache.
-func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]user.User, error) {
+func (r *Repository) UserGetAll(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter) ([]user.User, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -38,7 +38,7 @@ func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, param
 }
 
 // UserSetAll sets users into cache.
-func (r *Repository) UserSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, users []user.User) error {
+func (r *Repository) UserSetAll(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter, users []user.User) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -56,9 +56,9 @@ func (r *Repository) UserSetAll(ctxr context.Context, meta query.MetaData, param
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, usersKey, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, usersKey, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // UserGetOne gets user by id from cache.
@@ -104,9 +104,9 @@ func (r *Repository) UserCreate(ctxr context.Context, usr user.User) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, userKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, userKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // UserUpdate updates user by id in cache.
@@ -126,7 +126,7 @@ func (r *Repository) UserUpdate(ctxr context.Context, usr user.User) error {
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, userKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, userKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -145,7 +145,7 @@ func (r *Repository) UserDelete(ctxr context.Context, userID string) error {
 
 	err := r.client.Del(ctx, userKey+userID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // UserInvalidate invalidate users cache.
@@ -164,15 +164,15 @@ func (r *Repository) UserInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }
 
 // UserGetAllRoles gets all roles from cache.
-func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]role.Role, error) {
+func (r *Repository) UserGetAllRoles(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter) ([]role.Role, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -198,7 +198,7 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, 
 }
 
 // UserSetAllRoles sets all roles in cache.
-func (r *Repository) UserSetAllRoles(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, roles []role.Role) error {
+func (r *Repository) UserSetAllRoles(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter, roles []role.Role) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -216,7 +216,7 @@ func (r *Repository) UserSetAllRoles(ctxr context.Context, meta query.MetaData, 
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, rolesKey, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, rolesKey, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }

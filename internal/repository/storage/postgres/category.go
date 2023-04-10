@@ -31,7 +31,7 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, p
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &categories, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &categories, qry, args...)
 
 	return categories, errors.Wrap(err, "categories select query error")
 }
@@ -130,7 +130,7 @@ func (r *Repository) CategoryGetOne(ctxr context.Context, meta query.MetaData, c
 		return ctgry, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &ctgry, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &ctgry, qry, args...)
 
 	return ctgry, errors.Wrap(err, "category select query error")
 }
@@ -162,7 +162,7 @@ func (r *Repository) CategoryCreate(ctxr context.Context, meta query.MetaData, i
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 
 	err = row.Scan(&categoryID)
 
@@ -220,7 +220,7 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, meta query.MetaData, i
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "category update query error")
 }
@@ -252,7 +252,7 @@ func (r *Repository) CategoryDelete(ctxr context.Context, meta query.MetaData, c
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "category delete query error")
 }

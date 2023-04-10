@@ -18,6 +18,7 @@ const (
 	favoriteTable      = "users_favorites"
 	ruleTable          = "casbin_rule"
 	tokenTable         = "token_whitelist"
+	messageTable       = "messages"
 	// categoryItemTable = "categories_items".
 
 	vendorRole = "vendor"

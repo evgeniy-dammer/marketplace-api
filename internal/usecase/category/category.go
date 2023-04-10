@@ -12,7 +12,7 @@ import (
 )
 
 // CategoryGetAll returns all categories from the system.
-func (s *UseCase) CategoryGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
+func (s *UseCase) CategoryGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryGetAll")
 		defer span.End()
@@ -30,7 +30,7 @@ func (s *UseCase) CategoryGetAll(ctx context.Context, meta query.MetaData, param
 }
 
 // getAllWithCache returns categories from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) { //nolint:lll
 	categories, err := s.adapterCache.CategoryGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get categories from cache", zap.String("error", err.Error()))
@@ -53,7 +53,7 @@ func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, para
 }
 
 // CategoryGetOne returns category by id from the system.
-func (s *UseCase) CategoryGetOne(ctx context.Context, meta query.MetaData, categoryID string) (category.Category, error) {
+func (s *UseCase) CategoryGetOne(ctx context.Context, meta query.MetaData, categoryID string) (category.Category, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryGetOne")
 		defer span.End()
@@ -71,7 +71,7 @@ func (s *UseCase) CategoryGetOne(ctx context.Context, meta query.MetaData, categ
 }
 
 // getOneWithCache returns category by id from cache if exists.
-func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, categoryID string) (category.Category, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, categoryID string) (category.Category, error) { //nolint:lll
 	ctgry, err := s.adapterCache.CategoryGetOne(ctx, categoryID)
 	if err != nil {
 		logger.Logger.Error("unable to get category from cache", zap.String("error", err.Error()))
@@ -94,7 +94,7 @@ func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, cate
 }
 
 // CategoryCreate inserts category into system.
-func (s *UseCase) CategoryCreate(ctx context.Context, meta query.MetaData, input category.CreateCategoryInput) (string, error) {
+func (s *UseCase) CategoryCreate(ctx context.Context, meta query.MetaData, input category.CreateCategoryInput) (string, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.CategoryCreate")
 		defer span.End()

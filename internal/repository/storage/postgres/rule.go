@@ -29,7 +29,7 @@ func (r *Repository) RuleGetAll(ctxr context.Context, meta query.MetaData, param
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &rules, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &rules, qry, args...)
 
 	return rules, errors.Wrap(err, "rules select query error")
 }
@@ -96,7 +96,7 @@ func (r *Repository) RuleGetOne(ctxr context.Context, _ query.MetaData, ruleID s
 		return rle, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &rle, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &rle, qry, args...)
 
 	return rle, errors.Wrap(err, "rule select query error")
 }
@@ -125,7 +125,7 @@ func (r *Repository) RuleCreate(ctxr context.Context, _ query.MetaData, input ru
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 	err = row.Scan(&ruleID)
 
 	return ruleID, errors.Wrap(err, "rule create query error")
@@ -180,7 +180,7 @@ func (r *Repository) RuleUpdate(ctxr context.Context, _ query.MetaData, input ru
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "rule update query error")
 }
@@ -204,7 +204,7 @@ func (r *Repository) RuleDelete(ctxr context.Context, _ query.MetaData, ruleID s
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "rule delete query error")
 }

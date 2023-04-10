@@ -6,6 +6,7 @@ import (
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/favorite"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/image"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/item"
+	"github.com/evgeniy-dammer/marketplace-api/internal/domain/message"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/order"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/organization"
 	"github.com/evgeniy-dammer/marketplace-api/internal/domain/role"
@@ -130,4 +131,13 @@ type Rule interface {
 	RuleCreate(ctx context.Context, meta query.MetaData, input rule.CreateRuleInput) (string, error)
 	RuleUpdate(ctx context.Context, meta query.MetaData, input rule.UpdateRuleInput) error
 	RuleDelete(ctx context.Context, meta query.MetaData, ruleID string) error
+}
+
+// Message interface.
+type Message interface {
+	MessageGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]message.Message, error) //nolint:lll
+	MessageGetOne(ctx context.Context, meta query.MetaData, messageID string) (message.Message, error)
+	MessageCreate(ctx context.Context, meta query.MetaData, input message.CreateMessageInput) (string, error)
+	MessageUpdate(ctx context.Context, meta query.MetaData, input message.UpdateMessageInput) error
+	MessageDelete(ctx context.Context, meta query.MetaData, messageID string) error
 }

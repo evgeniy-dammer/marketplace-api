@@ -14,7 +14,7 @@ type Repository struct {
 
 type Options struct {
 	Timeout time.Duration
-	Ttl     time.Duration
+	TTL     time.Duration
 }
 
 func New(client *redis.Client, options Options, isTracingOn bool) *Repository {

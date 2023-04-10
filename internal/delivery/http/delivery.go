@@ -30,7 +30,9 @@ type Delivery struct {
 	ucSpecification  usecase.Specification
 	ucFavorite       usecase.Favorite
 	ucRule           usecase.Rule
-	adapter          *pgadapter.Adapter
+	ucMessage        usecase.Message
+	adapterMaster    *pgadapter.Adapter
+	adapterSlave     *pgadapter.Adapter
 	isTracingOn      bool
 }
 
@@ -49,7 +51,9 @@ func New(
 	ucSpecification usecase.Specification,
 	ucFavorite usecase.Favorite,
 	ucRule usecase.Rule,
-	adapter *pgadapter.Adapter,
+	ucMessage usecase.Message,
+	adapterMaster *pgadapter.Adapter,
+	adapterSlave *pgadapter.Adapter,
 	isTracingOn bool,
 ) *Delivery {
 	return &Delivery{
@@ -66,7 +70,9 @@ func New(
 		ucSpecification:  ucSpecification,
 		ucFavorite:       ucFavorite,
 		ucRule:           ucRule,
-		adapter:          adapter,
+		ucMessage:        ucMessage,
+		adapterMaster:    adapterMaster,
+		adapterSlave:     adapterSlave,
 		isTracingOn:      isTracingOn,
 	}
 }

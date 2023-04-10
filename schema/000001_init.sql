@@ -269,6 +269,17 @@ CREATE TABLE IF NOT EXISTS token_whitelist
     expired BOOLEAN NOT NULL DEFAULT false
 );
 
+CREATE TABLE IF NOT EXISTS messages
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMPTZ DEFAULT (now() AT TIME ZONE 'gmt'),
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    is_public BOOLEAN NOT NULL DEFAULT false,
+    is_published BOOLEAN NOT NULL DEFAULT false
+);
+
 -- DATA --
 
 INSERT INTO users_statuses (name) VALUES ('active'), ('inactive'), ('blocked');
@@ -643,6 +654,7 @@ DROP TABLE IF EXISTS images;
 DROP TABLE IF EXISTS images_types;
 DROP TABLE IF EXISTS organizations;
 DROP TABLE IF EXISTS brands;
+DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS token_whitelist;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS users_statuses;

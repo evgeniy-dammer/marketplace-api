@@ -18,7 +18,7 @@ func (s *UseCase) AuthorizationGetUserRole(ctx context.Context, userID string) (
 	}
 
 	if s.isCacheOn {
-		return getUserRoleWithCache(ctx, s, userID)
+		return s.getUserRoleWithCache(ctx, userID)
 	}
 
 	role, err := s.adapterStorage.AuthorizationGetUserRole(ctx, userID)
@@ -26,7 +26,7 @@ func (s *UseCase) AuthorizationGetUserRole(ctx context.Context, userID string) (
 	return role, errors.Wrap(err, "can not get role")
 }
 
-func getUserRoleWithCache(ctx context.Context, s *UseCase, userID string) (string, error) {
+func (s *UseCase) getUserRoleWithCache(ctx context.Context, userID string) (string, error) {
 	role, err := s.adapterCache.AuthorizationGetUserRole(ctx, userID)
 	if err != nil {
 		logger.Logger.Error("unable to get user role from cache", zap.String("error", err.Error()))

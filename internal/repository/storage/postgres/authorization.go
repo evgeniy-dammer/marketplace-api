@@ -32,7 +32,7 @@ func (r *Repository) AuthorizationGetUserRole(ctxr context.Context, userID strin
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &name, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &name, qry, args...)
 
 	return name, errors.Wrap(err, "role name select error")
 }

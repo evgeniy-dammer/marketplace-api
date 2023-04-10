@@ -23,4 +23,6 @@ const (
 	imagesKey         = "images."
 	orderKey          = "order."
 	ordersKey         = "orders."
+	messageKey        = "message."
+	messagesKey       = "messages."
 )

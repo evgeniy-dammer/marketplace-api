@@ -32,7 +32,7 @@ func (r *Repository) UserGetAll(ctxr context.Context, meta query.MetaData, param
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &users, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &users, qry, args...)
 
 	return users, errors.Wrap(err, "users select query error")
 }
@@ -122,7 +122,7 @@ func (r *Repository) UserGetAllRoles(ctxr context.Context, meta query.MetaData, 
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &roles, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &roles, qry, args...)
 
 	return roles, errors.Wrap(err, "roles select query error")
 }
@@ -184,7 +184,7 @@ func (r *Repository) UserGetOne(ctxr context.Context, _ query.MetaData, userID s
 		return usr, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &usr, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &usr, qry, args...)
 
 	return usr, errors.Wrap(err, "user select query error")
 }
@@ -203,7 +203,7 @@ func (r *Repository) UserCreate(ctxr context.Context, meta query.MetaData, input
 
 	var insertID string
 
-	trx, err := r.database.Begin()
+	trx, err := r.databaseMaster.Begin()
 	if err != nil {
 		return "", errors.Wrap(err, "transaction begin error")
 	}
@@ -283,7 +283,7 @@ func (r *Repository) UserUpdate(ctxr context.Context, meta query.MetaData, input
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "user update query error")
 }
@@ -311,7 +311,7 @@ func (r *Repository) UserDelete(ctxr context.Context, meta query.MetaData, userI
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "user delete query error")
 }

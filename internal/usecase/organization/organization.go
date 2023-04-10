@@ -12,7 +12,7 @@ import (
 )
 
 // OrganizationGetAll returns all organizations from the system.
-func (s *UseCase) OrganizationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) {
+func (s *UseCase) OrganizationGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationGetAll")
 		defer span.End()
@@ -30,7 +30,7 @@ func (s *UseCase) OrganizationGetAll(ctx context.Context, meta query.MetaData, p
 }
 
 // getAllWithCache returns organizations from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) { //nolint:lll
 	organizations, err := s.adapterCache.OrganizationGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get organizations from cache", zap.String("error", err.Error()))
@@ -54,7 +54,7 @@ func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, para
 }
 
 // OrganizationGetOne returns organization by id from the system.
-func (s *UseCase) OrganizationGetOne(ctx context.Context, meta query.MetaData, organizationID string) (organization.Organization, error) {
+func (s *UseCase) OrganizationGetOne(ctx context.Context, meta query.MetaData, organizationID string) (organization.Organization, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationGetOne")
 		defer span.End()
@@ -72,7 +72,7 @@ func (s *UseCase) OrganizationGetOne(ctx context.Context, meta query.MetaData, o
 }
 
 // getOneWithCache returns organization by id from cache if exists.
-func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, organizationID string) (organization.Organization, error) {
+func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, organizationID string) (organization.Organization, error) { //nolint:lll
 	org, err := s.adapterCache.OrganizationGetOne(ctx, organizationID)
 	if err != nil {
 		logger.Logger.Error("unable to get organization from cache", zap.String("error", err.Error()))
@@ -96,7 +96,7 @@ func (s *UseCase) getOneWithCache(ctx context.Context, meta query.MetaData, orga
 }
 
 // OrganizationCreate inserts organization into system.
-func (s *UseCase) OrganizationCreate(ctx context.Context, meta query.MetaData, input organization.CreateOrganizationInput) (string, error) {
+func (s *UseCase) OrganizationCreate(ctx context.Context, meta query.MetaData, input organization.CreateOrganizationInput) (string, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationCreate")
 		defer span.End()
@@ -130,7 +130,7 @@ func (s *UseCase) OrganizationCreate(ctx context.Context, meta query.MetaData, i
 }
 
 // OrganizationUpdate updates organization by id in the system.
-func (s *UseCase) OrganizationUpdate(ctx context.Context, meta query.MetaData, input organization.UpdateOrganizationInput) error {
+func (s *UseCase) OrganizationUpdate(ctx context.Context, meta query.MetaData, input organization.UpdateOrganizationInput) error { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.OrganizationUpdate")
 		defer span.End()

@@ -113,6 +113,15 @@ var mappingSortRule = map[columncode.ColumnCode]string{
 	"v5":    "v5",
 }
 
+var mappingSortMessage = map[columncode.ColumnCode]string{
+	"id":           "id",
+	"title":        "title",
+	"body":         "body",
+	"user_id":      "user_id",
+	"is_public":    "is_public",
+	"is_published": "is_published",
+}
+
 var mappingSortOrder = map[columncode.ColumnCode]string{
 	"id":              "id",
 	"user_id":         "user_id",

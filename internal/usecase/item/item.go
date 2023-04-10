@@ -14,7 +14,7 @@ import (
 )
 
 // ItemGetAll returns all items from the system.
-func (s *UseCase) ItemGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) {
+func (s *UseCase) ItemGetAll(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) { //nolint:lll
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.ItemGetAll")
 		defer span.End()
@@ -32,7 +32,7 @@ func (s *UseCase) ItemGetAll(ctx context.Context, meta query.MetaData, params qu
 }
 
 // getAllWithCache returns items from cache if exists.
-func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) {
+func (s *UseCase) getAllWithCache(ctx context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]item.Item, error) { //nolint:lll
 	items, err := s.adapterCache.ItemGetAll(ctx, meta, params)
 	if err != nil {
 		logger.Logger.Error("unable to get items from cache", zap.String("error", err.Error()))

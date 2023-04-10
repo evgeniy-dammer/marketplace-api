@@ -31,7 +31,7 @@ func (r *Repository) OrderGetAll(ctxr context.Context, meta query.MetaData, para
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &orders, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &orders, qry, args...)
 
 	return orders, errors.Wrap(err, "orders select query error")
 }
@@ -115,7 +115,7 @@ func (r *Repository) OrderGetOne(ctxr context.Context, meta query.MetaData, orde
 		return ordr, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &ordr, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &ordr, qry, args...)
 
 	return ordr, errors.Wrap(err, "order select query error")
 }
@@ -134,7 +134,7 @@ func (r *Repository) OrderCreate(ctxr context.Context, meta query.MetaData, inpu
 
 	var orderID string
 
-	trx, err := r.database.Begin()
+	trx, err := r.databaseMaster.Begin()
 	if err != nil {
 		return "", errors.Wrap(err, "transaction begin error")
 	}
@@ -196,7 +196,7 @@ func (r *Repository) OrderUpdate(ctxr context.Context, meta query.MetaData, inpu
 		ctx = context.New(ctxt)
 	}
 
-	trx, err := r.database.Begin()
+	trx, err := r.databaseMaster.Begin()
 	if err != nil {
 		return errors.Wrap(err, "transaction begin error")
 	}
@@ -307,7 +307,7 @@ func (r *Repository) OrderDelete(ctxr context.Context, meta query.MetaData, orde
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "order delete query error")
 }

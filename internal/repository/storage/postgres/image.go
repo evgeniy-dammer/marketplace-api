@@ -31,7 +31,7 @@ func (r *Repository) ImageGetAll(ctxr context.Context, meta query.MetaData, para
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &images, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &images, qry, args...)
 
 	return images, errors.Wrap(err, "images select query error")
 }
@@ -115,7 +115,7 @@ func (r *Repository) ImageGetOne(ctxr context.Context, meta query.MetaData, imag
 		return img, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &img, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &img, qry, args...)
 
 	return img, errors.Wrap(err, "image select query error")
 }
@@ -145,7 +145,7 @@ func (r *Repository) ImageCreate(ctxr context.Context, meta query.MetaData, inpu
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 
 	err = row.Scan(&imageID)
 
@@ -207,7 +207,7 @@ func (r *Repository) ImageUpdate(ctxr context.Context, meta query.MetaData, inpu
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "image update query error")
 }
@@ -239,7 +239,7 @@ func (r *Repository) ImageDelete(ctxr context.Context, meta query.MetaData, imag
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "image delete query error")
 }

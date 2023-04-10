@@ -11,7 +11,7 @@ import (
 )
 
 // OrganizationGetAll gets organizations from cache.
-func (r *Repository) OrganizationGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]organization.Organization, error) {
+func (r *Repository) OrganizationGetAll(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter) ([]organization.Organization, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) OrganizationGetAll(ctxr context.Context, meta query.MetaDat
 }
 
 // OrganizationSetAll sets organizations into cache.
-func (r *Repository) OrganizationSetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, organizations []organization.Organization) error {
+func (r *Repository) OrganizationSetAll(ctxr context.Context, _ query.MetaData, _ queryparameter.QueryParameter, organizations []organization.Organization) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,13 +55,13 @@ func (r *Repository) OrganizationSetAll(ctxr context.Context, meta query.MetaDat
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, organizationsKey, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, organizationsKey, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // OrganizationGetOne gets organization by id from cache.
-func (r *Repository) OrganizationGetOne(ctxr context.Context, organizationID string) (organization.Organization, error) {
+func (r *Repository) OrganizationGetOne(ctxr context.Context, organizationID string) (organization.Organization, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -103,9 +103,9 @@ func (r *Repository) OrganizationCreate(ctxr context.Context, usr organization.O
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, organizationKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, organizationKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // OrganizationUpdate updates organization by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) OrganizationUpdate(ctxr context.Context, usr organization.O
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, organizationKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, organizationKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) OrganizationDelete(ctxr context.Context, organizationID str
 
 	err := r.client.Del(ctx, organizationKey+organizationID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // OrganizationInvalidate invalidate organizations cache.
@@ -163,9 +163,9 @@ func (r *Repository) OrganizationInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

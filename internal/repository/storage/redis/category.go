@@ -11,7 +11,7 @@ import (
 )
 
 // CategoryGetAll gets categories from cache.
-func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter) ([]category.Category, error) {
+func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter) ([]category.Category, error) { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -37,7 +37,7 @@ func (r *Repository) CategoryGetAll(ctxr context.Context, meta query.MetaData, p
 }
 
 // CategorySetAll sets categories into cache.
-func (r *Repository) CategorySetAll(ctxr context.Context, meta query.MetaData, params queryparameter.QueryParameter, categories []category.Category) error {
+func (r *Repository) CategorySetAll(ctxr context.Context, meta query.MetaData, _ queryparameter.QueryParameter, categories []category.Category) error { //nolint:lll
 	ctx := ctxr.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
 
@@ -55,9 +55,9 @@ func (r *Repository) CategorySetAll(ctxr context.Context, meta query.MetaData, p
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, categoriesKey+"o."+meta.OrganizationID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, categoriesKey+"o."+meta.OrganizationID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // CategoryGetOne gets category by id from cache.
@@ -103,9 +103,9 @@ func (r *Repository) CategoryCreate(ctxr context.Context, usr category.Category)
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	err = r.client.Set(ctx, categoryKey+usr.ID, bytes, r.options.Ttl).Err()
+	err = r.client.Set(ctx, categoryKey+usr.ID, bytes, r.options.TTL).Err()
 
-	return err
+	return errors.Wrap(err, "setting key")
 }
 
 // CategoryUpdate updates category by id in cache.
@@ -125,7 +125,7 @@ func (r *Repository) CategoryUpdate(ctxr context.Context, usr category.Category)
 		return errors.Wrap(err, "unable to marshal json")
 	}
 
-	r.client.Set(ctx, categoryKey+usr.ID, bytes, r.options.Ttl)
+	r.client.Set(ctx, categoryKey+usr.ID, bytes, r.options.TTL)
 
 	return nil
 }
@@ -144,7 +144,7 @@ func (r *Repository) CategoryDelete(ctxr context.Context, categoryID string) err
 
 	err := r.client.Del(ctx, categoryKey+categoryID).Err()
 
-	return err
+	return errors.Wrap(err, "deleting key")
 }
 
 // CategoryInvalidate invalidate categories cache.
@@ -163,9 +163,9 @@ func (r *Repository) CategoryInvalidate(ctxr context.Context) error {
 	for iter.Next(ctx) {
 		err := r.client.Del(ctx, iter.Val()).Err()
 		if err != nil {
-			panic(err)
+			return errors.Wrap(err, "deleting key")
 		}
 	}
 
-	return iter.Err()
+	return errors.Wrap(iter.Err(), "invalidate")
 }

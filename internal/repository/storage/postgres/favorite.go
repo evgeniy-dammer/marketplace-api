@@ -33,7 +33,7 @@ func (r *Repository) FavoriteCreate(ctxr context.Context, meta query.MetaData, f
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 	err = row.Scan(&favoriteID)
 
 	return errors.Wrap(err, "favorite create query error")
@@ -62,7 +62,7 @@ func (r *Repository) FavoriteDelete(ctxr context.Context, meta query.MetaData, i
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "favorite delete query error")
 }

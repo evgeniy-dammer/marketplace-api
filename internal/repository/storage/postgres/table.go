@@ -31,7 +31,7 @@ func (r *Repository) TableGetAll(ctxr context.Context, meta query.MetaData, para
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.SelectContext(ctx, &tables, qry, args...)
+	err = r.databaseSlave.SelectContext(ctx, &tables, qry, args...)
 
 	return tables, errors.Wrap(err, "tables select query error")
 }
@@ -121,7 +121,7 @@ func (r *Repository) TableGetOne(ctxr context.Context, meta query.MetaData, tabl
 		return tble, errors.Wrap(err, "unable to build a query string")
 	}
 
-	err = r.database.GetContext(ctx, &tble, qry, args...)
+	err = r.databaseSlave.GetContext(ctx, &tble, qry, args...)
 
 	return tble, errors.Wrap(err, "table select query error")
 }
@@ -150,7 +150,7 @@ func (r *Repository) TableCreate(ctxr context.Context, meta query.MetaData, inpu
 		return "", errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.database.QueryRowContext(ctx, qry, args...)
+	row := r.databaseMaster.QueryRowContext(ctx, qry, args...)
 	err = row.Scan(&tableID)
 
 	return tableID, errors.Wrap(err, "table create query error")
@@ -191,7 +191,7 @@ func (r *Repository) TableUpdate(ctxr context.Context, meta query.MetaData, inpu
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "table update query error")
 }
@@ -223,7 +223,7 @@ func (r *Repository) TableDelete(ctxr context.Context, meta query.MetaData, tabl
 		return errors.Wrap(err, "unable to build a query string")
 	}
 
-	_, err = r.database.ExecContext(ctx, qry, args...)
+	_, err = r.databaseMaster.ExecContext(ctx, qry, args...)
 
 	return errors.Wrap(err, "table delete query error")
 }

@@ -37,7 +37,7 @@ func (s *UseCase) AuthenticationGenerateToken(ctx context.Context, userID string
 	if username != "" {
 		match, err := usecase.ComparePasswordAndHash(password, usr.Password)
 		if err != nil {
-			return usr, tokens, err
+			return usr, tokens, errors.Wrap(err, "comparing")
 		}
 
 		if !match {
@@ -134,7 +134,7 @@ func (s *UseCase) AuthenticationCreateUser(ctx context.Context, input user.Creat
 	return userID, errors.Wrap(err, "can not create user")
 }
 
-// AuthenticationCreateTokenHash creates token hash in database
+// AuthenticationCreateTokenHash creates token hash in database.
 func (s *UseCase) AuthenticationCreateTokenHash(ctx context.Context, userID string, hash string) error {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.AuthenticationCreateTokenHash")
@@ -148,7 +148,7 @@ func (s *UseCase) AuthenticationCreateTokenHash(ctx context.Context, userID stri
 	return errors.Wrap(err, "token create failed")
 }
 
-// AuthenticationGetTokenHash returns token hash id from database
+// AuthenticationGetTokenHash returns token hash id from database.
 func (s *UseCase) AuthenticationGetTokenHash(ctx context.Context, userID string, hash string) (string, error) {
 	if s.isTracingOn {
 		ctxt, span := tracing.Tracer.Start(ctx, "Usecase.AuthenticationGetTokenHash")

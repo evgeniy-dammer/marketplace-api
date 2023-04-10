@@ -9,6 +9,8 @@ var (
 	ErrInvalidSigningMethod = errors.New("invalid signing method")
 	ErrInvalidTokenClaims   = errors.New("token claims are not of type *tokenClaims")
 	ErrUserNotFound         = errors.New("user not found")
+	ErrTableNotFound        = errors.New("table not found")
 	ErrUsersNotFound        = errors.New("users not found")
+	ErrTablesNotFound       = errors.New("tables not found")
 	ErrRolesNotFound        = errors.New("roles not found")
 )
